@@ -2,7 +2,7 @@ import { Navbar } from "@/components/landing/navbar";
 import { HeroSection } from "@/components/landing/hero-section";
 import { FeaturesSection } from "@/components/landing/features-section";
 import { HowItWorksSection } from "@/components/landing/how-it-works-section";
-import { ForInstitutionsSection } from "@/components/landing/for-institutions-section";
+import { FaqSection } from "@/components/landing/faq-section";
 import { PricingSection } from "@/components/landing/pricing-section";
 import { Footer } from "@/components/landing/footer";
 
@@ -14,7 +14,7 @@ export default function Home() {
         <HeroSection />
         <FeaturesSection />
         <HowItWorksSection />
-        <ForInstitutionsSection />
+        <FaqSection />
         <PricingSection />
       </main>
       <Footer />

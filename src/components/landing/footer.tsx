@@ -3,10 +3,10 @@ import { FileText, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const footerLinks = [
-  { name: "Features", href: "#" },
-  { name: "How it Works", href: "#" },
-  { name: "For Institutions", href: "#" },
-  { name: "Pricing", href: "#" },
+  { name: "Features", href: "#features" },
+  { name: "How it Works", href: "#how-it-works" },
+  { name: "FAQ", href: "#faq" },
+  { name: "Pricing", href: "#pricing" },
   { name: "Privacy Policy", href: "#" },
   { name: "Terms of Service", href: "#" },
   { name: "Contact", href: "#" },

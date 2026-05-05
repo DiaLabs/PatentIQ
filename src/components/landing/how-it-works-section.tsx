@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { motion, useScroll, useMotionValueEvent } from "framer-motion";
+import { useState, useRef, useEffect } from "react";
+import { motion, useInView } from "framer-motion";
 import { Upload, ShieldCheck, Search, BrainCircuit, SlidersHorizontal, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -41,17 +41,22 @@ const steps = [
 export function HowItWorksSection() {
   const [activeStep, setActiveStep] = useState(0);
   const sectionRef = useRef<HTMLElement>(null);
+  const isInView = useInView(sectionRef, { once: true, margin: "-20% 0px" });
 
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start end", "end end"]
-  });
-
-  useMotionValueEvent(scrollYProgress, "change", (latest) => {
-    // latest is between 0 and 1. We map it to 0 -> 5.
-    const step = Math.min(steps.length - 1, Math.max(0, Math.floor(latest * steps.length)));
-    setActiveStep(step);
-  });
+  useEffect(() => {
+    if (isInView) {
+      let currentStep = 0;
+      const interval = setInterval(() => {
+        if (currentStep < steps.length - 1) {
+          currentStep++;
+          setActiveStep(currentStep);
+        } else {
+          clearInterval(interval);
+        }
+      }, 280); // 280ms per step to complete all 5 transitions in ~1400ms
+      return () => clearInterval(interval);
+    }
+  }, [isInView]);
 
   return (
     <section ref={sectionRef} id="how-it-works" className="bg-white py-24 dark:bg-[#0a0a0a] sm:py-32 overflow-hidden">
@@ -85,18 +90,19 @@ export function HowItWorksSection() {
               return (
                 <div 
                   key={step.name} 
-                  className="relative flex flex-col items-center text-center"
+                  className="relative flex flex-col items-center text-center cursor-pointer group"
+                  onClick={() => setActiveStep(index)}
                 >
                   {/* Icon Container */}
                   <div className="relative mb-6">
                     <motion.div 
                       className={cn(
-                        "relative z-10 flex h-20 w-20 items-center justify-center rounded-full transition-colors duration-500",
+                        "relative z-10 flex h-20 w-20 items-center justify-center rounded-full border-2 transition-colors duration-500",
                         isActive 
-                          ? "bg-indigo-600 text-white shadow-xl shadow-indigo-600/30 dark:bg-indigo-500 dark:shadow-indigo-500/30" 
+                          ? "border-indigo-600 bg-indigo-600 text-white shadow-xl shadow-indigo-600/30 dark:border-indigo-500 dark:bg-indigo-500 dark:shadow-indigo-500/30" 
                           : isPast
-                            ? "bg-indigo-50 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-400"
-                            : "bg-gray-50 text-gray-400 dark:bg-zinc-900 dark:text-zinc-500"
+                            ? "border-indigo-200 bg-indigo-50 text-indigo-600 dark:border-indigo-900 dark:bg-indigo-950 dark:text-indigo-400"
+                            : "border-gray-200 bg-white text-gray-400 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-500"
                       )}
                       initial={false}
                       animate={{ scale: isActive ? 1.1 : 1 }}

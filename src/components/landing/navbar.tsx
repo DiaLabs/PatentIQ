@@ -73,10 +73,10 @@ export function Navbar() {
             How it Works
           </Link>
           <Link
-            href="#institutions"
+            href="#faq"
             className="text-sm font-medium text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
           >
-            For Institutions
+            FAQ
           </Link>
           <Link
             href="#pricing"
@@ -84,10 +84,6 @@ export function Navbar() {
           >
             Pricing
           </Link>
-          <button className="flex items-center gap-1 text-sm font-medium text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">
-            Resources
-            <ChevronDown className="h-4 w-4" />
-          </button>
         </nav>
 
         {/* Right Actions */}
