@@ -322,7 +322,7 @@ function StatCard({ icon, label, value, color }: any) {
     <div className="rounded-md border border-gray-50 bg-white p-3 shadow-sm dark:border-gray-800 dark:bg-zinc-900/40">
       <div className="mb-2 flex items-center gap-2">
         <div className={cn("flex h-7 w-7 items-center justify-center rounded-md", `bg-${color}-50 text-${color}-600`)}>
-          {React.cloneElement(icon as React.ReactElement, { className: "h-3.5 w-3.5" })}
+          {React.cloneElement(icon as React.ReactElement<any>, { className: "h-3.5 w-3.5" })}
         </div>
         <span className="text-[9px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-tight">{label}</span>
       </div>
@@ -335,7 +335,7 @@ function QuickActionItem({ icon, title }: any) {
   return (
     <div className="flex items-center gap-3 rounded-md border border-gray-50 p-2.5 bg-white dark:bg-transparent">
       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-indigo-50 text-indigo-600">
-        {React.cloneElement(icon as React.ReactElement, { className: "h-4 w-4" })}
+        {React.cloneElement(icon as React.ReactElement<any>, { className: "h-4 w-4" })}
       </div>
       <p className="text-xs font-bold text-gray-900 dark:text-gray-100 truncate">{title}</p>
       <ChevronRight className="h-3 w-3 text-gray-300 ml-auto" />
