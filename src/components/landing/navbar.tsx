@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, Sun } from "lucide-react";
+import { ChevronDown } from "lucide-react";
+import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 
 export function Navbar() {
   return (
-    <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md">
+    <header className="fixed top-0 z-50 w-full bg-white/80 backdrop-blur-md dark:bg-[#0a0a0a]/80 border-b border-transparent dark:border-white/[0.05]">
       <div className="mx-auto flex h-24 max-w-[1440px] items-center justify-between px-6 lg:px-12">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
@@ -14,7 +15,7 @@ export function Navbar() {
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
-            className="text-indigo-600"
+            className="text-indigo-600 dark:text-indigo-400"
           >
             <path
               d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2Z"
@@ -45,13 +46,15 @@ export function Navbar() {
               strokeLinejoin="round"
             />
           </svg>
-          <div className="flex items-center gap-2">
-            <span className="text-xl font-bold text-gray-900">
-              Patent<span className="text-gray-900">IQ</span>
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-[22px] font-bold tracking-tight text-gray-900 dark:text-white">
+              PatentIQ
             </span>
-            <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold tracking-wide text-emerald-700">
-              BETA
-            </span>
+            <div className="flex items-center gap-1.5">
+              <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold tracking-wide text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+                BETA
+              </span>
+            </div>
           </div>
         </Link>
 
@@ -59,29 +62,29 @@ export function Navbar() {
         <nav className="hidden items-center gap-8 md:flex">
           <Link
             href="#features"
-            className="text-sm font-medium text-gray-600 transition-colors hover:text-gray-900"
+            className="text-sm font-medium text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
           >
             Features
           </Link>
           <Link
             href="#how-it-works"
-            className="text-sm font-medium text-gray-600 transition-colors hover:text-gray-900"
+            className="text-sm font-medium text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
           >
             How it Works
           </Link>
           <Link
             href="#institutions"
-            className="text-sm font-medium text-gray-600 transition-colors hover:text-gray-900"
+            className="text-sm font-medium text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
           >
             For Institutions
           </Link>
           <Link
             href="#pricing"
-            className="text-sm font-medium text-gray-600 transition-colors hover:text-gray-900"
+            className="text-sm font-medium text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
           >
             Pricing
           </Link>
-          <button className="flex items-center gap-1 text-sm font-medium text-gray-600 transition-colors hover:text-gray-900">
+          <button className="flex items-center gap-1 text-sm font-medium text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">
             Resources
             <ChevronDown className="h-4 w-4" />
           </button>
@@ -89,22 +92,15 @@ export function Navbar() {
 
         {/* Right Actions */}
         <div className="hidden items-center gap-4 md:flex">
-          {/* Theme Toggle (Hover Dropdown) */}
-          <div className="group relative">
-            <button className="flex h-10 w-10 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900">
-              <Sun className="h-5 w-5" />
-            </button>
-            <div className="absolute right-0 top-full mt-1 hidden w-32 flex-col overflow-hidden rounded-md border border-gray-200 bg-white py-1 shadow-lg group-hover:flex">
-              <button className="px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50">Light</button>
-              <button className="px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50">Dark</button>
-              <button className="px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50">System</button>
-            </div>
-          </div>
+          <AnimatedThemeToggler 
+            duration={400}
+            className="flex h-10 w-10 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-zinc-800 dark:hover:text-gray-300 [&>svg]:h-5 [&>svg]:w-5" 
+          />
 
           {/* CTA Button */}
           <Button
             variant="outline"
-            className="h-10 gap-2 rounded-md border-gray-200 px-5 text-sm font-medium text-gray-700 shadow-sm transition-all hover:border-gray-300 hover:shadow-md"
+            className="h-10 gap-2 rounded-md border-gray-200 px-5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-800 dark:bg-zinc-900 dark:text-gray-300 dark:hover:bg-zinc-800"
           >
             <GoogleIcon />
             Sign in

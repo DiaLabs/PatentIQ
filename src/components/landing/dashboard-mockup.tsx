@@ -21,10 +21,10 @@ export function DashboardMockup() {
   return (
     <div className="relative">
       {/* Dashboard Container — overflows right edge */}
-      <div className="rounded-2xl border border-gray-200/80 bg-white shadow-2xl shadow-gray-200/60 lg:w-[700px]">
+      <div className="rounded-2xl border border-gray-200/80 bg-white shadow-2xl shadow-gray-200/60 lg:w-[700px] dark:border-gray-800 dark:bg-[#09090b] dark:shadow-gray-900/50">
         <div className="flex">
           {/* Sidebar */}
-          <div className="w-36 shrink-0 border-r border-gray-100 p-3 pt-4">
+          <div className="w-36 shrink-0 border-r border-gray-100 p-3 pt-4 dark:border-gray-800">
             {/* Logo */}
             <div className="mb-5 flex items-center gap-2">
               <div className="flex h-5 w-5 items-center justify-center rounded-md bg-gradient-to-br from-violet-500 to-indigo-600">
@@ -43,7 +43,7 @@ export function DashboardMockup() {
                   />
                 </svg>
               </div>
-              <span className="text-xs font-bold text-gray-900">PatentIQ</span>
+              <span className="text-xs font-bold text-gray-900 dark:text-gray-100">PatentIQ</span>
             </div>
 
             {/* Nav Items */}
@@ -84,15 +84,15 @@ export function DashboardMockup() {
             {/* User */}
             <div className="mt-6 flex items-center gap-2">
               <Avatar className="h-6 w-6">
-                <AvatarFallback className="bg-violet-100 text-[8px] font-medium text-violet-700">
+                <AvatarFallback className="bg-violet-100 text-[8px] font-medium text-violet-700 dark:bg-violet-900/30 dark:text-violet-400">
                   SW
                 </AvatarFallback>
               </Avatar>
               <div>
-                <p className="text-[10px] font-medium text-gray-900">
+                <p className="text-[10px] font-medium text-gray-900 dark:text-gray-100">
                   Dr. Sarah Wilson
                 </p>
-                <p className="text-[8px] text-gray-400">Mentor</p>
+                <p className="text-[8px] text-gray-400 dark:text-gray-500">Mentor</p>
               </div>
             </div>
           </div>
@@ -102,18 +102,18 @@ export function DashboardMockup() {
             {/* Header */}
             <div className="mb-4 flex items-center justify-between">
               <div>
-                <h2 className="text-base font-bold text-gray-900">Dashboard</h2>
-                <p className="text-[10px] text-gray-400">
+                <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">Dashboard</h2>
+                <p className="text-[10px] text-gray-400 dark:text-gray-500">
                   Here&apos;s what&apos;s happening with your groups today.
                 </p>
               </div>
               <div className="flex items-center gap-2">
-                <button className="flex items-center gap-1 rounded-md border border-gray-200 px-2 py-1 text-[10px] font-medium text-gray-600">
+                <button className="flex items-center gap-1 rounded-md border border-gray-200 px-2 py-1 text-[10px] font-medium text-gray-600 dark:border-gray-800 dark:text-gray-300 dark:hover:bg-gray-800">
                   All Groups
                   <ChevronDown className="h-2.5 w-2.5" />
                 </button>
                 <button className="relative">
-                  <Bell className="h-3.5 w-3.5 text-gray-400" />
+                  <Bell className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />
                 </button>
               </div>
             </div>
@@ -122,43 +122,43 @@ export function DashboardMockup() {
             <div className="mb-4 grid grid-cols-4 gap-2">
               <StatCard
                 icon={
-                  <FileText className="h-3 w-3 text-violet-600" />
+                  <FileText className="h-3 w-3 text-violet-600 dark:text-violet-400" />
                 }
-                iconBg="bg-violet-50"
+                iconBg="bg-violet-50 dark:bg-violet-900/20"
                 label="Total Submissions"
                 value="128"
                 change="↑ 12% from last month"
-                changeColor="text-emerald-600"
+                changeColor="text-emerald-600 dark:text-emerald-400"
               />
               <StatCard
                 icon={
-                  <CheckCircle2 className="h-3 w-3 text-emerald-600" />
+                  <CheckCircle2 className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
                 }
-                iconBg="bg-emerald-50"
+                iconBg="bg-emerald-50 dark:bg-emerald-900/20"
                 label="Completed"
                 value="96"
                 change="↑ 8% from last month"
-                changeColor="text-emerald-600"
+                changeColor="text-emerald-600 dark:text-emerald-400"
               />
               <StatCard
                 icon={
-                  <Clock className="h-3 w-3 text-amber-600" />
+                  <Clock className="h-3 w-3 text-amber-600 dark:text-amber-400" />
                 }
-                iconBg="bg-amber-50"
+                iconBg="bg-amber-50 dark:bg-amber-900/20"
                 label="In Progress"
                 value="24"
                 change="↑ 8% from last month"
-                changeColor="text-emerald-600"
+                changeColor="text-emerald-600 dark:text-emerald-400"
               />
               <StatCard
                 icon={
-                  <AlertCircle className="h-3 w-3 text-red-500" />
+                  <AlertCircle className="h-3 w-3 text-red-500 dark:text-red-400" />
                 }
-                iconBg="bg-red-50"
+                iconBg="bg-red-50 dark:bg-red-900/20"
                 label="Needs Review"
                 value="8"
                 change="↑ 2% from last month"
-                changeColor="text-emerald-600"
+                changeColor="text-emerald-600 dark:text-emerald-400"
               />
             </div>
 
@@ -167,35 +167,35 @@ export function DashboardMockup() {
               {/* Recent Submissions Table */}
               <div className="min-w-0 flex-1">
                 <div className="mb-2 flex items-center justify-between">
-                  <h3 className="text-xs font-semibold text-gray-900">
+                  <h3 className="text-xs font-semibold text-gray-900 dark:text-gray-100">
                     Recent Submissions
                   </h3>
-                  <button className="text-[10px] font-medium text-violet-600 hover:text-violet-700">
+                  <button className="text-[10px] font-medium text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300">
                     View all
                   </button>
                 </div>
 
                 {/* Table */}
-                <div className="overflow-hidden rounded-lg border border-gray-100">
+                <div className="overflow-hidden rounded-lg border border-gray-100 dark:border-gray-800">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b border-gray-100 bg-gray-50/50">
-                        <th className="px-2 py-1.5 text-left text-[9px] font-medium text-gray-400">
+                      <tr className="border-b border-gray-100 bg-gray-50/50 dark:border-gray-800 dark:bg-gray-800/50">
+                        <th className="px-2 py-1.5 text-left text-[9px] font-medium text-gray-400 dark:text-gray-500">
                           Document
                         </th>
-                        <th className="px-1.5 py-1.5 text-left text-[9px] font-medium text-gray-400">
+                        <th className="px-1.5 py-1.5 text-left text-[9px] font-medium text-gray-400 dark:text-gray-500">
                           Student
                         </th>
-                        <th className="px-1.5 py-1.5 text-left text-[9px] font-medium text-gray-400">
+                        <th className="px-1.5 py-1.5 text-left text-[9px] font-medium text-gray-400 dark:text-gray-500">
                           Group
                         </th>
-                        <th className="px-1.5 py-1.5 text-left text-[9px] font-medium text-gray-400">
+                        <th className="px-1.5 py-1.5 text-left text-[9px] font-medium text-gray-400 dark:text-gray-500">
                           Status
                         </th>
-                        <th className="px-1.5 py-1.5 text-left text-[9px] font-medium text-gray-400">
+                        <th className="px-1.5 py-1.5 text-left text-[9px] font-medium text-gray-400 dark:text-gray-500">
                           Score
                         </th>
-                        <th className="px-1.5 py-1.5 text-left text-[9px] font-medium text-gray-400">
+                        <th className="px-1.5 py-1.5 text-left text-[9px] font-medium text-gray-400 dark:text-gray-500">
                           Submitted
                         </th>
                         <th className="w-6 px-1 py-1.5"></th>
@@ -207,7 +207,7 @@ export function DashboardMockup() {
                         student="Alice Johnson"
                         group="AI Innovators"
                         status="Completed"
-                        statusColor="text-emerald-600 bg-emerald-50"
+                        statusColor="text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 dark:text-emerald-400"
                         score="7.8/10"
                         time="2h ago"
                       />
@@ -216,7 +216,7 @@ export function DashboardMockup() {
                         student="Bob Smith"
                         group="AgriTech Crew"
                         status="In Progress"
-                        statusColor="text-amber-600 bg-amber-50"
+                        statusColor="text-amber-600 bg-amber-50 dark:bg-amber-900/30 dark:text-amber-400"
                         score="–"
                         time="5h ago"
                       />
@@ -225,7 +225,7 @@ export function DashboardMockup() {
                         student="Charlie Brown"
                         group="MedTech Pioneers"
                         status="Completed"
-                        statusColor="text-emerald-600 bg-emerald-50"
+                        statusColor="text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 dark:text-emerald-400"
                         score="6.2/10"
                         time="1d ago"
                       />
@@ -234,7 +234,7 @@ export function DashboardMockup() {
                         student="Diana Prince"
                         group="Green Future"
                         status="Needs Review"
-                        statusColor="text-red-500 bg-red-50"
+                        statusColor="text-red-500 bg-red-50 dark:bg-red-900/30 dark:text-red-400"
                         score="4.5/10"
                         time="2d ago"
                       />
@@ -318,8 +318,8 @@ function SidebarItem({
     <div
       className={`flex items-center gap-2 rounded-md px-2 py-1.5 text-[10px] font-medium transition-colors ${
         active
-          ? "bg-violet-50 text-violet-700"
-          : "text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+          ? "bg-violet-50 text-violet-700 dark:bg-violet-900/20 dark:text-violet-400"
+          : "text-gray-500 hover:bg-gray-50 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800/50 dark:hover:text-gray-200"
       }`}
     >
       {icon}
@@ -344,16 +344,16 @@ function StatCard({
   changeColor: string;
 }) {
   return (
-    <div className="rounded-lg border border-gray-100 bg-white p-2.5">
+    <div className="rounded-lg border border-gray-100 bg-white p-2.5 dark:border-gray-800 dark:bg-zinc-900/40">
       <div className="mb-1.5 flex items-center gap-1.5">
         <div
           className={`flex h-5 w-5 items-center justify-center rounded-md ${iconBg}`}
         >
           {icon}
         </div>
-        <span className="text-[8px] font-medium text-gray-400">{label}</span>
+        <span className="text-[8px] font-medium text-gray-400 dark:text-gray-500">{label}</span>
       </div>
-      <p className="text-lg font-bold text-gray-900">{value}</p>
+      <p className="text-lg font-bold text-gray-900 dark:text-gray-100">{value}</p>
       <p className={`mt-0.5 text-[8px] ${changeColor}`}>{change}</p>
     </div>
   );
@@ -377,15 +377,15 @@ function TableRow({
   time: string;
 }) {
   return (
-    <tr className="border-b border-gray-50 last:border-0">
+    <tr className="border-b border-gray-50 last:border-0 dark:border-gray-800/50">
       <td className="px-2 py-1.5">
         <div className="flex items-center gap-1">
-          <FileText className="h-2.5 w-2.5 shrink-0 text-gray-300" />
-          <span className="truncate text-[9px] font-medium text-gray-700">{doc}</span>
+          <FileText className="h-2.5 w-2.5 shrink-0 text-gray-300 dark:text-gray-600" />
+          <span className="truncate text-[9px] font-medium text-gray-700 dark:text-gray-300">{doc}</span>
         </div>
       </td>
-      <td className="px-1.5 py-1.5 text-[9px] text-gray-500">{student}</td>
-      <td className="px-1.5 py-1.5 text-[9px] text-gray-500">{group}</td>
+      <td className="px-1.5 py-1.5 text-[9px] text-gray-500 dark:text-gray-400">{student}</td>
+      <td className="px-1.5 py-1.5 text-[9px] text-gray-500 dark:text-gray-400">{group}</td>
       <td className="px-1.5 py-1.5">
         <span
           className={`inline-flex whitespace-nowrap rounded-full px-1.5 py-0.5 text-[8px] font-medium ${statusColor}`}
@@ -393,12 +393,12 @@ function TableRow({
           {status}
         </span>
       </td>
-      <td className="px-1.5 py-1.5 text-[9px] font-medium text-gray-700">
+      <td className="px-1.5 py-1.5 text-[9px] font-medium text-gray-700 dark:text-gray-300">
         {score}
       </td>
-      <td className="px-1.5 py-1.5 text-[9px] text-gray-400">{time}</td>
+      <td className="px-1.5 py-1.5 text-[9px] text-gray-400 dark:text-gray-500">{time}</td>
       <td className="px-1 py-1.5">
-        <MoreHorizontal className="h-2.5 w-2.5 text-gray-300" />
+        <MoreHorizontal className="h-2.5 w-2.5 text-gray-300 dark:text-gray-600" />
       </td>
     </tr>
   );
@@ -421,7 +421,7 @@ function PipelineItem({
     <div className="flex items-center gap-2">
       {icon}
       <div className="min-w-0 flex-1">
-        <p className="truncate text-[9px] font-medium text-gray-700">
+        <p className="truncate text-[9px] font-medium text-gray-700 dark:text-gray-300">
           {step}. {label}
         </p>
       </div>
