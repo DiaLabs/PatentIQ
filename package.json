@@ -1,6 +1,6 @@
 {
   "name": "patent-iq",
-  "version": "0.0.1",
+  "version": "0.0.6",
   "private": true,
   "scripts": {
     "dev": "next dev",
