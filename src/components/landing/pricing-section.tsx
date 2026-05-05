@@ -4,19 +4,19 @@ import { cn } from "@/lib/utils";
 
 export function PricingSection() {
   return (
-    <section id="pricing" className="bg-white py-20 dark:bg-[#0a0a0a] sm:py-24">
+    <section id="pricing" className="bg-white py-16 md:py-24 dark:bg-[#0a0a0a]">
       <div className="mx-auto max-w-[1280px] px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl text-center mb-12">
-          <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
+        <div className="mx-auto max-w-2xl text-center mb-10 md:mb-16">
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white md:text-4xl">
             Simple, transparent access
           </h2>
-          <p className="mt-4 text-lg text-gray-600 dark:text-gray-400">
+          <p className="mt-4 text-base md:text-lg text-gray-600 dark:text-gray-400">
             PatentIQ is currently in Beta. Early users get complete access for free.
           </p>
         </div>
 
         <div className="mx-auto max-w-lg">
-          <div className="relative rounded-md border border-gray-100 bg-white p-8 dark:border-zinc-800 dark:bg-zinc-900/40 transition-all duration-300">
+          <div className="relative rounded-md border border-gray-100 bg-white p-6 sm:p-8 dark:border-zinc-800 dark:bg-zinc-900/40 transition-all duration-300">
             <div className="flex flex-col gap-6">
               <div className="flex flex-col gap-3">
                 <span className="text-[10px] font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">

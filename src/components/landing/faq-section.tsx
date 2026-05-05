@@ -32,14 +32,14 @@ export function FaqSection() {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   return (
-    <section id="faq" className="bg-white py-20 dark:bg-[#0a0a0a] sm:py-24">
+    <section id="faq" className="bg-white py-16 md:py-24 dark:bg-[#0a0a0a]">
       <div className="mx-auto max-w-[1280px] px-6 lg:px-8">
         <div className="mx-auto max-w-3xl">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
+          <div className="text-center mb-10 md:mb-16">
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white md:text-4xl">
               Common questions about PatentIQ
             </h2>
-            <p className="mt-4 text-lg text-gray-600 dark:text-gray-400">
+            <p className="mt-4 text-base md:text-lg text-gray-600 dark:text-gray-400">
               Everything you need to know about our evaluation process and security.
             </p>
           </div>

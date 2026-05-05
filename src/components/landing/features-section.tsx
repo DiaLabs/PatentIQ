@@ -117,13 +117,13 @@ const features = [
 
 export function FeaturesSection() {
   return (
-    <section id="features" className="bg-gray-50 py-24 dark:bg-[#0a0a0a] sm:py-32">
+    <section id="features" className="bg-gray-50 py-16 md:py-24 dark:bg-[#0a0a0a]">
       <div className="mx-auto max-w-[1280px] px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl text-center mb-16">
-          <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
+        <div className="mx-auto max-w-2xl text-center mb-12 md:mb-16">
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white md:text-4xl">
             AI-powered patent evaluation, built for clarity and trust
           </h2>
-          <p className="mt-4 text-lg leading-8 text-gray-600 dark:text-gray-400">
+          <p className="mt-4 text-base md:text-lg text-gray-600 dark:text-gray-400">
             Analyze, validate, and improve patents with a structured, explainable system designed for mentors and institutions.
           </p>
         </div>

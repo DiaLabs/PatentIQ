@@ -59,13 +59,13 @@ export function HowItWorksSection() {
   }, [isInView]);
 
   return (
-    <section ref={sectionRef} id="how-it-works" className="bg-white py-24 dark:bg-[#0a0a0a] sm:py-32 overflow-hidden">
+    <section ref={sectionRef} id="how-it-works" className="bg-white py-16 md:py-24 dark:bg-[#0a0a0a] overflow-hidden">
       <div className="mx-auto max-w-[1280px] px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl text-center mb-24">
-          <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
+        <div className="mx-auto max-w-2xl text-center mb-12 md:mb-24">
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white md:text-4xl">
             From submission to insight — fully automated
           </h2>
-          <p className="mt-4 text-lg leading-8 text-gray-600 dark:text-gray-400">
+          <p className="mt-4 text-base md:text-lg text-gray-600 dark:text-gray-400">
             A seamless pipeline ensuring every patent is rigorously evaluated.
           </p>
         </div>
