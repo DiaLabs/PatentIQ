@@ -3,13 +3,22 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
+import { Menu, X, LogOut } from "lucide-react";
 import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, signInWithGoogle, signOut } = useAuth();
+  const router = useRouter();
+
+  const handleSignIn = async () => {
+    await signInWithGoogle();
+    router.push("/dashboard");
+  };
 
   const navLinks = [
     { name: "Features", href: "#features" },
@@ -103,10 +112,25 @@ export function Navbar() {
 
             <Button
               variant="outline"
-              className="hidden md:flex h-10 gap-2 rounded-md border-gray-200 px-5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-800 dark:bg-zinc-900 dark:text-gray-300 dark:hover:bg-zinc-800"
+              onClick={user ? signOut : handleSignIn}
+              className={cn(
+                "hidden md:flex h-10 gap-2 rounded-md border-gray-200 px-5 text-sm font-medium transition-colors",
+                user 
+                  ? "border-red-100 text-red-600 hover:bg-red-50 dark:border-red-900/30 dark:bg-red-900/10 dark:text-red-400 dark:hover:bg-red-900/20" 
+                  : "text-gray-700 hover:bg-gray-50 dark:border-gray-800 dark:bg-zinc-900 dark:text-gray-300 dark:hover:bg-zinc-800"
+              )}
             >
-              <GoogleIcon />
-              Sign in
+              {user ? (
+                <>
+                  <LogOut className="h-4 w-4" />
+                  Sign Out
+                </>
+              ) : (
+                <>
+                  <GoogleIcon />
+                  Sign in
+                </>
+              )}
             </Button>
 
             {/* Mobile Menu Toggle */}
@@ -145,12 +169,21 @@ export function Navbar() {
             <hr className="my-2 border-gray-100 dark:border-zinc-800" />
             <Button
               size="lg"
-              className="w-full h-12 gap-3 rounded-md bg-indigo-600 text-white dark:bg-white dark:text-black text-sm font-bold"
+              onClick={user ? signOut : handleSignIn}
+              className={cn(
+                "w-full h-12 gap-3 rounded-md text-sm font-bold",
+                user 
+                  ? "bg-red-50 text-red-600 border border-red-100 dark:bg-red-900/20 dark:text-red-400 dark:border-red-900/30" 
+                  : "bg-indigo-600 text-white dark:bg-white dark:text-black"
+              )}
             >
-              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-white shadow-sm shrink-0">
-                <GoogleIcon />
+              <div className={cn(
+                "flex h-6 w-6 items-center justify-center rounded-full shadow-sm shrink-0",
+                user ? "bg-red-100 dark:bg-red-900/40" : "bg-white"
+              )}>
+                {user ? <LogOut className="h-3.5 w-3.5" /> : <GoogleIcon />}
               </div>
-              Sign in with Google
+              {user ? "Sign Out" : "Sign in with Google"}
             </Button>
           </div>
         </div>

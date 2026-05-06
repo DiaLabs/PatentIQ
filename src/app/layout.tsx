@@ -13,14 +13,20 @@ export const metadata: Metadata = {
     "PatentIQ combines AI, prior art search, and mentor-defined criteria to evaluate patents with accuracy, consistency, and clarity.",
 };
 
+import { AuthProvider } from "@/context/AuthContext";
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col font-sans">{children}</body>
+    <html lang="en" className={`${inter.variable} h-full antialiased`} data-scroll-behavior="smooth">
+      <body className="min-h-full flex flex-col font-sans">
+        <AuthProvider>
+          {children}
+        </AuthProvider>
+      </body>
     </html>
   );
 }
