@@ -1,6 +1,10 @@
+"use client";
+
 import Link from "next/link";
 import { FileText, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 const footerLinks = [
   { name: "Features", href: "#features" },
@@ -13,6 +17,20 @@ const footerLinks = [
 ];
 
 export function Footer() {
+  const { user, signInWithGoogle, isSigningIn } = useAuth();
+  const router = useRouter();
+
+  const handleSignIn = async () => {
+    if (user) {
+      router.replace("/dashboard");
+      return;
+    }
+    const result = await signInWithGoogle();
+    if (result.user) {
+      router.replace("/dashboard");
+    }
+  };
+
   return (
     <footer className="bg-white dark:bg-[#0a0a0a] border-t border-gray-100 dark:border-zinc-900">
       <div className="mx-auto max-w-[1280px] px-6 py-20 lg:px-8">
@@ -25,7 +43,11 @@ export function Footer() {
           <p className="text-lg text-gray-600 dark:text-gray-400 mb-8 max-w-2xl">
             Join the early access beta to evaluate patents with consistency, clarity, and trust using PatentIQ by DiaLabs.
           </p>
-          <Button className="h-12 px-8 text-base bg-indigo-600 hover:bg-indigo-700 text-white dark:bg-white dark:text-black dark:hover:bg-gray-100">
+          <Button
+            onClick={handleSignIn}
+            disabled={!user && isSigningIn}
+            className="h-12 px-8 text-base bg-indigo-600 hover:bg-indigo-700 text-white dark:bg-white dark:text-black dark:hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
+          >
             Get Started for Free
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>

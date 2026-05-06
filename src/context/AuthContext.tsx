@@ -2,12 +2,13 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { User } from "firebase/auth";
-import { onAuthStateChangedListener, signInWithGoogle, signOutUser } from "@/lib/auth";
+import { onAuthStateChangedListener, signInWithGoogle, signOutUser, SignInResult } from "@/lib/auth";
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  signInWithGoogle: () => Promise<void>;
+  isSigningIn: boolean;
+  signInWithGoogle: () => Promise<SignInResult>;
   signOut: () => Promise<void>;
 }
 
@@ -16,6 +17,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isSigningIn, setIsSigningIn] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChangedListener((user) => {
@@ -26,20 +28,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => unsubscribe();
   }, []);
 
-  const [isSigningIn, setIsSigningIn] = useState(false);
-
   const handleSignInWithGoogle = async () => {
-    if (isSigningIn) return;
+    if (isSigningIn) {
+      return { user: null, cancelled: true };
+    }
     setIsSigningIn(true);
+    const resetTimer = setTimeout(() => {
+      setIsSigningIn(false);
+    }, 2500);
     try {
-      await signInWithGoogle();
-    } catch (error: any) {
-      // Ignore cancellation errors
-      const ignoredErrors = ["auth/cancelled-popup-request", "auth/popup-closed-by-user"];
-      if (!ignoredErrors.includes(error.code)) {
-        console.error("Sign in failed:", error);
+      const result = await signInWithGoogle();
+      if (result.cancelled) {
+        setIsSigningIn(false);
       }
+      return result;
+    } catch (error: any) {
+      console.error("Sign in failed:", error);
+      throw error;
     } finally {
+      clearTimeout(resetTimer);
       setIsSigningIn(false);
     }
   };
@@ -53,7 +60,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signInWithGoogle: handleSignInWithGoogle, signOut: handleSignOut }}>
+    <AuthContext.Provider
+      value={{ user, loading, isSigningIn, signInWithGoogle: handleSignInWithGoogle, signOut: handleSignOut }}
+    >
       {children}
     </AuthContext.Provider>
   );

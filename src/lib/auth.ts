@@ -1,19 +1,32 @@
-import { 
-  signInWithPopup, 
-  signOut, 
-  onAuthStateChanged, 
-  User 
+import {
+  signInWithPopup,
+  signOut,
+  onAuthStateChanged,
+  User,
 } from "firebase/auth";
 import { auth, googleProvider } from "./firebase";
 
-export const signInWithGoogle = async () => {
+const ignoredAuthErrorCodes = new Set([
+  "auth/popup-closed-by-user",
+  "auth/cancelled-popup-request",
+]);
+
+export type SignInResult = {
+  user: User | null;
+  cancelled: boolean;
+};
+
+export const signInWithGoogle = async (): Promise<SignInResult> => {
   try {
     const result = await signInWithPopup(auth, googleProvider);
-    return result.user;
+    return { user: result.user, cancelled: false };
   } catch (error: any) {
-    if (error.code !== "auth/popup-closed-by-user" && error.code !== "auth/cancelled-popup-request") {
-      console.error("Error signing in with Google:", error);
+    const code = error?.code;
+    if (typeof code === "string" && ignoredAuthErrorCodes.has(code)) {
+      return { user: null, cancelled: true };
     }
+
+    console.error("Error signing in with Google:", error);
     throw error;
   }
 };

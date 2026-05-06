@@ -5,9 +5,23 @@ import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { LogOut, User } from "lucide-react";
 import { Navbar } from "@/components/landing/navbar";
+import { useEffect } from "react";
 
 export default function DashboardPage() {
   const { user, signOut } = useAuth();
+
+  useEffect(() => {
+    if (!user) return;
+
+    // Prevent browser back from leaving the dashboard when signed in.
+    window.history.pushState({ dashboardLock: true }, "", "/dashboard");
+    const handlePopState = () => {
+      window.history.go(1);
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [user]);
 
   return (
     <ProtectedRoute>

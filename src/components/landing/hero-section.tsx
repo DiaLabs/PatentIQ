@@ -7,12 +7,18 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 
 export function HeroSection() {
-  const { user, signInWithGoogle } = useAuth();
+  const { user, signInWithGoogle, isSigningIn } = useAuth();
   const router = useRouter();
 
   const handleSignIn = async () => {
-    await signInWithGoogle();
-    router.push("/dashboard");
+    if (user) {
+      router.replace("/dashboard");
+      return;
+    }
+    const result = await signInWithGoogle();
+    if (result.user) {
+      router.replace("/dashboard");
+    }
   };
 
   const containerVariants: Variants = {
@@ -88,12 +94,13 @@ export function HeroSection() {
             <motion.div variants={itemVariants} className="mt-10 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
               <button 
                 onClick={handleSignIn}
-                className="flex h-14 w-full sm:w-auto items-center justify-center gap-3 rounded-md bg-indigo-600 px-8 text-[16px] font-semibold text-white transition-colors hover:bg-indigo-700"
+                disabled={isSigningIn}
+                className="flex h-14 w-full sm:w-auto items-center justify-center gap-3 rounded-md bg-indigo-600 px-8 text-[16px] font-semibold text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <div className="flex h-7 w-7 items-center justify-center rounded-full bg-white shadow-sm shrink-0">
                   <GoogleIcon />
                 </div>
-                {user ? "Go to Dashboard" : "Continue with Google"}
+                Continue with Google
               </button>
 
               <button className="flex h-14 w-full sm:w-auto items-center justify-center gap-2.5 rounded-md border border-gray-200 bg-white px-7 text-[16px] font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-800 dark:bg-zinc-900 dark:text-gray-300 dark:hover:bg-zinc-800">

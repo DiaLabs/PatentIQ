@@ -12,12 +12,18 @@ import { useRouter } from "next/navigation";
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user, signInWithGoogle, signOut } = useAuth();
+  const { user, signInWithGoogle, signOut, isSigningIn } = useAuth();
   const router = useRouter();
 
   const handleSignIn = async () => {
-    await signInWithGoogle();
-    router.push("/dashboard");
+    if (user) {
+      router.replace("/dashboard");
+      return;
+    }
+    const result = await signInWithGoogle();
+    if (result.user) {
+      router.replace("/dashboard");
+    }
   };
 
   const navLinks = [
@@ -113,8 +119,9 @@ export function Navbar() {
             <Button
               variant="outline"
               onClick={user ? signOut : handleSignIn}
+              disabled={!user && isSigningIn}
               className={cn(
-                "hidden md:flex h-10 gap-2 rounded-md border-gray-200 px-5 text-sm font-medium transition-colors",
+                "hidden md:flex h-10 gap-2 rounded-md border-gray-200 px-5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60",
                 user 
                   ? "border-red-100 text-red-600 hover:bg-red-50 dark:border-red-900/30 dark:bg-red-900/10 dark:text-red-400 dark:hover:bg-red-900/20" 
                   : "text-gray-700 hover:bg-gray-50 dark:border-gray-800 dark:bg-zinc-900 dark:text-gray-300 dark:hover:bg-zinc-800"
@@ -170,8 +177,9 @@ export function Navbar() {
             <Button
               size="lg"
               onClick={user ? signOut : handleSignIn}
+              disabled={!user && isSigningIn}
               className={cn(
-                "w-full h-12 gap-3 rounded-md text-sm font-bold",
+                "w-full h-12 gap-3 rounded-md text-sm font-bold disabled:cursor-not-allowed disabled:opacity-60",
                 user 
                   ? "bg-red-50 text-red-600 border border-red-100 dark:bg-red-900/20 dark:text-red-400 dark:border-red-900/30" 
                   : "bg-indigo-600 text-white dark:bg-white dark:text-black"
