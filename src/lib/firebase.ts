@@ -11,7 +11,14 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+let app;
+if (!firebaseConfig.apiKey) {
+  console.warn("⚠️ Firebase API Key is missing. Please check your .env.local file.");
+  app = getApps().length > 0 ? getApp() : initializeApp({ ...firebaseConfig, apiKey: "placeholder" }); 
+} else {
+  app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+}
+
 const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 
