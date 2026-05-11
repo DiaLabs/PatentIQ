@@ -170,12 +170,12 @@ export interface SubmissionStatusResponse {
 
 /** GET /mentor/dashboard */
 export async function fetchDashboard(days = 30): Promise<DashboardData> {
-  return apiFetch<DashboardData>(`/mentor/dashboard?days=${days}`);
+  return apiFetch<DashboardData>(`/api/v1/mentor/dashboard?days=${days}`);
 }
 
 /** GET /mentor/groups */
 export async function fetchGroups(): Promise<{ groups: Group[] }> {
-  return apiFetch<{ groups: Group[] }>('/mentor/groups');
+  return apiFetch<{ groups: Group[] }>('/api/v1/mentor/groups');
 }
 
 /** POST /mentor/groups */
@@ -184,7 +184,7 @@ export async function createGroup(body: {
   plag_threshold: number;
   link_expiry_days: number;
 }): Promise<CreatedGroup> {
-  return apiFetch<CreatedGroup>('/mentor/groups', {
+  return apiFetch<CreatedGroup>('/api/v1/mentor/groups', {
     method: 'POST',
     body: JSON.stringify(body),
   });
@@ -200,12 +200,12 @@ export async function fetchGroupDetails(
   if (params?.limit) qs.set('limit', String(params.limit));
   if (params?.status) qs.set('status', params.status);
   const query = qs.toString() ? `?${qs.toString()}` : '';
-  return apiFetch<GroupDetails>(`/mentor/groups/${groupId}${query}`);
+  return apiFetch<GroupDetails>(`/api/v1/mentor/groups/${groupId}${query}`);
 }
 
 /** DELETE /mentor/groups/:id */
 export async function deleteGroup(groupId: string): Promise<void> {
-  await apiFetch(`/mentor/groups/${groupId}`, { method: 'DELETE' });
+  await apiFetch(`/api/v1/mentor/groups/${groupId}`, { method: 'DELETE' });
 }
 
 /** GET /mentor/groups/:groupId/submissions/:submissionId/pipeline */
@@ -233,13 +233,32 @@ export async function fetchSubmissionPipeline(
   submissionId: string
 ): Promise<PipelineDetails> {
   return apiFetch<PipelineDetails>(
-    `/mentor/groups/${groupId}/submissions/${submissionId}/pipeline`
+    `/api/v1/mentor/groups/${groupId}/submissions/${submissionId}/pipeline`
+  );
+}
+
+/** POST /mentor/groups/:groupId/submissions/:submissionId/retry */
+export async function retrySubmissionEvaluation(
+  groupId: string,
+  submissionId: string
+): Promise<{ success: boolean; message: string; retry_count: number }> {
+  return apiFetch<{ success: boolean; message: string; retry_count: number }>(
+    `/api/v1/mentor/groups/${groupId}/submissions/${submissionId}/retry`,
+    { method: 'POST' }
   );
 }
 
 // ── Public (Student) API Helpers ──────────────────────────────────────────────
+/** GET /api/v1/group/:token */
+export async function fetchGroupPublic(token: string): Promise<{
+  id: string;
+  name: string;
+  plag_threshold: number;
+}> {
+  return publicFetch<{ id: string; name: string; plag_threshold: number }>(`/api/v1/group/${token}`);
+}
 
-/** POST /submit/prepare */
+/** POST /api/v1/submit/prepare */
 export async function prepareUpload(body: {
   access_token: string;
   submitter_name: string;
@@ -257,7 +276,7 @@ export async function prepareUpload(body: {
   content_type: string;
   expires_in: number;
 }> {
-  return publicFetch('/submit/prepare', {
+  return publicFetch('/api/v1/submit/prepare', {
     method: 'POST',
     body: JSON.stringify(body),
   });
@@ -282,7 +301,7 @@ export async function confirmUpload(body: {
   submission_id: string;
   access_token: string;
 }): Promise<{ queued: boolean; submission_id: string; message: string }> {
-  return publicFetch('/submit/confirm', {
+  return publicFetch('/api/v1/submit/confirm', {
     method: 'POST',
     body: JSON.stringify(body),
   });
@@ -292,5 +311,5 @@ export async function confirmUpload(body: {
 export async function checkSubmissionStatus(
   submissionId: string
 ): Promise<SubmissionStatusResponse> {
-  return publicFetch<SubmissionStatusResponse>(`/submit/${submissionId}/status`);
+  return publicFetch<SubmissionStatusResponse>(`/api/v1/submit/${submissionId}/status`);
 }

@@ -128,6 +128,32 @@ export function PipelineDetails({ phases, status, currentStage = 0, loading = fa
 
                 {/* Metadata */}
                 <div className="grid grid-cols-2 gap-3">
+                  {phase.metadata?.patent_ids && phase.metadata.patent_ids.length > 0 && (
+                    <div className="bg-white rounded p-2 border border-gray-200 col-span-2">
+                      <p className="text-xs text-gray-500 font-medium">Extracted Patent IDs</p>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {phase.metadata.patent_ids.map((id: string) => (
+                          <span key={id} className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-indigo-50 text-indigo-700 border border-indigo-100">
+                            {id}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {phase.metadata?.invalid_ids && phase.metadata.invalid_ids.length > 0 && (
+                    <div className="bg-white rounded p-2 border border-gray-200 col-span-2">
+                      <p className="text-xs text-red-500 font-medium">Invalid/Not Found Patent IDs</p>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {phase.metadata.invalid_ids.map((id: string) => (
+                          <span key={id} className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-red-50 text-red-700 border border-red-100 line-through">
+                            {id}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {phase.api_provider && (
                     <div className="bg-white rounded p-2 border border-gray-200">
                       <p className="text-xs text-gray-500 font-medium">API Provider</p>

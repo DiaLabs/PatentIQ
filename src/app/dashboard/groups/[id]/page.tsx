@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { PipelineDetails } from "@/components/dashboard/pipeline-details";
+import { RetrySubmissionButton } from "@/components/dashboard/retry-submission-button";
 
 const STATUS_OPTIONS: { label: string; value: string }[] = [
   { label: "All", value: "" },
@@ -394,6 +395,21 @@ export default function GroupDetailPage() {
                 phases={pipelinePhases}
                 status="PENDING"
                 loading={pipelineLoading}
+              />
+            </div>
+
+            {/* Retry Button */}
+            <div className="mt-6">
+              <RetrySubmissionButton
+                groupId={groupId}
+                submissionId={selectedSubmissionPipeline}
+                status={data?.submissions.find(s => s.submission_id === selectedSubmissionPipeline)?.status || "PENDING"}
+                retryCount={data?.submissions.find(s => s.submission_id === selectedSubmissionPipeline)?.retry_count}
+                onRetrySuccess={() => {
+                  // Refresh data after successful retry
+                  load();
+                  // Optionally close the modal and reopen to show the updated status
+                }}
               />
             </div>
 

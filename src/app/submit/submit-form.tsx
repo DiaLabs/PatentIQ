@@ -7,6 +7,7 @@ import {
   uploadFile,
   confirmUpload,
   checkSubmissionStatus,
+  fetchGroupPublic,
   type SubmissionStatusResponse,
 } from "@/lib/api";
 import { FileText, Upload, Check, AlertCircle, Loader2, Plus, X } from "lucide-react";
@@ -40,8 +41,27 @@ export default function SubmitForm() {
   const [submitterName, setSubmitterName] = useState("");
   const [teammates, setTeammates] = useState<string[]>([""]);
   const [file, setFile] = useState<File | null>(null);
+  const [groupInfo, setGroupInfo] = useState<{ name: string; plag_threshold: number } | null>(null);
+  const [loadingGroup, setLoadingGroup] = useState(true);
+
   const fileRef = useRef<HTMLInputElement>(null);
 
+  // Fetch group info
+  useEffect(() => {
+    if (!token) return;
+    const loadGroup = async () => {
+      try {
+        const info = await fetchGroupPublic(token);
+        setGroupInfo(info);
+      } catch (err: any) {
+        setError(err?.message ?? "Failed to load group info.");
+        setStep("error");
+      } finally {
+        setLoadingGroup(false);
+      }
+    };
+    loadGroup();
+  }, [token]);
   // Tracking state
   const [statusData, setStatusData] = useState<SubmissionStatusResponse | null>(null);
   const [submissionId, setSubmissionId] = useState<string | null>(null);
@@ -80,7 +100,7 @@ export default function SubmitForm() {
         access_token: token,
         submitter_name: submitterName.trim(),
         team_member_names: teamMembers,
-        group_name: "Submitted Group",
+        group_name: groupInfo?.name || "Submitted Group",
         file_name: file.name,
         file_type: ext,
         file_size_bytes: file.size,
@@ -163,11 +183,15 @@ export default function SubmitForm() {
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
               <div className="px-8 py-6 border-b border-gray-100">
                 <h1 className="text-xl font-bold text-gray-900">
-                  Submit Your Patent
+                  Submit Your Patent {groupInfo && <span className="text-indigo-600">to {groupInfo.name}</span>}
                 </h1>
-                <p className="text-sm text-gray-500 mt-1">
-                  Upload your patent document for AI-powered evaluation.
-                </p>
+                {loadingGroup ? (
+                   <div className="h-4 w-32 bg-gray-100 animate-pulse rounded mt-1" />
+                ) : (
+                  <p className="text-sm text-gray-500 mt-1">
+                    Upload your patent document for AI-powered evaluation.
+                  </p>
+                )}
               </div>
 
               <form onSubmit={handleSubmit} className="px-8 py-6 space-y-6">
