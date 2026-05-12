@@ -53,16 +53,14 @@ export default function OverviewPage() {
 
   return (
     <div className="px-12 py-8 bg-white dark:bg-[#0a0a0a] min-h-screen relative">
-      {/* Dashboard Header */}
+      {/* Welcome greeting — Overview only */}
       <DashboardHeader
         userName={mounted ? (user?.displayName?.split(" ")[0] ?? "Mentor") : "Mentor"}
-        onRefresh={load}
-        isLoading={loading}
       />
 
       {/* Error Banner */}
       {error && (
-        <div className="mt-6 flex items-center gap-3 rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/10 p-4 text-sm text-red-700 dark:text-red-400">
+        <div className="mt-6 flex items-center gap-3 rounded-md border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/10 p-4 text-sm text-red-700 dark:text-red-400">
           <AlertCircle className="h-4 w-4 flex-shrink-0" />
           {error}
         </div>
@@ -74,7 +72,7 @@ export default function OverviewPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.1 }}
-          className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none overflow-hidden"
+          className="bg-white dark:bg-zinc-900 rounded-md border border-gray-100 dark:border-zinc-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none overflow-hidden"
         >
           {/* Header */}
           <div className="flex items-center justify-between px-8 py-7 border-b border-gray-50 dark:border-zinc-800">
@@ -98,7 +96,7 @@ export default function OverviewPage() {
           {loading ? (
             <div className="p-8 space-y-4">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-16 animate-pulse rounded-xl bg-gray-50 dark:bg-zinc-800/50" />
+                <div key={i} className="h-16 animate-pulse rounded-md bg-gray-50 dark:bg-zinc-800/50" />
               ))}
             </div>
           ) : dashboard && (dashboard.active_groups?.length ?? 0) > 0 ? (
@@ -176,7 +174,7 @@ export default function OverviewPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.2 }}
-          className="lg:col-span-2 bg-white dark:bg-zinc-900 rounded-3xl border border-gray-100 dark:border-zinc-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none relative"
+          className="lg:col-span-2 bg-white dark:bg-zinc-900 rounded-md border border-gray-100 dark:border-zinc-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none relative"
         >
           <div className="px-8 py-7 flex items-center justify-between border-b border-gray-50 dark:border-zinc-800">
             <h2 className="text-xl font-bold text-gray-900 dark:text-white">Recent Submissions</h2>
@@ -211,7 +209,7 @@ export default function OverviewPage() {
                     <tr key={s.submission_id} className="group hover:bg-gray-50/50 dark:hover:bg-zinc-800/20 transition-colors">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2.5">
-                          <div className="h-8 w-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center shrink-0">
+                          <div className="h-8 w-8 rounded-md bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center shrink-0">
                             <FileText className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
                           </div>
                           <span className="text-sm font-semibold text-gray-900 dark:text-white max-w-[140px] truncate">
@@ -230,7 +228,7 @@ export default function OverviewPage() {
                       </td>
                       <td className="px-4 py-4">
                         {s.score != null ? (
-                          <div className="inline-flex items-center px-2 py-0.5 rounded-lg bg-orange-50 dark:bg-orange-900/20 text-[11px] font-bold text-orange-600 dark:text-orange-400 border border-orange-100 dark:border-orange-900/30">
+                          <div className="inline-flex items-center px-2 py-0.5 rounded-md bg-orange-50 dark:bg-orange-900/20 text-[11px] font-bold text-orange-600 dark:text-orange-400 border border-orange-100 dark:border-orange-900/30">
                             {s.score}/10
                           </div>
                         ) : (
@@ -268,7 +266,7 @@ export default function OverviewPage() {
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.4, delay: 0.3 }}
-          className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none p-8"
+          className="bg-white dark:bg-zinc-900 rounded-md border border-gray-100 dark:border-zinc-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none p-8"
         >
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-8">
             Quick Actions
@@ -367,7 +365,7 @@ function SubmissionActionMenu({
       <button
         onClick={() => setIsOpen(!isOpen)}
         disabled={isDeleting}
-        className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
+        className="p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
       >
         <MoreVertical className="h-4 w-4" />
       </button>
@@ -382,7 +380,7 @@ function SubmissionActionMenu({
               initial={{ opacity: 0, scale: 0.95, y: -10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: -10 }}
-              className="absolute right-0 mt-2 w-48 bg-white dark:bg-zinc-900 rounded-xl border border-gray-100 dark:border-zinc-800 shadow-xl z-50 py-1.5 overflow-hidden"
+              className="absolute right-0 mt-2 w-48 bg-white dark:bg-zinc-900 rounded-md border border-gray-100 dark:border-zinc-800 shadow-xl z-50 py-1.5 overflow-hidden"
             >
               <button
                 onClick={() => router.push(`/dashboard/submissions?id=${submissionId}`)}
@@ -439,7 +437,7 @@ function QuickActionItem({
   return (
     <Link
       href={href}
-      className="flex items-center gap-4 p-4 rounded-xl border border-gray-50 dark:border-zinc-800 hover:border-gray-200 dark:hover:border-zinc-700 hover:bg-gray-50/50 dark:hover:bg-zinc-800/30 transition-all group"
+      className="flex items-center gap-4 p-4 rounded-md border border-gray-50 dark:border-zinc-800 hover:border-gray-200 dark:hover:border-zinc-700 hover:bg-gray-50/50 dark:hover:bg-zinc-800/30 transition-all group"
     >
       <div className={`h-11 w-11 rounded-full flex items-center justify-center shrink-0 ${color}`}>
         {icon}
