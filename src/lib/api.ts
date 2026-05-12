@@ -196,12 +196,14 @@ export interface SubmissionsResponse {
 export async function fetchAllSubmissions(params?: {
   search?: string;
   status?: string;
+  group?: string;
   page?: number;
   limit?: number;
 }): Promise<SubmissionsResponse> {
   const qs = new URLSearchParams();
   if (params?.search) qs.set('search', params.search);
   if (params?.status) qs.set('status', params.status);
+  if (params?.group) qs.set('group', params.group);
   if (params?.page) qs.set('page', String(params.page));
   if (params?.limit) qs.set('limit', String(params.limit));
   const query = qs.toString() ? `?${qs.toString()}` : '';
@@ -331,14 +333,19 @@ export async function fetchGroupPublic(token: string): Promise<{
   id: string;
   name: string;
   plag_threshold: number;
+  expires_at: number;
+  mentor_name?: string;
 }> {
-  return publicFetch<{ id: string; name: string; plag_threshold: number }>(`/api/v1/group/${token}`);
+  return publicFetch<{ id: string; name: string; plag_threshold: number; expires_at: number; mentor_name: string }>(`/api/v1/group/${token}`);
 }
 
 /** POST /api/v1/submit/prepare */
 export async function prepareUpload(body: {
   access_token: string;
   submitter_name: string;
+  roll_number: string;
+  email: string;
+  phone: string;
   team_member_names: string[];
   group_name: string;
   file_name: string;

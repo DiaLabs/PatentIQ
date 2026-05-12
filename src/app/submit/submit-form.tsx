@@ -10,7 +10,7 @@ import {
   fetchGroupPublic,
   type SubmissionStatusResponse,
 } from "@/lib/api";
-import { FileText, Upload, Check, AlertCircle, Loader2, Plus, X } from "lucide-react";
+import { FileText, CheckCircle, Check, Upload, AlertCircle, Loader2, Plus, X, Calendar, User, UserPlus, FileIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 type Step = "form" | "uploading" | "tracking" | "done" | "error";
@@ -39,9 +39,12 @@ export default function SubmitForm() {
 
   // Form state
   const [submitterName, setSubmitterName] = useState("");
+  const [rollNumber, setRollNumber] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [teammates, setTeammates] = useState<string[]>([""]);
   const [file, setFile] = useState<File | null>(null);
-  const [groupInfo, setGroupInfo] = useState<{ name: string; plag_threshold: number } | null>(null);
+  const [groupInfo, setGroupInfo] = useState<{ name: string; plag_threshold: number; expires_at?: number; mentor_name?: string } | null>(null);
   const [loadingGroup, setLoadingGroup] = useState(true);
 
   const fileRef = useRef<HTMLInputElement>(null);
@@ -62,6 +65,7 @@ export default function SubmitForm() {
     };
     loadGroup();
   }, [token]);
+
   // Tracking state
   const [statusData, setStatusData] = useState<SubmissionStatusResponse | null>(null);
   const [submissionId, setSubmissionId] = useState<string | null>(null);
@@ -79,7 +83,7 @@ export default function SubmitForm() {
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!file || !submitterName.trim() || !token) return;
+    if (!file || !submitterName.trim() || !email.trim() || !phone.trim() || !rollNumber.trim() || !token) return;
 
     setStep("uploading");
     setError(null);
@@ -88,17 +92,17 @@ export default function SubmitForm() {
       const fileHash = await computeFileHash(file);
       const ext = file.name.split(".").pop()?.toLowerCase() ?? "pdf";
       
-      // Fix: Must be a proper UUID for the backend
       const idempotencyKey = crypto.randomUUID();
       
-      // Fix: Ensure at least one member (the submitter) if list is empty
       const filteredTeams = teammates.filter((t) => t.trim());
       const teamMembers = filteredTeams.length > 0 ? filteredTeams : [submitterName];
 
-      // 1. Prepare upload
       const prep = await prepareUpload({
         access_token: token,
         submitter_name: submitterName.trim(),
+        roll_number: rollNumber.trim(),
+        email: email.trim(),
+        phone: phone.trim(),
         team_member_names: teamMembers,
         group_name: groupInfo?.name || "Submitted Group",
         file_name: file.name,
@@ -108,10 +112,8 @@ export default function SubmitForm() {
         idempotency_key: idempotencyKey,
       });
 
-      // 2. Upload file to R2 via backend proxy
       await uploadFile(prep.upload_url, file, prep.content_type);
 
-      // 3. Confirm upload & start pipeline
       const confirmed = await confirmUpload({
         submission_id: prep.submission_id,
         access_token: token,
@@ -123,7 +125,7 @@ export default function SubmitForm() {
       setError(err?.message ?? "Submission failed. Please try again.");
       setStep("error");
     }
-  }, [file, submitterName, token, teammates]);
+  }, [file, submitterName, rollNumber, email, phone, token, teammates, groupInfo]);
 
   // Poll for status
   useEffect(() => {
@@ -158,103 +160,213 @@ export default function SubmitForm() {
     );
   }
 
-  const currentStepIdx = statusData
-    ? PIPELINE_STEPS.findIndex((s) => s.status === statusData.status)
-    : -1;
+  const formatDate = (ts: number | undefined) => {
+    if (!ts) return "No deadline set";
+    return new Date(ts * 1000).toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="max-w-2xl mx-auto flex items-center gap-2.5">
-          <div className="h-7 w-7 rounded-lg bg-indigo-600 flex items-center justify-center">
-            <FileText className="h-4 w-4 text-white" />
-          </div>
-          <span className="font-bold text-gray-900">PatentIQ</span>
-          <span className="text-gray-300 mx-1">·</span>
-          <span className="text-sm text-gray-500">Student Submission</span>
-        </div>
-      </header>
+    <div className="min-h-screen bg-white flex flex-col relative">
+      {/* Absolute Header Logo */}
+      <div className="absolute top-6 left-6 lg:top-8 lg:left-8 flex items-center gap-3 z-10">
+        <svg
+          width="44"
+          height="44"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className="text-indigo-600 shrink-0"
+        >
+          <path
+            d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2Z"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M14 2V8H20"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <circle cx="10" cy="14" r="2" stroke="currentColor" strokeWidth="2" />
+          <path
+            d="M15 17H9"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+        <span className="text-2xl font-bold text-gray-900 tracking-tight">
+          PatentIQ
+        </span>
+      </div>
 
-      <main className="flex-1 flex items-start justify-center py-12 px-4">
-        <div className="w-full max-w-2xl">
+      <main className="flex-1 flex flex-col items-center justify-center py-12 px-4 w-full">
+        <div className="w-full max-w-6xl mt-12 lg:mt-0">
           {/* Submission Form */}
           {step === "form" && (
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-              <div className="px-8 py-6 border-b border-gray-100">
-                <h1 className="text-xl font-bold text-gray-900">
-                  Submit Your Patent {groupInfo && <span className="text-indigo-600">to {groupInfo.name}</span>}
-                </h1>
-                {loadingGroup ? (
-                   <div className="h-4 w-32 bg-gray-100 animate-pulse rounded mt-1" />
-                ) : (
-                  <p className="text-sm text-gray-500 mt-1">
-                    Upload your patent document for AI-powered evaluation.
-                  </p>
-                )}
-              </div>
-
-              <form onSubmit={handleSubmit} className="px-8 py-6 space-y-6">
-                {/* Submitter Name */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+              
+              {/* Left Column: Form Section */}
+              <div className="lg:col-span-7 flex flex-col gap-10">
+                
+                {/* Group Details */}
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">
-                    Your Name *
-                  </label>
-                  <input
-                    type="text"
-                    value={submitterName}
-                    onChange={(e) => setSubmitterName(e.target.value)}
-                    placeholder="Full name"
-                    required
-                    className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all"
-                  />
+                  {loadingGroup ? (
+                    <div className="h-9 w-64 bg-gray-100 animate-pulse rounded-md mb-4" />
+                  ) : (
+                    <h1 className="text-3xl font-bold text-gray-900 mb-4 tracking-tight">
+                      {groupInfo?.name || "Group Submission"}
+                    </h1>
+                  )}
+                  <div className="flex flex-wrap gap-6 text-sm text-gray-600">
+                    <div className="flex items-center gap-2">
+                      <div className="h-8 w-8 rounded-md bg-indigo-50 flex items-center justify-center">
+                        <Calendar className="w-4 h-4 text-indigo-600" />
+                      </div>
+                      <span>
+                        Deadline:{" "}
+                        <span className="font-medium text-gray-900">
+                          {loadingGroup ? "..." : formatDate(groupInfo?.expires_at)}
+                        </span>
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="h-8 w-8 rounded-md bg-indigo-50 flex items-center justify-center">
+                        <User className="w-4 h-4 text-indigo-600" />
+                      </div>
+                      <span>
+                        Assignee: <span className="font-medium text-gray-900">{groupInfo?.mentor_name || "Mentor"}</span>
+                      </span>
+                    </div>
+                  </div>
                 </div>
 
-                {/* Team Members */}
+                {/* Form Fields */}
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">
-                    Team Members (optional)
-                  </label>
-                  <div className="space-y-2">
-                    {teammates.map((tm, i) => (
-                      <div key={i} className="flex gap-2">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-6">Student Details</h2>
+                  <form id="submission-form" onSubmit={handleSubmit} className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      {/* Submitter Name */}
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">
+                          Your Name *
+                        </label>
                         <input
                           type="text"
-                          value={tm}
-                          onChange={(e) => updateTeammate(i, e.target.value)}
-                          placeholder={`Team member ${i + 1}`}
-                          className="flex-1 rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all"
+                          value={submitterName}
+                          onChange={(e) => setSubmitterName(e.target.value)}
+                          placeholder="Full name"
+                          required
+                          className="w-full rounded-md border border-gray-200 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all"
                         />
-                        {teammates.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => removeTeammate(i)}
-                            className="rounded-xl border border-gray-200 px-3 text-gray-400 hover:bg-gray-50 hover:text-gray-600 transition-colors"
-                          >
-                            <X className="h-4 w-4" />
-                          </button>
-                        )}
                       </div>
-                    ))}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={addTeammate}
-                    className="mt-2 flex items-center gap-1.5 text-xs text-indigo-600 hover:text-indigo-700 font-medium transition-colors"
-                  >
-                    <Plus className="h-3.5 w-3.5" />
-                    Add team member
-                  </button>
-                </div>
 
+                      {/* Roll Number */}
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">
+                          Roll Number *
+                        </label>
+                        <input
+                          type="text"
+                          value={rollNumber}
+                          onChange={(e) => setRollNumber(e.target.value)}
+                          placeholder="Roll number"
+                          required
+                          className="w-full rounded-md border border-gray-200 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      {/* Email */}
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">
+                          Email *
+                        </label>
+                        <input
+                          type="email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          placeholder="Email address"
+                          required
+                          className="w-full rounded-md border border-gray-200 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all"
+                        />
+                      </div>
+
+                      {/* Phone */}
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">
+                          Phone *
+                        </label>
+                        <input
+                          type="tel"
+                          value={phone}
+                          onChange={(e) => setPhone(e.target.value)}
+                          placeholder="Phone number"
+                          required
+                          className="w-full rounded-md border border-gray-200 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Team Members */}
+                    <div className="pt-2">
+                      <label className="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">
+                        Team Members (optional)
+                      </label>
+                      <div className="space-y-3">
+                        {teammates.map((tm, i) => (
+                          <div key={i} className="flex gap-2">
+                            <input
+                              type="text"
+                              value={tm}
+                              onChange={(e) => updateTeammate(i, e.target.value)}
+                              placeholder={`Team member ${i + 1}`}
+                              className="flex-1 rounded-md border border-gray-200 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all"
+                            />
+                            {teammates.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => removeTeammate(i)}
+                                className="rounded-md border border-gray-200 px-4 text-gray-400 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors"
+                              >
+                                <X className="h-4 w-4" />
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={addTeammate}
+                        className="mt-3 flex items-center gap-1.5 text-sm text-indigo-600 hover:text-indigo-700 font-medium transition-colors"
+                      >
+                        <Plus className="h-4 w-4" />
+                        Add another team member
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+
+              {/* Right Column: Upload Widget */}
+              <div className="lg:col-span-5 lg:pl-12 lg:sticky lg:top-24">
+                <h3 className="text-xl font-bold text-gray-900 mb-6">Upload Document</h3>
+                
                 {/* File Upload */}
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">
-                    Patent Document *
-                  </label>
+                <div className="mb-8">
                   <div
                     onClick={() => fileRef.current?.click()}
-                    className={`rounded-xl border-2 border-dashed cursor-pointer transition-all p-8 text-center ${
+                    className={`rounded-md border-2 border-dashed cursor-pointer transition-all p-10 text-center ${
                       file
                         ? "border-indigo-300 bg-indigo-50"
                         : "border-gray-200 hover:border-indigo-300 hover:bg-indigo-50/50"
@@ -268,96 +380,134 @@ export default function SubmitForm() {
                       className="hidden"
                     />
                     {file ? (
-                      <div className="flex flex-col items-center gap-2">
-                        <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                          <FileText className="h-5 w-5 text-indigo-600" />
+                      <div className="flex flex-col items-center gap-3">
+                        <div className="h-12 w-12 rounded-md bg-indigo-100 flex items-center justify-center">
+                          <FileText className="h-6 w-6 text-indigo-600" />
                         </div>
-                        <p className="text-sm font-medium text-indigo-700">{file.name}</p>
-                        <p className="text-xs text-indigo-400">
-                          {(file.size / 1024 / 1024).toFixed(2)} MB
-                        </p>
+                        <div>
+                          <p className="text-sm font-medium text-indigo-900 mb-1 truncate max-w-[200px]">{file.name}</p>
+                          <p className="text-xs text-indigo-500 font-medium">
+                            {(file.size / 1024 / 1024).toFixed(2)} MB
+                          </p>
+                        </div>
                         <button
                           type="button"
                           onClick={(e) => { e.stopPropagation(); setFile(null); }}
-                          className="text-xs text-indigo-400 hover:text-indigo-600 underline"
+                          className="mt-2 text-xs font-semibold text-indigo-600 hover:text-indigo-800 bg-indigo-100/50 px-3 py-1.5 rounded-md transition-colors"
                         >
-                          Remove
+                          Change file
                         </button>
                       </div>
                     ) : (
-                      <div className="flex flex-col items-center gap-2">
-                        <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center">
-                          <Upload className="h-5 w-5 text-gray-400" />
+                      <div className="flex flex-col items-center gap-3">
+                        <div className="h-12 w-12 rounded-md bg-gray-50 flex items-center justify-center group-hover:bg-white transition-colors">
+                          <Upload className="h-6 w-6 text-gray-400" />
                         </div>
-                        <p className="text-sm font-medium text-gray-600">
-                          Click to upload or drag & drop
-                        </p>
-                        <p className="text-xs text-gray-400">PDF, DOC, DOCX up to 25MB</p>
+                        <div>
+                          <p className="text-sm font-medium text-gray-700 mb-1">
+                            Click to upload or drag & drop
+                          </p>
+                          <p className="text-xs text-gray-400">PDF, DOC, DOCX up to 25MB</p>
+                        </div>
                       </div>
                     )}
                   </div>
                 </div>
 
+                <div className="bg-gray-50 rounded-md p-4 mb-8">
+                   <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Checklist</h4>
+                   <ul className="space-y-2 text-sm text-gray-600">
+                     <li className="flex gap-2 items-start">
+                        <Check className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
+                        <span>Ensure all team members are listed</span>
+                     </li>
+                     <li className="flex gap-2 items-start">
+                        <Check className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
+                        <span>Document is in a supported format</span>
+                     </li>
+                     <li className="flex gap-2 items-start">
+                        <Check className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
+                        <span>File size is under the 25MB limit</span>
+                     </li>
+                   </ul>
+                </div>
+
                 <Button
+                  form="submission-form"
                   type="submit"
-                  disabled={!file || !submitterName.trim()}
-                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 text-sm font-semibold"
+                  disabled={!file || !submitterName.trim() || !email.trim() || !phone.trim() || !rollNumber.trim()}
+                  className="w-full py-6 text-base"
                 >
-                  Submit Patent
+                  Submit Patent Evaluation
                 </Button>
-              </form>
+              </div>
             </div>
           )}
 
           {/* Uploading State */}
           {step === "uploading" && (
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-12 text-center">
-              <Loader2 className="mx-auto h-10 w-10 text-indigo-500 animate-spin mb-4" />
-              <h2 className="text-lg font-semibold text-gray-900">Uploading your document...</h2>
-              <p className="text-sm text-gray-400 mt-2">Please don't close this page.</p>
+            <div className="max-w-md mx-auto bg-white rounded-md border border-gray-200 shadow-sm p-12 text-center">
+              <Loader2 className="mx-auto h-12 w-12 text-indigo-500 animate-spin mb-6" />
+              <h2 className="text-xl font-bold text-gray-900">Uploading your document...</h2>
+              <p className="text-sm text-gray-500 mt-2">Please don't close this page while we process your submission.</p>
             </div>
           )}
 
-          {/* Tracking/Done State - Simple Success Message (No Pipeline for Students) */}
+          {/* Tracking/Done State */}
           {(step === "tracking" || step === "done") && statusData && (
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+            <div className="max-w-xl mx-auto bg-white rounded-md border border-gray-200 shadow-sm overflow-hidden">
               <div className="px-8 py-12 text-center">
-                {/* Checkmark Icon */}
-                <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-emerald-50 mb-4">
-                  <Check className="h-8 w-8 text-emerald-600" />
+                <div className="inline-flex items-center justify-center h-24 w-24 rounded-full bg-emerald-50 mb-6 border-4 border-white shadow-sm">
+                  <CheckCircle className="h-12 w-12 text-emerald-600" strokeWidth={1.5} />
                 </div>
 
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                  Patent Submitted Successfully! ✓
+                <h2 className="text-3xl font-bold text-gray-900 mb-3 tracking-tight">
+                  Submitted Successfully!
                 </h2>
 
-                <p className="text-sm text-gray-500 mb-6 max-w-sm mx-auto">
-                  Your patent has been received and is now under evaluation. Your mentor will review the results and share them with you.
+                <p className="text-gray-500 mb-8 max-w-sm mx-auto leading-relaxed">
+                  Your patent has been received and is now getting evaluated. Your mentor will review the results soon.
                 </p>
 
-                <div className="rounded-lg bg-blue-50 border border-blue-100 p-4 mb-6 text-left">
-                  <p className="text-xs text-blue-700 font-medium mb-1">Submission ID</p>
-                  <p className="text-sm font-mono text-blue-900 break-all">{submissionId}</p>
+                <div className="rounded-md bg-gray-50 border border-gray-100 p-6 mb-8 text-left space-y-3">
+                  <div className="flex justify-between border-b border-gray-200 pb-3">
+                    <span className="text-sm font-semibold text-gray-500">Name</span>
+                    <span className="text-sm font-medium text-gray-900">{submitterName}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-gray-200 pb-3">
+                    <span className="text-sm font-semibold text-gray-500">Roll Number</span>
+                    <span className="text-sm font-medium text-gray-900">{rollNumber}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm font-semibold text-gray-500">Document</span>
+                    <span className="text-sm font-medium text-gray-900 truncate max-w-[150px]">{file?.name}</span>
+                  </div>
                 </div>
 
-                <p className="text-xs text-gray-400">
-                  You will be notified once your mentor has reviewed the evaluation results.
-                </p>
+                <Button
+                  onClick={() => window.location.reload()}
+                  variant="outline"
+                  className="w-full"
+                >
+                  Submit Another Document
+                </Button>
               </div>
             </div>
           )}
 
           {/* Error State */}
           {step === "error" && (
-            <div className="bg-white rounded-2xl border border-red-200 shadow-sm p-8 text-center">
-              <AlertCircle className="mx-auto h-10 w-10 text-red-400 mb-4" />
-              <h2 className="text-lg font-semibold text-gray-900">
+            <div className="max-w-md mx-auto bg-white rounded-md border border-red-200 shadow-sm p-10 text-center">
+              <div className="inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-red-50 mb-6">
+                <AlertCircle className="h-8 w-8 text-red-500" />
+              </div>
+              <h2 className="text-xl font-bold text-gray-900 mb-2">
                 Submission Failed
               </h2>
-              <p className="text-sm text-gray-500 mt-2 mb-6">{error}</p>
+              <p className="text-sm text-gray-500 mb-8">{error}</p>
               <Button
                 onClick={() => { setStep("form"); setError(null); }}
-                variant="outline"
+                className="w-full"
               >
                 Try Again
               </Button>
