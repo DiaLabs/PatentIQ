@@ -320,6 +320,11 @@ export async function retrySubmissionEvaluation(
   );
 }
 
+/** GET /mentor/submissions/:id/report */
+export async function fetchSubmissionReport(submissionId: string): Promise<any> {
+  return apiFetch<any>(`/api/v1/mentor/submissions/${submissionId}/report`);
+}
+
 // ── Public (Student) API Helpers ──────────────────────────────────────────────
 /** GET /api/v1/group/:token */
 export async function fetchGroupPublic(token: string): Promise<{

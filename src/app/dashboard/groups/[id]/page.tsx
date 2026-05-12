@@ -29,6 +29,7 @@ import {
 import Link from "next/link";
 import { PipelineDetails } from "@/components/dashboard/pipeline-details";
 import { RetrySubmissionButton } from "@/components/dashboard/retry-submission-button";
+import { ReportModal } from "@/components/dashboard/report-modal";
 
 const STATUS_OPTIONS: { label: string; value: string }[] = [
   { label: "All", value: "" },
@@ -55,6 +56,7 @@ export default function GroupDetailPage() {
   const [selectedSubmissionPipeline, setSelectedSubmissionPipeline] = useState<string | null>(null);
   const [pipelineLoading, setPipelineLoading] = useState(false);
   const [pipelinePhases, setPipelinePhases] = useState<PipelinePhase[]>([]);
+  const [selectedSubmissionReport, setSelectedSubmissionReport] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -323,8 +325,7 @@ export default function GroupDetailPage() {
                         {s.status === "COMPLETED" ? (
                           <button
                             onClick={() => {
-                              // TODO: Implement report download
-                              alert("Generating report for " + s.submission_id);
+                              setSelectedSubmissionReport(s.submission_id);
                             }}
                             className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-50 border border-indigo-100 px-2.5 py-1.5 text-xs font-medium text-indigo-600 hover:bg-indigo-100 transition-colors"
                           >
@@ -486,6 +487,14 @@ export default function GroupDetailPage() {
             </div>
           </div>
         </div>
+      )}
+      
+      {/* Report Modal */}
+      {selectedSubmissionReport && (
+        <ReportModal
+          submissionId={selectedSubmissionReport}
+          onClose={() => setSelectedSubmissionReport(null)}
+        />
       )}
     </div>
   );

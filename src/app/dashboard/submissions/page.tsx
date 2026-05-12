@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import { ReportModal } from "@/components/dashboard/report-modal";
 
 export default function SubmissionsPage() {
   const { user } = useAuth();
@@ -36,6 +37,7 @@ export default function SubmissionsPage() {
   const [status, setStatus] = useState("");
   const [page, setPage] = useState(1);
   const [selectedSubmission, setSelectedSubmission] = useState<string | null>(null);
+  const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -209,7 +211,7 @@ export default function SubmissionsPage() {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            alert("Generating report for " + s.submission_id);
+                            setSelectedReportId(s.submission_id);
                           }}
                           className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-900/30 px-2.5 py-1.5 text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-colors"
                         >
@@ -388,6 +390,14 @@ export default function SubmissionsPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Report Modal */}
+      {selectedReportId && (
+        <ReportModal
+          submissionId={selectedReportId}
+          onClose={() => setSelectedReportId(null)}
+        />
+      )}
     </div>
   );
 }
