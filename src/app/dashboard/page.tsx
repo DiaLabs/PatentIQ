@@ -31,6 +31,11 @@ export default function OverviewPage() {
   const [dashboard, setDashboard] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -50,7 +55,7 @@ export default function OverviewPage() {
     <div className="px-12 py-8 bg-white dark:bg-[#0a0a0a] min-h-screen relative">
       {/* Dashboard Header */}
       <DashboardHeader
-        userName={user?.displayName?.split(" ")[0] ?? "Mentor"}
+        userName={mounted ? (user?.displayName?.split(" ")[0] ?? "Mentor") : "Mentor"}
         onRefresh={load}
         isLoading={loading}
       />
@@ -96,7 +101,7 @@ export default function OverviewPage() {
                 <div key={i} className="h-16 animate-pulse rounded-xl bg-gray-50 dark:bg-zinc-800/50" />
               ))}
             </div>
-          ) : dashboard && dashboard.active_groups.length > 0 ? (
+          ) : dashboard && (dashboard.active_groups?.length ?? 0) > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
@@ -116,7 +121,7 @@ export default function OverviewPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50 dark:divide-zinc-800">
-                  {dashboard.active_groups.map((g) => (
+                  {dashboard.active_groups?.map((g) => (
                     <tr key={g.group_id} className="hover:bg-gray-50/80 dark:hover:bg-zinc-800/30 transition-colors group">
                       <td className="px-8 py-6 font-semibold text-gray-900 dark:text-white">
                         <Link
@@ -201,8 +206,8 @@ export default function OverviewPage() {
                       <td colSpan={7} className="px-6 py-6 h-16 bg-gray-50/30"></td>
                     </tr>
                   ))
-                ) : dashboard && dashboard.recent_submissions.length > 0 ? (
-                  dashboard.recent_submissions.map((s) => (
+                ) : dashboard && (dashboard.recent_submissions?.length ?? 0) > 0 ? (
+                  dashboard.recent_submissions?.map((s) => (
                     <tr key={s.submission_id} className="group hover:bg-gray-50/50 dark:hover:bg-zinc-800/20 transition-colors">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2.5">

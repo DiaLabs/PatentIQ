@@ -23,6 +23,8 @@ import {
   ChevronRight,
   Eye,
   X,
+  FileText,
+  Download,
 } from "lucide-react";
 import Link from "next/link";
 import { PipelineDetails } from "@/components/dashboard/pipeline-details";
@@ -263,6 +265,9 @@ export default function GroupDetailPage() {
                       Submitted
                     </th>
                     <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wide">
+                      Report
+                    </th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wide">
                       Details
                     </th>
                   </tr>
@@ -313,6 +318,22 @@ export default function GroupDetailPage() {
                       </td>
                       <td className="px-6 py-4 text-right text-xs text-gray-400">
                         {new Date(s.submitted_at).toLocaleDateString()}
+                      </td>
+                      <td className="px-4 py-4 text-center">
+                        {s.status === "COMPLETED" ? (
+                          <button
+                            onClick={() => {
+                              // TODO: Implement report download
+                              alert("Generating report for " + s.submission_id);
+                            }}
+                            className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-50 border border-indigo-100 px-2.5 py-1.5 text-xs font-medium text-indigo-600 hover:bg-indigo-100 transition-colors"
+                          >
+                            <FileText className="h-3.5 w-3.5" />
+                            Report
+                          </button>
+                        ) : (
+                          <span className="text-gray-300 text-xs">—</span>
+                        )}
                       </td>
                       <td className="px-4 py-4 text-center">
                         <button

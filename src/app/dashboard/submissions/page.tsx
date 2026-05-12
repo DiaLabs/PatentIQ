@@ -137,6 +137,7 @@ export default function SubmissionsPage() {
                   Score <ArrowUpDown className="h-3 w-3" />
                 </th>
                 <th className="px-6 py-5 text-left text-[11px] font-bold text-gray-400 uppercase tracking-widest">Submitted</th>
+                <th className="px-4 py-5 text-center text-[11px] font-bold text-gray-400 uppercase tracking-widest">Report</th>
                 <th className="px-8 py-5 text-right"></th>
               </tr>
             </thead>
@@ -202,6 +203,22 @@ export default function SubmissionsPage() {
                         <Calendar className="h-3.5 w-3.5" />
                         {formatRelativeTime(s.submitted_at)}
                       </div>
+                    </td>
+                    <td className="px-4 py-5 text-center">
+                      {s.status === "COMPLETED" ? (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            alert("Generating report for " + s.submission_id);
+                          }}
+                          className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-900/30 px-2.5 py-1.5 text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-colors"
+                        >
+                          <FileText className="h-3.5 w-3.5" />
+                          Report
+                        </button>
+                      ) : (
+                        <span className="text-gray-300 dark:text-zinc-600">—</span>
+                      )}
                     </td>
                     <td className="px-8 py-5 text-right">
                       <div className="flex items-center justify-end gap-2">
