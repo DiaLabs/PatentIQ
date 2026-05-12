@@ -1,37 +1,58 @@
+import { motion } from "framer-motion";
+import { TrendingUp } from "lucide-react";
+
 export function StatCard({
   title,
   value,
   description,
   icon,
+  iconBackground = "bg-indigo-50",
   trend,
+  trendPercentage,
   loading,
 }: {
   title: string;
   value: string;
   description?: string;
   icon: React.ReactNode;
+  iconBackground?: string;
   trend?: string;
+  trendPercentage?: string;
   loading?: boolean;
 }) {
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-      <div className="flex items-center justify-between mb-3">
-        <p className="text-sm font-medium text-gray-500">{title}</p>
-        <div className="h-9 w-9 flex items-center justify-center rounded-lg bg-indigo-50">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow"
+    >
+      {/* Top Row: Icon + Title (Inline) */}
+      <div className="flex items-center gap-4 mb-4">
+        {/* Circular Icon */}
+        <div className={`h-14 w-14 flex items-center justify-center rounded-full ${iconBackground} flex-shrink-0`}>
           {icon}
         </div>
+        {/* Title */}
+        <p className="text-sm font-medium text-gray-600">{title}</p>
       </div>
+
+      {/* Value - Big Number */}
       {loading ? (
-        <div className="h-8 w-20 animate-pulse rounded-md bg-gray-100 mb-1" />
+        <div className="h-12 w-20 animate-pulse rounded-md bg-gray-100 mb-4" />
       ) : (
-        <p className="text-2xl font-bold text-gray-900">{value}</p>
+        <p className="text-4xl font-bold text-gray-900 mb-4">{value}</p>
       )}
-      {description && (
-        <p className="mt-1 text-xs text-gray-400">{description}</p>
+
+      {/* Trend Indicator */}
+      {(trendPercentage || trend) && !loading && (
+        <div className="flex items-center gap-2">
+          <TrendingUp className="h-3.5 w-3.5 text-emerald-500" />
+          <span className="text-xs font-medium text-emerald-600">
+            {trendPercentage ? `${trendPercentage} from last month` : trend}
+          </span>
+        </div>
       )}
-      {trend && !loading && (
-        <p className="mt-1.5 text-xs font-medium text-emerald-600">{trend}</p>
-      )}
-    </div>
+    </motion.div>
   );
 }

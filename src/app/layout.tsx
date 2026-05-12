@@ -14,6 +14,7 @@ export const metadata: Metadata = {
 };
 
 import { AuthProvider } from "@/context/AuthContext";
+import { ToastProvider } from "@/context/ToastContext";
 
 export default function RootLayout({
   children,
@@ -21,10 +22,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} h-full antialiased`} data-scroll-behavior="smooth">
-      <body className="min-h-full flex flex-col font-sans">
+    <html lang="en" suppressHydrationWarning className={`${inter.variable} h-full antialiased`} data-scroll-behavior="smooth">
+      <body className="min-h-full flex flex-col font-sans bg-white dark:bg-[#0a0a0a] text-gray-900 dark:text-white transition-colors">
         <AuthProvider>
-          {children}
+          <ToastProvider>
+            {children}
+          </ToastProvider>
         </AuthProvider>
       </body>
     </html>

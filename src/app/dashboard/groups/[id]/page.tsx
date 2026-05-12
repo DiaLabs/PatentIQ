@@ -404,7 +404,6 @@ export default function GroupDetailPage() {
                 groupId={groupId}
                 submissionId={selectedSubmissionPipeline}
                 status={data?.submissions.find(s => s.submission_id === selectedSubmissionPipeline)?.status || "PENDING"}
-                retryCount={data?.submissions.find(s => s.submission_id === selectedSubmissionPipeline)?.retry_count}
                 onRetrySuccess={() => {
                   // Refresh data after successful retry
                   load();
