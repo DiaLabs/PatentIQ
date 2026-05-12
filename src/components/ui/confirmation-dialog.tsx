@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { AlertTriangle, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { Button } from './button';
 import { Portal } from './portal';
 
