@@ -86,10 +86,22 @@ export interface ActiveGroup {
   avg_score: number | null;
 }
 
+export interface RecentSubmission {
+  submission_id: string;
+  group_id: string;
+  group_name: string;
+  submitter_name: string;
+  file_name: string;
+  status: SubmissionStatus;
+  score: number | null;
+  submitted_at: number;
+}
+
 export interface DashboardData {
   overview: DashboardOverview;
-  verdict_distribution: Record<string, number>;
+  status_distribution: Record<string, number>;
   active_groups: ActiveGroup[];
+  recent_submissions: RecentSubmission[];
 }
 
 export interface Group {
@@ -120,6 +132,8 @@ export interface Submission {
 }
 
 export type SubmissionStatus =
+  | 'PENDING'
+  | 'PROCESSING'
   | 'QUEUED'
   | 'EXTRACTING_IDS'
   | 'VALIDATING_IDS'
@@ -168,6 +182,63 @@ export interface SubmissionStatusResponse {
 
 // ── Mentor API Helpers ────────────────────────────────────────────────────────
 
+export interface SubmissionsResponse {
+  submissions: (RecentSubmission & { evaluation_results: any | null })[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    total_pages: number;
+  };
+}
+
+/** GET /mentor/submissions */
+export async function fetchAllSubmissions(params?: {
+  search?: string;
+  status?: string;
+  page?: number;
+  limit?: number;
+}): Promise<SubmissionsResponse> {
+  const qs = new URLSearchParams();
+  if (params?.search) qs.set('search', params.search);
+  if (params?.status) qs.set('status', params.status);
+  if (params?.page) qs.set('page', String(params.page));
+  if (params?.limit) qs.set('limit', String(params.limit));
+  const query = qs.toString() ? `?${qs.toString()}` : '';
+  return apiFetch<SubmissionsResponse>(`/api/v1/mentor/submissions${query}`);
+}
+
+/** DELETE /mentor/submissions/:id */
+export async function deleteSubmission(submissionId: string): Promise<{ success: boolean }> {
+  return apiFetch<{ success: boolean }>(`/api/v1/mentor/submissions/${submissionId}`, {
+    method: 'DELETE',
+  });
+}
+
+/** GET /mentor/submissions/:id/download */
+export async function downloadSubmissionFile(submissionId: string): Promise<Blob> {
+  const user = auth.currentUser;
+  if (!user) throw new Error('Not authenticated');
+  const idToken = await user.getIdToken(false);
+
+  const response = await fetch(`${API_BASE_URL}/api/v1/mentor/submissions/${submissionId}/download`, {
+    headers: {
+      Authorization: `Bearer ${idToken}`,
+    },
+  });
+
+  if (!response.ok) {
+    let msg = 'Download failed';
+    try {
+      const e = await response.json() as { error?: string };
+      if (e.error) msg = e.error;
+    } catch { /* ignore */ }
+    throw new Error(msg);
+  }
+
+  return response.blob();
+}
+
 /** GET /mentor/dashboard */
 export async function fetchDashboard(days = 30): Promise<DashboardData> {
   return apiFetch<DashboardData>(`/api/v1/mentor/dashboard?days=${days}`);
@@ -212,13 +283,14 @@ export async function deleteGroup(groupId: string): Promise<void> {
 export interface PipelinePhase {
   phase_name: string;
   stage_number: number;
-  status: 'COMPLETED' | 'FAILED' | 'REJECTED';
+  status: 'COMPLETED' | 'FAILED' | 'REJECTED' | 'PENDING' | 'PROCESSING';
   duration_ms: number | null;
   timestamp: number;
   cost_usd: number | null;
   tokens_used: number | null;
   api_provider: string | null;
   error_message: string | null;
+  metadata?: any;
 }
 
 export interface PipelineDetails {
