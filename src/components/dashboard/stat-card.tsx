@@ -25,7 +25,7 @@ export function StatCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow"
+      className="bg-white rounded-md border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow"
     >
       {/* Top Row: Icon + Title (Inline) */}
       <div className="flex items-center gap-4 mb-4">

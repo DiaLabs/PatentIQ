@@ -49,7 +49,7 @@ export function ReportContent({ data }: ReportContentProps) {
             <span className="text-sm font-semibold text-emerald-600">{patentStrength}</span>
           </div>
         </div>
-        <div className="p-4 bg-indigo-50/50 dark:bg-indigo-900/10 rounded-2xl border border-indigo-100 dark:border-indigo-900/20">
+        <div className="p-4 bg-indigo-50/50 dark:bg-indigo-900/10 rounded-md border border-indigo-100 dark:border-indigo-900/20">
           <div className="flex items-center gap-2 mb-2">
             <ShieldAlert className="h-4 w-4 text-indigo-600" />
             <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest">Main Risk</span>
@@ -63,12 +63,12 @@ export function ReportContent({ data }: ReportContentProps) {
       {/* 1. Executive Verdict */}
       <section className="mb-12">
         <div className="flex items-center gap-3 mb-6">
-          <div className="h-8 w-8 rounded-lg bg-gray-900 dark:bg-white flex items-center justify-center text-white dark:text-gray-900 font-bold">1</div>
+          <div className="h-8 w-8 rounded-md bg-gray-900 dark:bg-white flex items-center justify-center text-white dark:text-gray-900 font-bold">1</div>
           <h3 className="text-xl font-bold uppercase tracking-tight">Executive Verdict</h3>
         </div>
         <div className="space-y-4 text-gray-700 dark:text-gray-300 leading-relaxed">
           <p>{summary}</p>
-          <div className="p-5 rounded-2xl bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/20">
+          <div className="p-5 rounded-md bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/20">
             <p className="text-sm font-bold text-amber-800 dark:text-amber-400 mb-1 flex items-center gap-2">
               <Zap className="h-4 w-4" /> Recommended Action
             </p>
@@ -81,10 +81,10 @@ export function ReportContent({ data }: ReportContentProps) {
       {(data.detailed_scoring || data.analysis) && (
         <section className="mb-12">
           <div className="flex items-center gap-3 mb-6">
-            <div className="h-8 w-8 rounded-lg bg-gray-900 dark:bg-white flex items-center justify-center text-white dark:text-gray-900 font-bold">2</div>
+            <div className="h-8 w-8 rounded-md bg-gray-900 dark:bg-white flex items-center justify-center text-white dark:text-gray-900 font-bold">2</div>
             <h3 className="text-xl font-bold uppercase tracking-tight">Detailed Scoring</h3>
           </div>
-          <div className="overflow-hidden rounded-2xl border border-gray-100 dark:border-zinc-800">
+          <div className="overflow-hidden rounded-md border border-gray-100 dark:border-zinc-800">
             <table className="w-full text-left">
               <thead>
                 <tr className="bg-gray-50 dark:bg-zinc-800/50">
@@ -125,13 +125,13 @@ export function ReportContent({ data }: ReportContentProps) {
       {(data.key_strengths || data.strengths) && (
         <section className="mb-12">
           <div className="flex items-center gap-3 mb-6">
-            <div className="h-8 w-8 rounded-lg bg-gray-900 dark:bg-white flex items-center justify-center text-white dark:text-gray-900 font-bold">3</div>
+            <div className="h-8 w-8 rounded-md bg-gray-900 dark:bg-white flex items-center justify-center text-white dark:text-gray-900 font-bold">3</div>
             <h3 className="text-xl font-bold uppercase tracking-tight">Key Strengths</h3>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {data.key_strengths ? (
               data.key_strengths.map((s: any, i: number) => (
-                <div key={i} className="p-4 rounded-xl border border-emerald-100 dark:border-emerald-900/20 bg-emerald-50/30 dark:bg-emerald-900/5">
+                <div key={i} className="p-4 rounded-md border border-emerald-100 dark:border-emerald-900/20 bg-emerald-50/30 dark:bg-emerald-900/5">
                   <h4 className="text-sm font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-2 mb-1">
                     <CheckCircle2 className="h-4 w-4" /> {s.title}
                   </h4>
@@ -156,11 +156,11 @@ export function ReportContent({ data }: ReportContentProps) {
       {(data.major_weaknesses_and_improvements) && (
         <section className="mb-12">
           <div className="flex items-center gap-3 mb-6">
-            <div className="h-8 w-8 rounded-lg bg-gray-900 dark:bg-white flex items-center justify-center text-white dark:text-gray-900 font-bold">4</div>
+            <div className="h-8 w-8 rounded-md bg-gray-900 dark:bg-white flex items-center justify-center text-white dark:text-gray-900 font-bold">4</div>
             <h3 className="text-xl font-bold uppercase tracking-tight">Major Weaknesses</h3>
           </div>
-          <div className="overflow-hidden rounded-2xl border border-gray-100 dark:border-zinc-800">
-            <table className="w-full text-left">
+          <div className="overflow-hidden rounded-md border border-gray-100 dark:border-zinc-800\">
+            <table className="w-full text-left\">
               <thead>
                 <tr className="bg-gray-50 dark:bg-zinc-800/50">
                   <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase">Weakness</th>
@@ -186,10 +186,10 @@ export function ReportContent({ data }: ReportContentProps) {
       {(data.improved_core_inventive_concept) && (
         <section className="mb-12">
           <div className="flex items-center gap-3 mb-6">
-            <div className="h-8 w-8 rounded-lg bg-gray-900 dark:bg-white flex items-center justify-center text-white dark:text-gray-900 font-bold">5</div>
+            <div className="h-8 w-8 rounded-md bg-gray-900 dark:bg-white flex items-center justify-center text-white dark:text-gray-900 font-bold">5</div>
             <h3 className="text-xl font-bold uppercase tracking-tight">Inventive Concept</h3>
           </div>
-          <div className="p-6 rounded-2xl bg-indigo-50/30 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-900/20 italic text-gray-700 dark:text-gray-300 leading-relaxed">
+          <div className="p-6 rounded-md bg-indigo-50/30 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-900/20 italic text-gray-700 dark:text-gray-300 leading-relaxed">
             "{data.improved_core_inventive_concept.concept}"
           </div>
         </section>
@@ -199,7 +199,7 @@ export function ReportContent({ data }: ReportContentProps) {
       {(data.recommended_claim_structure) && (
         <section className="mb-12">
           <div className="flex items-center gap-3 mb-6">
-            <div className="h-8 w-8 rounded-lg bg-gray-900 dark:bg-white flex items-center justify-center text-white dark:text-gray-900 font-bold">6</div>
+            <div className="h-8 w-8 rounded-md bg-gray-900 dark:bg-white flex items-center justify-center text-white dark:text-gray-900 font-bold">6</div>
             <h3 className="text-xl font-bold uppercase tracking-tight">Claim Structure</h3>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

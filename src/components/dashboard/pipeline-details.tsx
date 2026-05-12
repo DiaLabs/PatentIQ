@@ -32,7 +32,7 @@ export function PipelineDetails({ phases, status, currentStage = 0, loading = fa
 
   if (!phases || phases.length === 0) {
     return (
-      <div className="text-sm text-gray-500 italic p-4 bg-gray-50 rounded-lg">
+      <div className="text-sm text-gray-500 italic p-4 bg-gray-50 rounded-md">
         Pipeline execution has not started yet. Check back once the submission begins processing.
       </div>
     );
@@ -47,7 +47,7 @@ export function PipelineDetails({ phases, status, currentStage = 0, loading = fa
         const isRejected = phase.status === "REJECTED";
 
         return (
-          <div key={`${phase.stage_number}-${phase.timestamp}`} className="border border-gray-200 rounded-lg overflow-hidden hover:border-gray-300 transition-colors">
+          <div key={`${phase.stage_number}-${phase.timestamp}`} className="border border-gray-200 rounded-md overflow-hidden hover:border-gray-300 transition-colors">
             {/* Phase Header */}
             <button
               onClick={() => setExpandedPhase(isExpanded ? null : idx)}

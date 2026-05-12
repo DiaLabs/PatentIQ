@@ -84,7 +84,7 @@ export function Sidebar() {
       initial={{ x: -300, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
-      className="fixed left-0 top-0 h-screen w-64 bg-white dark:bg-[#0a0a0a] border-r border-gray-200 dark:border-zinc-800 flex flex-col z-40 shadow-sm"
+      className="fixed left-0 top-0 h-screen w-64 bg-white dark:bg-[#0a0a0a] border-r border-gray-200 dark:border-zinc-800 flex flex-col z-30 shadow-sm"
     >
       {/* Header - Logo Section */}
       <motion.div
@@ -153,7 +153,7 @@ export function Sidebar() {
             >
               <Link
                 href={item.href}
-                className={`group relative flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
+                className={`group relative flex items-center gap-3 px-4 py-3 rounded-md text-sm font-medium transition-all duration-200 ${
                   isActive
                     ? "bg-gradient-to-r from-indigo-50 to-indigo-100 text-indigo-700 shadow-sm dark:from-indigo-900/20 dark:to-indigo-900/10 dark:text-indigo-300"
                     : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 hover:text-gray-900 dark:hover:bg-zinc-900 dark:hover:text-gray-200"
@@ -192,7 +192,7 @@ export function Sidebar() {
 
         <div className="relative z-10 space-y-3">
           {/* User Profile Card */}
-          <div className="px-4 py-3 rounded-lg bg-gradient-to-br from-indigo-50 to-indigo-100/50 border border-indigo-200/50 dark:from-indigo-900/20 dark:to-indigo-900/10 dark:border-indigo-800/30">
+          <div className="px-4 py-3 rounded-md bg-gradient-to-br from-indigo-50 to-indigo-100/50 border border-indigo-200/50 dark:from-indigo-900/20 dark:to-indigo-900/10 dark:border-indigo-800/30">
             <div className="flex items-center gap-3">
               {/* Avatar */}
               {user?.photoURL ? (
@@ -235,7 +235,7 @@ export function Sidebar() {
             disabled={isSigningOut}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-700 hover:text-gray-900 dark:bg-zinc-900 dark:hover:bg-zinc-800 dark:text-gray-300 dark:hover:text-gray-100 font-medium text-sm transition-all duration-200 border border-gray-200 dark:border-zinc-800 disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-md bg-gray-50 hover:bg-gray-100 text-gray-700 hover:text-gray-900 dark:bg-zinc-900 dark:hover:bg-zinc-800 dark:text-gray-300 dark:hover:text-gray-100 font-medium text-sm transition-all duration-200 border border-gray-200 dark:border-zinc-800 disabled:opacity-60 disabled:cursor-not-allowed"
           >
             <LogOut className="h-4 w-4" strokeWidth={2} />
             <span>{isSigningOut ? "Signing out..." : "Sign out"}</span>
