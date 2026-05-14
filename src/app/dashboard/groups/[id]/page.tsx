@@ -1,19 +1,22 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   fetchGroupDetails,
   deleteGroup,
-  fetchSubmissionPipeline,
+  fetchGroups,
+  exportGroupExcel,
+  deleteSubmission,
+  downloadSubmissionFile,
+  retrySubmissionEvaluation,
   type GroupDetails,
   type SubmissionStatus,
-  type PipelinePhase,
+  type Submission,
 } from "@/lib/api";
 import { StatusBadge } from "@/components/dashboard/status-badge";
-import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
-  ArrowLeft,
   AlertCircle,
   Copy,
   Check,
@@ -24,39 +27,77 @@ import {
   Eye,
   X,
   FileText,
+  Calendar,
+  ShieldCheck,
+  Search,
+  Layers,
+  MoreVertical,
   Download,
+  RotateCcw,
 } from "lucide-react";
 import Link from "next/link";
-import { PipelineDetails } from "@/components/dashboard/pipeline-details";
-import { RetrySubmissionButton } from "@/components/dashboard/retry-submission-button";
+import { motion, AnimatePresence } from "framer-motion";
+import { Portal } from "@/components/ui/portal";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { ReportModal } from "@/components/dashboard/report-modal";
+import { useToast } from "@/context/ToastContext";
+import { CustomSelect } from "@/components/ui/custom-select";
+import { Button } from "@/components/ui/button";
 
-const STATUS_OPTIONS: { label: string; value: string }[] = [
-  { label: "All", value: "" },
-  { label: "Queued", value: "QUEUED" },
-  { label: "Evaluating", value: "EVALUATING" },
-  { label: "Completed", value: "COMPLETED" },
-  { label: "Rejected", value: "REJECTED" },
-  { label: "Failed", value: "FAILED" },
+const STATUS_OPTIONS = [
+  { value: "", label: "All Statuses" },
+  { value: "COMPLETED", label: "Completed" },
+  { value: "PROCESSING", label: "In Progress" },
+  { value: "QUEUED", label: "Queued" },
+  { value: "PENDING", label: "Pending" },
+  { value: "FAILED", label: "Failed" },
+  { value: "REJECTED", label: "Rejected" },
+];
+
+const GROUP_COLORS = [
+  { bg: "bg-indigo-100 dark:bg-indigo-900/30", text: "text-indigo-600 dark:text-indigo-400" },
+  { bg: "bg-emerald-100 dark:bg-emerald-900/30", text: "text-emerald-600 dark:text-emerald-400" },
+  { bg: "bg-orange-100 dark:bg-orange-900/30", text: "text-orange-600 dark:text-orange-400" },
+  { bg: "bg-red-100 dark:bg-red-900/30", text: "text-red-600 dark:text-red-400" },
+  { bg: "bg-violet-100 dark:bg-violet-900/30", text: "text-violet-600 dark:text-violet-400" },
+  { bg: "bg-cyan-100 dark:bg-cyan-900/30", text: "text-cyan-600 dark:text-cyan-400" },
 ];
 
 export default function GroupDetailPage() {
   const params = useParams();
   const router = useRouter();
   const groupId = params.id as string;
+  const { toast } = useToast();
 
   const [data, setData] = useState<GroupDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [deleting, setDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [selectedSubmissionPipeline, setSelectedSubmissionPipeline] = useState<string | null>(null);
-  const [pipelineLoading, setPipelineLoading] = useState(false);
-  const [pipelinePhases, setPipelinePhases] = useState<PipelinePhase[]>([]);
+  const [groupIndex, setGroupIndex] = useState(0);
+  
+  // Action Menu State
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [menuAnchor, setMenuAnchor] = useState<{ top: number; bottom: number; right: number } | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
+  const [isDeletingSubmission, setIsDeletingSubmission] = useState(false);
+  const [retryingId, setRetryingId] = useState<string | null>(null);
   const [selectedSubmissionReport, setSelectedSubmissionReport] = useState<string | null>(null);
+
+  const groupColor = useMemo(() => {
+    return GROUP_COLORS[groupIndex % GROUP_COLORS.length];
+  }, [groupIndex]);
+
+  useEffect(() => {
+    fetchGroups().then(res => {
+      const idx = res.groups.findIndex(g => g.group_id === groupId);
+      if (idx !== -1) setGroupIndex(idx);
+    }).catch(console.error);
+  }, [groupId]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -66,6 +107,7 @@ export default function GroupDetailPage() {
         page,
         limit: 20,
         status: statusFilter || undefined,
+        search: search || undefined,
       });
       setData(result);
     } catch (e: any) {
@@ -73,422 +115,517 @@ export default function GroupDetailPage() {
     } finally {
       setLoading(false);
     }
-  }, [groupId, page, statusFilter]);
+  }, [groupId, page, statusFilter, search]);
 
-  useEffect(() => { load(); }, [load]);
-
-  // Fetch pipeline data when modal is opened
   useEffect(() => {
-    if (!selectedSubmissionPipeline || !data) return;
-
-    const fetchPipeline = async () => {
-      setPipelineLoading(true);
-      try {
-        const result = await fetchSubmissionPipeline(groupId, selectedSubmissionPipeline);
-        setPipelinePhases(result.phases);
-      } catch (err) {
-        console.error('Failed to fetch pipeline:', err);
-        setPipelinePhases([]);
-      } finally {
-        setPipelineLoading(false);
-      }
-    };
-
-    fetchPipeline();
-  }, [selectedSubmissionPipeline, data, groupId]);
+    const timer = setTimeout(() => { load(); }, 300);
+    return () => clearTimeout(timer);
+  }, [load]);
 
   const handleDelete = useCallback(async () => {
     setDeleting(true);
     try {
       await deleteGroup(groupId);
+      toast("Group deleted successfully", "success");
       router.push("/dashboard/groups");
     } catch (e: any) {
-      setError(e?.message ?? "Failed to delete group.");
+      toast(e?.message ?? "Failed to delete group", "error");
       setDeleting(false);
       setShowDeleteConfirm(false);
     }
-  }, [groupId, router]);
-
-  const studentLink = data?.group.student_link || "";
+  }, [groupId, router, toast]);
 
   const handleCopy = () => {
-    if (!studentLink) return;
-    navigator.clipboard.writeText(studentLink);
+    const link = data?.group.student_link;
+    if (!link) return;
+    navigator.clipboard.writeText(link);
     setCopied(true);
+    toast("Link copied to clipboard", "info");
     setTimeout(() => setCopied(false), 2000);
   };
 
   return (
-    <div className="p-8">
-      {/* Breadcrumb */}
-      <div className="flex items-center gap-2 mb-6">
-        <Link
-          href="/dashboard/groups"
-          className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition-colors"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Groups
-        </Link>
-        <span className="text-gray-300">/</span>
-        <span className="text-sm text-gray-900 font-medium">
-          {loading ? "Loading..." : data?.group.name}
-        </span>
+    <div className="px-12 py-8 min-h-screen space-y-12">
+      {/* Page Header - Matching Groups Page Style */}
+      <div>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Groups</h1>
+        <p className="mt-2 text-base text-gray-500 dark:text-gray-400">
+          Organize and manage your evaluation groups.
+        </p>
       </div>
 
-      {/* Error */}
-      {error && (
-        <div className="mb-6 flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-          <AlertCircle className="h-4 w-4 flex-shrink-0" />
-          {error}
-        </div>
-      )}
-
-      {/* Group Header Card */}
-      {data && (
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 mb-6">
-          <div className="flex items-start justify-between">
-            <div>
-              <div className="flex items-center gap-3">
-                <h1 className="text-xl font-bold text-gray-900">
-                  {data.group.name}
-                </h1>
-                {data.group.is_expired ? (
-                  <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-500">
-                    Expired
+      {/* Group Detail Header Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex flex-col lg:flex-row lg:items-start justify-between gap-12"
+      >
+        <div className="flex items-start gap-6">
+          <div className={cn("h-16 w-16 rounded-md flex items-center justify-center shrink-0 shadow-sm", groupColor.bg)}>
+            <Layers className={cn("h-8 w-8", groupColor.text)} />
+          </div>
+          <div className="space-y-4">
+            <div className="flex items-center gap-4">
+              <h2 className="text-4xl font-black text-gray-900 dark:text-white tracking-tight leading-none">
+                {loading ? "..." : data?.group.name}
+              </h2>
+              {data && (
+                <span className={cn(
+                  "text-[10px] font-black uppercase tracking-[0.15em] px-3 py-1 rounded-full",
+                  data.group.is_expired 
+                    ? "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/10" 
+                    : "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/10"
+                )}>
+                  {data.group.is_expired ? "Expired" : "Active"}
+                </span>
+              )}
+            </div>
+            
+            <div className="flex flex-wrap items-center gap-x-10 gap-y-4">
+              <div className="flex items-center gap-2.5">
+                <Calendar className="h-4 w-4 text-gray-400" />
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-1">Expires on</span>
+                  <span className="text-sm font-bold text-gray-700 dark:text-gray-200">
+                    {data ? new Date(data.group.expires_at).toLocaleDateString() : "—"}
                   </span>
-                ) : (
-                  <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700">
-                    Active
-                  </span>
-                )}
+                </div>
               </div>
-              <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
-                <span>
-                  Plagiarism limit:{" "}
-                  <strong className="text-gray-700">
-                    {Math.round(data.group.plag_threshold * 100)}%
-                  </strong>
-                </span>
-                <span>
-                  Expires:{" "}
-                  <strong className="text-gray-700">
-                    {new Date(data.group.expires_at).toLocaleDateString()}
-                  </strong>
-                </span>
+              <div className="flex items-center gap-2.5">
+                <ShieldCheck className="h-4 w-4 text-indigo-400" />
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-1">Plagiarism Limit</span>
+                  <span className="text-sm font-bold text-indigo-600 dark:text-indigo-400">
+                    {data ? `${Math.round(data.group.plag_threshold * 100)}%` : "—"}
+                  </span>
+                </div>
               </div>
             </div>
+          </div>
+        </div>
 
+        {/* Clean Submission Gateway */}
+        <div className="max-w-md w-full">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-zinc-500">Submission Gateway</span>
+            <ExternalLink className="h-3.5 w-3.5 text-gray-300" />
+          </div>
+          <p className="text-xs font-mono text-gray-500 dark:text-gray-400 break-all leading-relaxed mb-4 pb-2 border-b border-gray-100 dark:border-zinc-800">
+            {data?.group.student_link || "Link not generated"}
+          </p>
+          <Button
+            onClick={handleCopy}
+            variant="outline"
+            className="w-full gap-2 font-bold text-xs rounded-md shadow-sm"
+          >
+            {copied ? (
+              <><Check className="h-3.5 w-3.5 text-emerald-500" /> Copied!</>
+            ) : (
+              <><Copy className="h-3.5 w-3.5" /> Copy Public Link</>
+            )}
+          </Button>
+        </div>
+      </motion.div>
+
+      {/* Filter Bar */}
+      <div className="flex flex-wrap items-center gap-3 pt-6 border-t border-gray-100 dark:border-zinc-800/50">
+        <div className="relative flex-1 min-w-[220px] max-w-sm">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+          <input
+            type="text"
+            placeholder="Search by student..."
+            className="w-full h-[42px] pl-10 pr-4 rounded-md border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/40 transition-all"
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+          />
+        </div>
+
+        <CustomSelect
+          value={statusFilter}
+          onChange={(v) => { setStatusFilter(v); setPage(1); }}
+          options={STATUS_OPTIONS}
+          placeholder="All Statuses"
+          className="w-44"
+        />
+
+        <div className="flex-1" />
+
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={async () => {
+              toast("Generating Excel report...", "info");
+              try {
+                const blob = await exportGroupExcel(groupId);
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `PatentIQ_${data?.group.name}_Report.xlsx`;
+                document.body.appendChild(a);
+                a.click();
+                URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                toast("Excel report downloaded successfully", "success");
+              } catch (err: any) {
+                toast("Export failed: " + err.message, "error");
+              }
+            }}
+            className="gap-2 h-[42px] rounded-md font-semibold"
+          >
+            <FileText className="h-4 w-4 text-emerald-600" />
+            Export as Excel
+          </Button>
+
+          <Button
+            variant="outline"
+            onClick={() => setShowDeleteConfirm(true)}
+            className="gap-2 h-[42px] rounded-md border-red-100 dark:border-red-900/30 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 font-semibold"
+          >
+            <Trash2 className="h-4 w-4" />
+            Delete Group
+          </Button>
+        </div>
+      </div>
+
+      {/* Main Table */}
+      <div className="bg-white dark:bg-zinc-900 rounded-md border border-gray-100 dark:border-zinc-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-gray-50 dark:border-zinc-800 bg-gray-50/30 dark:bg-zinc-800/20">
+                <th className="px-8 py-5 text-left text-[11px] font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-widest">Document</th>
+                <th className="px-6 py-5 text-left text-[11px] font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-widest">Student</th>
+                <th className="px-6 py-5 text-left text-[11px] font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-widest">Status</th>
+                <th className="px-6 py-5 text-left text-[11px] font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-widest">Score</th>
+                <th className="px-6 py-5 text-left text-[11px] font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-widest">Verdict</th>
+                <th className="px-6 py-5 text-left text-[11px] font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-widest">Submitted</th>
+                <th className="px-4 py-5 text-left text-[11px] font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-widest">Report</th>
+                <th className="px-6 py-5 text-right" />
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50 dark:divide-zinc-800">
+              {loading ? (
+                [1, 2, 3, 4, 5].map((i) => (
+                  <tr key={i} className="animate-pulse">
+                    <td colSpan={8} className="px-8 py-6 h-20 bg-gray-50/10 dark:bg-zinc-800/10" />
+                  </tr>
+                ))
+              ) : data && data.submissions.length > 0 ? (
+                data.submissions.map((s) => (
+                  <motion.tr
+                    layout
+                    key={s.submission_id}
+                    className="group transition-colors hover:bg-gray-50/50 dark:hover:bg-zinc-800/20"
+                  >
+                    <td className="px-8 py-5">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-md bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center shrink-0">
+                          <FileText className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold text-gray-900 dark:text-white truncate max-w-[220px]">
+                            {s.file_name || `Submission_${s.submission_id.slice(0, 8)}.pdf`}
+                          </p>
+                          <p className="text-[10px] text-gray-400 font-medium uppercase mt-0.5">PDF Document</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-5">
+                      <div className="flex flex-col">
+                        <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">{s.submitter_name}</span>
+                        <span className="text-[10px] text-gray-400">
+                          {s.team_member_names.length > 0 ? `${s.team_member_names.length + 1} Members` : "Individual"}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-5">
+                      <StatusBadge status={s.status as SubmissionStatus} />
+                    </td>
+                    <td className="px-6 py-5">
+                      {s.overall_score != null ? (
+                        <div className="inline-flex items-center px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-900/20 text-xs font-bold text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/30">
+                          {s.overall_score}/100
+                        </div>
+                      ) : (
+                        <span className="text-gray-300 dark:text-zinc-600">—</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-5">
+                      {s.verdict ? (
+                        <span className={cn(
+                          "text-xs font-bold px-2.5 py-1 rounded-md",
+                          s.verdict.toLowerCase().includes("patentable") 
+                            ? "text-emerald-600 bg-emerald-50 dark:bg-emerald-900/10" 
+                            : "text-amber-600 bg-amber-50 dark:bg-amber-900/10"
+                        )}>
+                          {s.verdict}
+                        </span>
+                      ) : (
+                        <span className="text-gray-300 dark:text-zinc-600">—</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-5">
+                      <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                        <Calendar className="h-3.5 w-3.5" />
+                        {new Date(s.submitted_at).toLocaleDateString()}
+                      </div>
+                    </td>
+                    <td className="px-4 py-5">
+                      {s.status === "COMPLETED" ? (
+                        <button
+                          onClick={() => setSelectedSubmissionReport(s.submission_id)}
+                          className="text-xs font-semibold text-indigo-500 dark:text-indigo-400 underline underline-offset-2 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
+                        >
+                          View Report
+                        </button>
+                      ) : (
+                        <span className="text-gray-300 dark:text-zinc-600">—</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-5 text-right">
+                      <button
+                        onClick={(e) => {
+                          const rect = e.currentTarget.getBoundingClientRect();
+                          setOpenMenuId(s.submission_id);
+                          setMenuAnchor({ top: rect.top, bottom: rect.bottom, right: rect.right });
+                        }}
+                        className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                      >
+                        <MoreVertical className="h-4 w-4" />
+                      </button>
+                    </td>
+                  </motion.tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={8} className="px-8 py-24 text-center">
+                    <div className="flex flex-col items-center max-w-sm mx-auto">
+                      <div className="h-16 w-16 bg-gray-50 dark:bg-zinc-800 rounded-full flex items-center justify-center mb-4">
+                        <Search className="h-8 w-8 text-gray-300" />
+                      </div>
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">No submissions found</h3>
+                      <p className="text-sm text-gray-500 mt-2">No student submissions have been recorded for this group yet.</p>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        {data && data.pagination.total_pages > 1 && (
+          <div className="px-8 py-6 border-t border-gray-50 dark:border-zinc-800 flex items-center justify-between bg-gray-50/30 dark:bg-zinc-800/20">
+            <p className="text-sm text-gray-500">
+              Showing <span className="font-semibold text-gray-900 dark:text-white">{(page - 1) * 20 + 1}</span> to{" "}
+              <span className="font-semibold text-gray-900 dark:text-white">{Math.min(page * 20, data.pagination.total)}</span>{" "}
+              of <span className="font-semibold text-gray-900 dark:text-white">{data.pagination.total}</span> results
+            </p>
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setShowDeleteConfirm(true)}
-                className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                className="rounded-md h-9 w-9 p-0"
+                disabled={page === 1}
+                onClick={() => setPage(page - 1)}
               >
-                <Trash2 className="h-4 w-4" />
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-md h-9 w-9 p-0"
+                disabled={page >= data.pagination.total_pages}
+                onClick={() => setPage(page + 1)}
+              >
+                <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
-          </div>
-
-          {/* Student Link */}
-          <div className="mt-4 rounded-lg bg-indigo-50 border border-indigo-100 p-3 flex items-center gap-3">
-            <ExternalLink className="h-4 w-4 text-indigo-400 flex-shrink-0" />
-            <p className="flex-1 text-xs text-indigo-700 font-mono truncate">
-              {studentLink}
-            </p>
-            <button
-              onClick={handleCopy}
-              className="flex-shrink-0 rounded-md p-1.5 text-indigo-400 hover:bg-indigo-100 transition-colors"
-            >
-              {copied ? (
-                <Check className="h-3.5 w-3.5 text-emerald-500" />
-              ) : (
-                <Copy className="h-3.5 w-3.5" />
-              )}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Submissions Table */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-          <h2 className="text-sm font-semibold text-gray-900">
-            Submissions{" "}
-            {data && (
-              <span className="ml-1.5 text-xs font-normal text-gray-400">
-                ({data.pagination.total} total)
-              </span>
-            )}
-          </h2>
-
-          {/* Status Filter */}
-          <select
-            value={statusFilter}
-            onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-            className="text-xs rounded-lg border border-gray-200 px-3 py-1.5 text-gray-600 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-200 outline-none"
-          >
-            {STATUS_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {loading ? (
-          <div className="p-6 space-y-3">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-14 animate-pulse rounded-lg bg-gray-50" />
-            ))}
-          </div>
-        ) : data && data.submissions.length > 0 ? (
-          <>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-gray-100">
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">
-                      Submitter
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">
-                      Team
-                    </th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wide">
-                      Status
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wide">
-                      Score
-                    </th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wide">
-                      Verdict
-                    </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wide">
-                      Submitted
-                    </th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wide">
-                      Report
-                    </th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wide">
-                      Details
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-50">
-                  {data.submissions.map((s) => (
-                    <tr
-                      key={s.submission_id}
-                      className="hover:bg-gray-50 transition-colors"
-                    >
-                      <td className="px-6 py-4 font-medium text-gray-900">
-                        {s.submitter_name}
-                      </td>
-                      <td className="px-4 py-4 text-gray-500 text-xs">
-                        {s.team_member_names.length > 0
-                          ? s.team_member_names.join(", ")
-                          : "—"}
-                      </td>
-                      <td className="px-4 py-4 text-center">
-                        <StatusBadge status={s.status as SubmissionStatus} />
-                      </td>
-                      <td className="px-4 py-4 text-right">
-                        {s.overall_score != null ? (
-                          <span className="font-semibold text-gray-900">
-                            {s.overall_score}
-                            <span className="text-gray-400 font-normal">/100</span>
-                          </span>
-                        ) : (
-                          <span className="text-gray-300">—</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-4 text-center">
-                        {s.verdict ? (
-                          <span
-                            className={`text-xs font-medium ${
-                              s.verdict === "ACCEPTED"
-                                ? "text-emerald-600"
-                                : s.verdict === "REJECTED"
-                                ? "text-red-600"
-                                : "text-amber-600"
-                            }`}
-                          >
-                            {s.verdict}
-                          </span>
-                        ) : (
-                          <span className="text-gray-300 text-xs">—</span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 text-right text-xs text-gray-400">
-                        {new Date(s.submitted_at).toLocaleDateString()}
-                      </td>
-                      <td className="px-4 py-4 text-center">
-                        {s.status === "COMPLETED" ? (
-                          <button
-                            onClick={() => {
-                              setSelectedSubmissionReport(s.submission_id);
-                            }}
-                            className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-50 border border-indigo-100 px-2.5 py-1.5 text-xs font-medium text-indigo-600 hover:bg-indigo-100 transition-colors"
-                          >
-                            <FileText className="h-3.5 w-3.5" />
-                            Report
-                          </button>
-                        ) : (
-                          <span className="text-gray-300 text-xs">—</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-4 text-center">
-                        <button
-                          onClick={() => setSelectedSubmissionPipeline(s.submission_id)}
-                          className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-2.5 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors"
-                        >
-                          <Eye className="h-3.5 w-3.5" />
-                          Pipeline
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Pagination */}
-            {data.pagination.total_pages > 1 && (
-              <div className="flex items-center justify-between px-6 py-3 border-t border-gray-100">
-                <p className="text-xs text-gray-500">
-                  Page {data.pagination.page} of {data.pagination.total_pages}
-                </p>
-                <div className="flex gap-2">
-                  <button
-                    disabled={page === 1}
-                    onClick={() => setPage((p) => p - 1)}
-                    className="rounded-lg border border-gray-200 p-1.5 text-gray-500 disabled:opacity-40 hover:bg-gray-50 transition-colors"
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </button>
-                  <button
-                    disabled={page >= data.pagination.total_pages}
-                    onClick={() => setPage((p) => p + 1)}
-                    className="rounded-lg border border-gray-200 p-1.5 text-gray-500 disabled:opacity-40 hover:bg-gray-50 transition-colors"
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-            )}
-          </>
-        ) : (
-          <div className="py-16 text-center">
-            <p className="text-sm text-gray-500">No submissions yet.</p>
-            <p className="text-xs text-gray-400 mt-1">
-              Share the student link above to start receiving submissions.
-            </p>
           </div>
         )}
       </div>
 
-      {/* Pipeline Details Modal */}
-      {selectedSubmissionPipeline && data && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-6 my-8">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">
-                  Evaluation Pipeline
-                </h3>
-                <p className="text-xs text-gray-500 mt-1">
-                  Submission ID: <span className="font-mono">{selectedSubmissionPipeline}</span>
-                </p>
+      {/* Modals */}
+      <AnimatePresence>
+        {showDeleteConfirm && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white dark:bg-zinc-900 rounded-md shadow-2xl w-full max-w-sm p-8 border border-gray-100 dark:border-zinc-800"
+            >
+              <div className="h-12 w-12 rounded-md bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-600 dark:text-red-400 mb-6">
+                <Trash2 className="h-6 w-6" />
               </div>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight mb-2">
+                Delete Group?
+              </h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed mb-8">
+                This will permanently delete <strong className="text-gray-900 dark:text-white">{data?.group.name}</strong> and all its associated data. This action is irreversible.
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <Button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  variant="outline"
+                  className="rounded-md py-3"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleDelete}
+                  disabled={deleting}
+                  className="rounded-md py-3 bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-600/20 disabled:opacity-50"
+                >
+                  {deleting ? "Deleting..." : "Confirm Delete"}
+                </Button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Action Menu Portal */}
+      {openMenuId && menuAnchor && (() => {
+        const activeRow = data?.submissions.find(s => s.submission_id === openMenuId);
+        if (!activeRow) return null;
+        return (
+          <Portal>
+            <div
+              className="fixed inset-0 z-40"
+              onMouseDown={() => { setOpenMenuId(null); setMenuAnchor(null); }}
+            />
+            <div
+              className="fixed z-50 w-52 bg-white dark:bg-zinc-900 rounded-md border border-gray-100 dark:border-zinc-800 shadow-2xl overflow-hidden py-1"
+              style={{
+                top: menuAnchor.bottom + 4,
+                left: menuAnchor.right - 208,
+              }}
+            >
+              <button
+                onClick={async () => {
+                  setOpenMenuId(null); setMenuAnchor(null);
+                  toast(`Preparing download...`, "info");
+                  try {
+                    const blob = await downloadSubmissionFile(activeRow.submission_id);
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url; a.download = activeRow.file_name || `Submission_${activeRow.submission_id.slice(0, 8)}.pdf`;
+                    document.body.appendChild(a); a.click();
+                    URL.revokeObjectURL(url); document.body.removeChild(a);
+                    toast("Download started", "success");
+                  } catch (err: any) { toast("Download failed: " + err.message, "error"); }
+                }}
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors"
+              >
+                <Download className="h-4 w-4 text-indigo-500" />
+                Download Document
+              </button>
+
+              {activeRow.status === "COMPLETED" && (
+                <button
+                  onClick={() => { setOpenMenuId(null); setMenuAnchor(null); setSelectedSubmissionReport(activeRow.submission_id); }}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors"
+                >
+                  <FileText className="h-4 w-4 text-emerald-500" />
+                  View Report
+                </button>
+              )}
+
+              <button
+                onClick={async () => {
+                  setOpenMenuId(null); setMenuAnchor(null);
+                  setRetryingId(activeRow.submission_id);
+                  try {
+                    await retrySubmissionEvaluation(groupId, activeRow.submission_id, true);
+                    toast("Re-evaluation queued (overwriting existing results)", "success");
+                    load();
+                  } catch (err: any) { toast("Re-evaluate failed: " + err.message, "error"); }
+                  finally { setRetryingId(null); }
+                }}
+                disabled={retryingId === activeRow.submission_id}
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/10 transition-colors disabled:opacity-50"
+              >
+                <RotateCcw className={cn("h-4 w-4", retryingId === activeRow.submission_id && "animate-spin")} />
+                Re-evaluate
+              </button>
+
+              <div className="h-px bg-gray-100 dark:bg-zinc-800 my-1" />
+
               <button
                 onClick={() => {
-                  setSelectedSubmissionPipeline(null);
-                  setPipelinePhases([]);
+                  setOpenMenuId(null); setMenuAnchor(null);
+                  setDeleteTarget({ id: activeRow.submission_id, name: activeRow.file_name || "this submission" });
                 }}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
               >
-                <X className="h-5 w-5" />
+                <Trash2 className="h-4 w-4" />
+                Delete Submission
               </button>
             </div>
+          </Portal>
+        );
+      })()}
 
-            {/* Pipeline Details */}
-            <div className="border-t border-gray-100 pt-4">
-              <PipelineDetails
-                phases={pipelinePhases}
-                status="PENDING"
-                loading={pipelineLoading}
-              />
-            </div>
+      <ConfirmationDialog
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={async () => {
+          if (!deleteTarget) return;
+          setIsDeletingSubmission(true);
+          try {
+            await deleteSubmission(deleteTarget.id);
+            toast("Submission deleted", "success");
+            load();
+          } catch (err: any) { toast("Delete failed: " + err.message, "error"); }
+          finally { setIsDeletingSubmission(false); setDeleteTarget(null); }
+        }}
+        title="Delete Submission"
+        description={`Are you sure you want to delete the submission from ${deleteTarget?.name}? This action cannot be undone.`}
+        confirmLabel="Delete"
+        isLoading={isDeletingSubmission}
+        variant="danger"
+      />
 
-            {/* Retry Button */}
-            <div className="mt-6">
-              <RetrySubmissionButton
-                groupId={groupId}
-                submissionId={selectedSubmissionPipeline}
-                status={data?.submissions.find(s => s.submission_id === selectedSubmissionPipeline)?.status || "PENDING"}
-                onRetrySuccess={() => {
-                  // Refresh data after successful retry
-                  load();
-                  // Optionally close the modal and reopen to show the updated status
-                }}
-              />
-            </div>
-
-            {/* Info Note */}
-            <div className="mt-6 rounded-lg bg-blue-50 border border-blue-100 p-3">
-              <p className="text-xs text-blue-700">
-                <strong>Pipeline Phases:</strong> 
-                <br />1️⃣ Extracting Patent IDs → 2️⃣ Validating IDs → 3️⃣ Plagiarism Check → 4️⃣ AI Evaluation → 5️⃣ Report Gen
+      <AnimatePresence>
+        {showDeleteConfirm && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white dark:bg-zinc-900 rounded-md shadow-2xl w-full max-w-sm p-8 border border-gray-100 dark:border-zinc-800"
+            >
+              <div className="h-12 w-12 rounded-md bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-600 dark:text-red-400 mb-6">
+                <Trash2 className="h-6 w-6" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight mb-2">
+                Delete Group?
+              </h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed mb-8">
+                This will permanently delete <strong className="text-gray-900 dark:text-white">{data?.group.name}</strong> and all its associated data. This action is irreversible.
               </p>
-            </div>
-
-            {/* Close Button */}
-            <div className="mt-6 flex justify-end">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setSelectedSubmissionPipeline(null);
-                  setPipelinePhases([]);
-                }}
-              >
-                Close
-              </Button>
-            </div>
+              <div className="grid grid-cols-2 gap-3">
+                <Button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  variant="outline"
+                  className="rounded-md py-3"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleDelete}
+                  disabled={deleting}
+                  className="rounded-md py-3 bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-600/20 disabled:opacity-50"
+                >
+                  {deleting ? "Deleting..." : "Confirm Delete"}
+                </Button>
+              </div>
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
 
-      {/* Delete Confirm Modal */}
-      {showDeleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
-            <h3 className="text-sm font-semibold text-gray-900 mb-2">
-              Delete Group?
-            </h3>
-            <p className="text-sm text-gray-500 mb-6">
-              This will permanently delete <strong>{data?.group.name}</strong> and
-              all its submissions. This action cannot be undone.
-            </p>
-            <div className="flex gap-3">
-              <Button
-                variant="outline"
-                className="flex-1"
-                onClick={() => setShowDeleteConfirm(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                className="flex-1 bg-red-600 hover:bg-red-700 text-white"
-                onClick={handleDelete}
-                disabled={deleting}
-              >
-                {deleting ? "Deleting..." : "Delete Group"}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-      
       {/* Report Modal */}
       {selectedSubmissionReport && (
         <ReportModal
