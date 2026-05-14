@@ -129,6 +129,7 @@ export interface Submission {
   overall_score: number | null;
   verdict: string | null;
   submitted_at: string;
+  file_name: string;
 }
 
 export type SubmissionStatus =
@@ -266,12 +267,13 @@ export async function createGroup(body: {
 /** GET /mentor/groups/:id */
 export async function fetchGroupDetails(
   groupId: string,
-  params?: { page?: number; limit?: number; status?: string }
+  params?: { page?: number; limit?: number; status?: string; search?: string }
 ): Promise<GroupDetails> {
   const qs = new URLSearchParams();
   if (params?.page) qs.set('page', String(params.page));
   if (params?.limit) qs.set('limit', String(params.limit));
   if (params?.status) qs.set('status', params.status);
+  if (params?.search) qs.set('search', params.search);
   const query = qs.toString() ? `?${qs.toString()}` : '';
   return apiFetch<GroupDetails>(`/api/v1/mentor/groups/${groupId}${query}`);
 }
@@ -314,11 +316,15 @@ export async function fetchSubmissionPipeline(
 /** POST /mentor/groups/:groupId/submissions/:submissionId/retry */
 export async function retrySubmissionEvaluation(
   groupId: string,
-  submissionId: string
+  submissionId: string,
+  force: boolean = false
 ): Promise<{ success: boolean; message: string; retry_count: number }> {
   return apiFetch<{ success: boolean; message: string; retry_count: number }>(
     `/api/v1/mentor/groups/${groupId}/submissions/${submissionId}/retry`,
-    { method: 'POST' }
+    { 
+      method: 'POST',
+      body: JSON.stringify({ force })
+    }
   );
 }
 
@@ -396,4 +402,28 @@ export async function checkSubmissionStatus(
   submissionId: string
 ): Promise<SubmissionStatusResponse> {
   return publicFetch<SubmissionStatusResponse>(`/api/v1/submit/${submissionId}/status`);
+}
+
+/** GET /mentor/groups/:id/export/excel */
+export async function exportGroupExcel(groupId: string): Promise<Blob> {
+  const user = auth.currentUser;
+  if (!user) throw new Error('Not authenticated');
+  const idToken = await user.getIdToken(false);
+
+  const response = await fetch(`${API_BASE_URL}/api/v1/mentor/groups/${groupId}/export/excel`, {
+    headers: {
+      Authorization: `Bearer ${idToken}`,
+    },
+  });
+
+  if (!response.ok) {
+    let msg = 'Export failed';
+    try {
+      const e = await response.json() as { error?: string };
+      if (e.error) msg = e.error;
+    } catch { /* ignore */ }
+    throw new Error(msg);
+  }
+
+  return response.blob();
 }
