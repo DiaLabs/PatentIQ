@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { fetchDashboard, deleteSubmission, downloadSubmissionFile, type DashboardData } from "@/lib/api";
@@ -21,6 +21,8 @@ import {
   Upload,
   Eye,
   Trash2,
+  TrendingUp,
+  Layers,
 } from "lucide-react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -66,105 +68,145 @@ export default function OverviewPage() {
         </div>
       )}
 
-      {/* Main Content: Recent Groups */}
-      <div className="mt-12">
+      {/* Middle Section: Performance & Groups */}
+      <div className="mt-12 lg:grid lg:grid-cols-3 gap-8 items-stretch">        {/* Left: Global Performance (2/3) */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.1 }}
-          className="bg-white dark:bg-zinc-900 rounded-md border border-gray-100 dark:border-zinc-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none overflow-hidden"
+          className="lg:col-span-2 bg-white dark:bg-zinc-900 rounded-md border border-gray-100 dark:border-zinc-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none p-8 flex flex-col h-full"
         >
-          {/* Header */}
-          <div className="flex items-center justify-between px-8 py-7 border-b border-gray-50 dark:border-zinc-800">
+          <div className="flex items-center justify-between mb-10">
             <div>
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                Recent Groups
-              </h2>
-              <p className="mt-1.5 text-sm text-gray-500 dark:text-gray-400">
-                Track your evaluation groups and submission progress
-              </p>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Global Performance</h2>
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">System-wide evaluation overview</p>
             </div>
-            <Link
-              href="/dashboard/groups"
-              className="flex items-center gap-1.5 text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 transition-colors group"
-            >
-              View all <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+            <TrendingUp className="h-5 w-5 text-indigo-500" />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 flex-1">
+            {/* Avg Score Chart/Stat */}
+            <div className="flex flex-col items-center justify-center p-6 rounded-md bg-gray-50/30 dark:bg-zinc-800/20 border border-gray-100/50 dark:border-zinc-800/50">
+              <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-4">Avg Overall Score</p>
+              <div className="relative h-28 w-28 flex items-center justify-center">
+                <svg className="h-full w-full -rotate-90">
+                  <circle cx="56" cy="56" r="50" className="stroke-gray-100 dark:stroke-zinc-800/50 fill-none" strokeWidth="8" />
+                  <motion.circle 
+                    cx="56" cy="56" r="50" 
+                    className="stroke-indigo-500 fill-none" 
+                    strokeWidth="8" 
+                    strokeDasharray="314"
+                    initial={{ strokeDashoffset: 314 }}
+                    animate={{ strokeDashoffset: 314 - (314 * (dashboard?.overview.avg_overall_score ?? 0)) / 100 }}
+                    transition={{ duration: 1, ease: "easeOut", delay: 0.5 }}
+                    strokeLinecap="round"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="text-2xl font-black text-gray-900 dark:text-white">
+                    {loading ? "—" : Math.round(dashboard?.overview.avg_overall_score ?? 0)}
+                  </span>
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">Percent</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Total Submissions */}
+            <div className="flex flex-col items-center justify-center p-6 rounded-md bg-gray-50/30 dark:bg-zinc-800/20 border border-gray-100/50 dark:border-zinc-800/50">
+              <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-4">Total Submissions</p>
+              <div className="text-center">
+                <span className="text-5xl font-black text-indigo-600 dark:text-indigo-400">
+                  {loading ? "—" : dashboard?.overview.total_submissions}
+                </span>
+                <p className="mt-3 text-[11px] font-bold text-gray-500 dark:text-gray-400 max-w-[140px] mx-auto leading-tight">
+                  Evaluated student documents across all groups
+                </p>
+              </div>
+            </div>
+
+            {/* Volume Stats */}
+            <div className="flex flex-col gap-4">
+              <div className="flex-1 p-5 rounded-md bg-emerald-50/30 dark:bg-emerald-900/10 border border-emerald-100/30 dark:border-emerald-900/20">
+                <p className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1">Active Groups</p>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-3xl font-black text-gray-900 dark:text-white">
+                    {loading ? "—" : dashboard?.overview.total_groups}
+                  </span>
+                  <span className="text-xs text-emerald-600 font-bold">Cohorts</span>
+                </div>
+              </div>
+              <div className="flex-1 p-5 rounded-md bg-red-50/30 dark:bg-red-900/10 border border-red-100/30 dark:border-red-900/20">
+                <p className="text-[9px] font-bold text-red-600 dark:text-red-400 uppercase tracking-widest mb-1">Flagged Items</p>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-3xl font-black text-gray-900 dark:text-white">
+                    {loading ? "—" : dashboard?.overview.total_rejected}
+                  </span>
+                  <span className="text-xs text-red-500 font-bold uppercase tracking-tighter">Action Required</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Right: Recent Groups (1/3) */}
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.4, delay: 0.2 }}
+          className="bg-white dark:bg-zinc-900 rounded-md border border-gray-100 dark:border-zinc-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none p-8 h-full flex flex-col"
+        >
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Recent Groups</h2>
+            <Link href="/dashboard/groups" className="text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
+              View all
             </Link>
           </div>
 
-          {/* Content */}
-          {loading ? (
-            <div className="p-8 space-y-4">
-              {[1, 2, 3].map((i) => (
+          <div className="space-y-3 flex-1 overflow-y-auto pr-2 custom-scrollbar">
+            {loading ? (
+              [1, 2, 3, 4].map(i => (
                 <div key={i} className="h-16 animate-pulse rounded-md bg-gray-50 dark:bg-zinc-800/50" />
-              ))}
-            </div>
-          ) : dashboard && (dashboard.active_groups?.length ?? 0) > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-gray-50 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-800/30">
-                    <th className="px-8 py-4 text-left text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
-                      GROUP
-                    </th>
-                    <th className="px-6 py-4 text-center text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
-                      COMPLETED
-                    </th>
-                    <th className="px-6 py-4 text-center text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
-                      PENDING
-                    </th>
-                    <th className="px-8 py-4 text-right text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
-                      AVG SCORE
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-50 dark:divide-zinc-800">
-                  {dashboard.active_groups?.map((g) => (
-                    <tr key={g.group_id} className="hover:bg-gray-50/80 dark:hover:bg-zinc-800/30 transition-colors group">
-                      <td className="px-8 py-6 font-semibold text-gray-900 dark:text-white">
-                        <Link
-                          href={`/dashboard/groups/${g.group_id}`}
-                          className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-                        >
-                          {g.name}
-                        </Link>
-                      </td>
-                      <td className="px-6 py-6 text-center text-gray-600 dark:text-gray-300 font-medium">
-                        {g.completed}
-                      </td>
-                      <td className="px-6 py-6 text-center text-gray-600 dark:text-gray-300 font-medium">
-                        {g.pending}
-                      </td>
-                      <td className="px-8 py-6 text-right">
-                        {g.avg_score != null ? (
-                          <span className="inline-flex items-center rounded-full bg-indigo-50 dark:bg-indigo-900/30 px-4 py-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400">
-                            {g.avg_score}/100
-                          </span>
-                        ) : (
-                          <span className="text-gray-300 dark:text-zinc-600 text-xs">—</span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div className="px-8 py-20 text-center">
-              <div className="mx-auto h-16 w-16 bg-gray-50 dark:bg-zinc-800 rounded-full flex items-center justify-center mb-4">
-                <Users className="h-8 w-8 text-gray-300 dark:text-gray-600" />
+              ))
+            ) : dashboard?.active_groups?.map((g, i) => {
+              const colors = [
+                "bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400",
+                "bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400",
+                "bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400",
+                "bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400"
+              ];
+              const colorClass = colors[i % colors.length];
+              
+              return (
+                <Link
+                  key={g.group_id}
+                  href={`/dashboard/groups/${g.group_id}`}
+                  className="flex items-center gap-4 p-4 rounded-md border border-gray-50 dark:border-zinc-800/50 hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-all group"
+                >
+                  <div className={`h-10 w-10 rounded-md flex items-center justify-center shrink-0 ${colorClass}`}>
+                    <Layers className="h-5 w-5" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="text-sm font-bold text-gray-900 dark:text-white truncate group-hover:text-indigo-600 transition-colors">{g.name}</h4>
+                    <p className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase mt-0.5">
+                      {g.completed} Completed
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-black text-indigo-600 dark:text-indigo-400">
+                      {g.avg_score?.toFixed(0)}%
+                    </p>
+                    <p className="text-[9px] text-gray-400 font-bold uppercase tracking-tighter">Avg Score</p>
+                  </div>
+                </Link>
+              );
+            })}
+            {(!dashboard?.active_groups || dashboard.active_groups.length === 0) && !loading && (
+              <div className="h-full flex flex-col items-center justify-center text-center py-10 opacity-50">
+                <Layers className="h-8 w-8 text-gray-300 mb-3" />
+                <p className="text-xs font-bold text-gray-400 uppercase">No active groups</p>
               </div>
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-1">No groups yet</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xs mx-auto mb-6">
-                Create your first evaluation group to start tracking submissions and scores.
-              </p>
-              <Link href="/dashboard/groups">
-                <Button className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 rounded-full font-semibold">
-                  Create First Group
-                </Button>
-              </Link>
-            </div>
-          )}
+            )}
+          </div>
         </motion.div>
       </div>
       
@@ -229,7 +271,7 @@ export default function OverviewPage() {
                       <td className="px-4 py-4">
                         {s.score != null ? (
                           <div className="inline-flex items-center px-2 py-0.5 rounded-md bg-orange-50 dark:bg-orange-900/20 text-[11px] font-bold text-orange-600 dark:text-orange-400 border border-orange-100 dark:border-orange-900/30">
-                            {s.score}/10
+                            {s.score.toFixed(0)}/100
                           </div>
                         ) : (
                           <span className="text-gray-300 dark:text-zinc-600">—</span>
@@ -321,9 +363,28 @@ function SubmissionActionMenu({
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const { toast } = useToast();
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Close on outside click or scroll
+  useEffect(() => {
+    if (!isOpen) return;
+    const handler = (e: MouseEvent | TouchEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    const scrollHandler = () => setIsOpen(false);
+
+    document.addEventListener("mousedown", handler);
+    window.addEventListener("scroll", scrollHandler, true);
+    return () => {
+      document.removeEventListener("mousedown", handler);
+      window.removeEventListener("scroll", scrollHandler, true);
+    };
+  }, [isOpen]);
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -347,7 +408,7 @@ function SubmissionActionMenu({
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = fileName; // Use original filename
+      a.download = fileName;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -361,7 +422,7 @@ function SubmissionActionMenu({
   };
 
   return (
-    <div className="relative">
+    <div className="relative" ref={menuRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
         disabled={isDeleting}
@@ -372,37 +433,32 @@ function SubmissionActionMenu({
 
       <AnimatePresence>
         {isOpen && (
-          <>
-            {/* Backdrop to close on click outside */}
-            <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)} />
-            
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: -10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: -10 }}
-              className="absolute right-0 mt-2 w-48 bg-white dark:bg-zinc-900 rounded-md border border-gray-100 dark:border-zinc-800 shadow-xl z-50 py-1.5 overflow-hidden"
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: -10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: -10 }}
+            className="absolute right-0 mt-2 w-48 bg-white dark:bg-zinc-900 rounded-md border border-gray-100 dark:border-zinc-800 shadow-xl z-50 py-1.5 overflow-hidden"
+          >
+            <button
+              onClick={() => router.push(`/dashboard/submissions?id=${submissionId}`)}
+              className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors text-left"
             >
-              <button
-                onClick={() => router.push(`/dashboard/submissions?id=${submissionId}`)}
-                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors"
-              >
-                <Eye className="h-4 w-4 text-indigo-500" /> View Details
-              </button>
-              <button
-                onClick={handleDownload}
-                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors"
-              >
-                <Download className="h-4 w-4 text-blue-500" /> Download PDF
-              </button>
-              <div className="h-px bg-gray-50 dark:bg-zinc-800 my-1" />
-              <button
-                onClick={() => setIsDeleteDialogOpen(true)}
-                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
-              >
-                <Trash2 className="h-4 w-4" /> Delete Submission
-              </button>
-            </motion.div>
-          </>
+              <Eye className="h-4 w-4 text-indigo-500" /> View Details
+            </button>
+            <button
+              onClick={handleDownload}
+              className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors text-left"
+            >
+              <Download className="h-4 w-4 text-blue-500" /> Download PDF
+            </button>
+            <div className="h-px bg-gray-50 dark:bg-zinc-800 my-1" />
+            <button
+              onClick={() => setIsDeleteDialogOpen(true)}
+              className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors text-left"
+            >
+              <Trash2 className="h-4 w-4" /> Delete Submission
+            </button>
+          </motion.div>
         )}
       </AnimatePresence>
 

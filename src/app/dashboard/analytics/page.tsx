@@ -5,7 +5,7 @@ import { BarChart3, TrendingUp, Users, FileText, Star, CheckCircle2 } from "luci
 
 const stats = [
   { label: "Total Evaluations", value: "128", icon: FileText, iconBg: "bg-indigo-50 dark:bg-indigo-900/30", iconColor: "text-indigo-600 dark:text-indigo-400", trend: "+12%", trendColor: "text-emerald-600 dark:text-emerald-400" },
-  { label: "Average Score", value: "7.6/10", icon: Star, iconBg: "bg-orange-50 dark:bg-orange-900/30", iconColor: "text-orange-500 dark:text-orange-400", trend: "+5%", trendColor: "text-emerald-600 dark:text-emerald-400" },
+  { label: "Average Score", value: "76/100", icon: Star, iconBg: "bg-orange-50 dark:bg-orange-900/30", iconColor: "text-orange-500 dark:text-orange-400", trend: "+5%", trendColor: "text-emerald-600 dark:text-emerald-400" },
   { label: "Completed", value: "104", icon: CheckCircle2, iconBg: "bg-emerald-50 dark:bg-emerald-900/30", iconColor: "text-emerald-600 dark:text-emerald-400", trend: "+8%", trendColor: "text-emerald-600 dark:text-emerald-400" },
   { label: "Active Groups", value: "12", icon: Users, iconBg: "bg-violet-50 dark:bg-violet-900/30", iconColor: "text-violet-600 dark:text-violet-400", trend: "+2", trendColor: "text-emerald-600 dark:text-emerald-400" },
 ];

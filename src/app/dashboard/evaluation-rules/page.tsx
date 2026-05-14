@@ -15,15 +15,17 @@ const rules = [
 export default function EvaluationRulesPage() {
   return (
     <div className="px-12 py-8">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Evaluation Rules</h1>
-          <p className="mt-2 text-base text-gray-500 dark:text-gray-400">
-            Configure and weight the criteria used to evaluate patent submissions.
-          </p>
-        </div>
-        <Button className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-md flex items-center gap-2">
+      {/* Page Title */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Evaluation Rules</h1>
+        <p className="mt-2 text-base text-gray-500 dark:text-gray-400">
+          Configure and weight the criteria used to evaluate patent submissions.
+        </p>
+      </div>
+
+      {/* Action Bar */}
+      <div className="flex items-center justify-end mb-8">
+        <Button className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-md flex items-center gap-2 h-[42px] px-5 font-semibold">
           <Plus className="h-4 w-4" />
           Add Rule
         </Button>
