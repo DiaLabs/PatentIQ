@@ -45,7 +45,7 @@ export function CustomSelect({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className={`flex items-center gap-2 h-[42px] px-4 rounded-md border text-sm font-medium transition-all outline-none
+        className={`flex items-center gap-2 h-[42px] px-4 rounded-md border text-sm font-medium transition-all outline-none w-full
           ${open
             ? "border-indigo-500 ring-2 ring-indigo-100 dark:ring-indigo-900/40 bg-white dark:bg-zinc-800 text-gray-900 dark:text-white"
             : "border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-gray-600 dark:text-gray-300 hover:border-gray-300 dark:hover:border-zinc-600"
@@ -66,7 +66,7 @@ export function CustomSelect({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 6, scale: 0.97 }}
             transition={{ duration: 0.15 }}
-            className="absolute left-0 top-full mt-1.5 z-50 min-w-full w-max bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-md shadow-xl overflow-hidden"
+            className="absolute left-0 top-full mt-1.5 z-50 min-w-full w-max bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-md shadow-xl"
           >
             {options.map((opt) => (
               <button

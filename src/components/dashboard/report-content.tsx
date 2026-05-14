@@ -99,7 +99,7 @@ export function ReportContent({ data }: ReportContentProps) {
                     <tr key={i} className="hover:bg-gray-50/50 dark:hover:bg-zinc-800/30 transition-colors">
                       <td className="px-6 py-4 text-sm font-bold text-gray-900 dark:text-white">{item.parameter}</td>
                       <td className="px-6 py-4">
-                        <span className="text-sm font-black text-indigo-600">{item.score}/10</span>
+                        <span className="text-sm font-black text-indigo-600">{parseFloat(item.score).toFixed(0)}/100</span>
                       </td>
                       <td className="px-6 py-4 text-xs text-gray-500 leading-relaxed">{item.review_comment}</td>
                     </tr>
@@ -109,7 +109,7 @@ export function ReportContent({ data }: ReportContentProps) {
                     <tr key={i} className="hover:bg-gray-50/50 dark:hover:bg-zinc-800/30 transition-colors">
                       <td className="px-6 py-4 text-sm font-bold text-gray-900 dark:text-white">{key}</td>
                       <td className="px-6 py-4">
-                        <span className="text-sm font-black text-indigo-600">{val}/10</span>
+                        <span className="text-sm font-black text-indigo-600">{parseFloat(val).toFixed(0)}/100</span>
                       </td>
                       <td className="px-6 py-4 text-xs text-gray-500 leading-relaxed">Detailed analysis available in PDF.</td>
                     </tr>
