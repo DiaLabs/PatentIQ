@@ -143,9 +143,7 @@ export function DashboardMockup() {
             <div>
               {/* Logo */}
               <div className="mb-6 flex items-center gap-2 px-2">
-                <div className="flex h-6 w-6 items-center justify-center rounded-md bg-indigo-600 text-white">
-                  <img src="/icon0.svg" alt="" className="h-full w-full object-contain" />
-                </div>
+                <img src="/icon0.svg" alt="PatentIQ Logo" className="w-6 h-6 object-contain" />
                 <span className="text-base font-bold tracking-tight text-gray-900 dark:text-gray-100">PatentIQ</span>
               </div>
 
@@ -198,10 +196,13 @@ export function DashboardMockup() {
                     {/* Header */}
                     <div className="mb-6 flex items-center justify-between">
                       <div>
-                        <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                          Welcome back, Dr. Sarah! 👋
-                        </h2>
-                        <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400 font-medium">
+                        <div className="flex items-center gap-2 mb-1">
+                          <img src="/icon1.png" alt="" className="h-6 w-6 object-contain invert dark:invert-0" />
+                          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                            Welcome back, Dr. Sarah! 👋
+                          </h2>
+                        </div>
+                        <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400 font-medium ml-8">
                           Here&apos;s what&apos;s happening with your groups today.
                         </p>
                       </div>

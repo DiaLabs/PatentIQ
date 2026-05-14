@@ -120,7 +120,7 @@ export default function SubmissionsPage() {
   }, [load]);
 
   return (
-    <div className="px-12 py-8 bg-white dark:bg-[#0a0a0a] min-h-screen relative">
+    <div className="px-12 py-8 min-h-screen relative">
       {/* Page Title */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">All Submissions</h1>

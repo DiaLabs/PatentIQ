@@ -62,8 +62,8 @@ export default function SettingsPage() {
                 <Icon className={`h-5 w-5 ${s.iconColor}`} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-gray-900">{s.title}</p>
-                <p className="text-xs text-gray-400 mt-0.5">{s.description}</p>
+                <p className="text-sm font-semibold text-gray-900 dark:text-white">{s.title}</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{s.description}</p>
               </div>
               <ChevronRight className="h-4 w-4 text-gray-300 group-hover:text-indigo-400 transition-colors flex-shrink-0" />
             </motion.button>

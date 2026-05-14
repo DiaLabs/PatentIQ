@@ -182,7 +182,7 @@ export default function SubmitForm() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#0a0a0a] flex flex-col relative transition-colors duration-300">
+    <div className="min-h-screen flex flex-col relative transition-colors duration-300">
       {/* Absolute Header Logo */}
       {/* Fixed Header */}
       <header className="absolute top-0 left-0 w-full h-24 px-6 lg:px-8 flex items-center justify-between z-20">
@@ -376,9 +376,14 @@ export default function SubmitForm() {
                     />
                     {file ? (
                       <div className="flex flex-col items-center gap-3">
-                        <div className="h-10 w-10 rounded-md bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center">
-                          <FileIcon className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
-                        </div>
+                        {(() => {
+                          const IconComp = file.name.toLowerCase().endsWith(".pdf") ? FileText : FileIcon;
+                          return (
+                            <div className="h-10 w-10 rounded-md bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center">
+                              <IconComp className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                            </div>
+                          );
+                        })()}
                         <div className="flex-1 min-w-0 max-w-full px-4">
                           <p className="text-sm font-semibold text-gray-900 dark:text-white truncate text-center" title={file.name}>
                             {file.name}

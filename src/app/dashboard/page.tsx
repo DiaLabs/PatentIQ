@@ -52,7 +52,7 @@ export default function OverviewPage() {
   useEffect(() => { load(); }, [load]);
 
   return (
-    <div className="px-12 py-8 bg-white dark:bg-[#0a0a0a] min-h-screen relative">
+    <div className="px-12 py-8 min-h-screen relative">
       {/* Welcome greeting — Overview only */}
       <DashboardHeader
         userName={mounted ? (user?.displayName?.split(" ")[0] ?? "Mentor") : "Mentor"}

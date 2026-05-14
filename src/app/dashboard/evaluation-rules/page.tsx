@@ -37,17 +37,17 @@ export default function EvaluationRulesPage() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05 }}
-            className="bg-white rounded-md border border-gray-200 p-5 flex items-center gap-5 hover:shadow-sm transition-shadow group"
+            className="bg-white dark:bg-zinc-900 rounded-md border border-gray-200 dark:border-zinc-800 p-5 flex items-center gap-5 hover:shadow-sm transition-shadow group"
           >
             {/* Icon */}
-            <div className="h-10 w-10 rounded-md bg-indigo-50 flex items-center justify-center flex-shrink-0">
-              <Sliders className="h-5 w-5 text-indigo-600" />
+            <div className="h-10 w-10 rounded-md bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center flex-shrink-0">
+              <Sliders className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
             </div>
 
             {/* Info */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-0.5">
-                <p className="text-sm font-semibold text-gray-900">{rule.name}</p>
+                <p className="text-sm font-semibold text-gray-900 dark:text-white">{rule.name}</p>
                 <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${rule.enabled ? "bg-emerald-50 text-emerald-700" : "bg-gray-100 text-gray-400"}`}>
                   {rule.enabled ? "Active" : "Disabled"}
                 </span>
@@ -57,15 +57,15 @@ export default function EvaluationRulesPage() {
 
             {/* Weight */}
             <div className="text-right flex-shrink-0 mr-4">
-              <p className="text-lg font-bold text-gray-900">{rule.weight}%</p>
-              <p className="text-xs text-gray-400">Weight</p>
+              <p className="text-lg font-bold text-gray-900 dark:text-white">{rule.weight}%</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500">Weight</p>
             </div>
 
             {/* Progress */}
             <div className="w-28 flex-shrink-0">
-              <div className="h-1.5 w-full rounded-full bg-gray-100 overflow-hidden">
+              <div className="h-1.5 w-full rounded-full bg-gray-100 dark:bg-zinc-800 overflow-hidden">
                 <div
-                  className="h-full rounded-full bg-indigo-500 transition-all"
+                  className="h-full rounded-full bg-indigo-500 dark:bg-indigo-400 transition-all"
                   style={{ width: `${rule.weight}%` }}
                 />
               </div>
@@ -77,9 +77,9 @@ export default function EvaluationRulesPage() {
       </div>
 
       {/* Total weight callout */}
-      <div className="mt-6 flex items-center gap-3 rounded-md bg-indigo-50 border border-indigo-100 px-5 py-3">
-        <div className="h-2 w-2 rounded-full bg-indigo-500" />
-        <p className="text-sm text-indigo-700 font-medium">
+      <div className="mt-6 flex items-center gap-3 rounded-md bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-900/50 px-5 py-3">
+        <div className="h-2 w-2 rounded-full bg-indigo-500 dark:bg-indigo-400" />
+        <p className="text-sm text-indigo-700 dark:text-indigo-300 font-medium">
           Total active weight: <span className="font-bold">90%</span> — weights must sum to 100% for scoring to be accurate.
         </p>
       </div>

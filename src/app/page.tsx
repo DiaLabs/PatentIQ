@@ -22,7 +22,7 @@ export default function Home() {
   }, [user, loading, router]);
 
   return (
-    <div className="flex min-h-screen flex-col bg-white dark:bg-[#0a0a0a]">
+    <div className="flex min-h-screen flex-col">
       <Navbar />
       <main className="flex-1">
         <HeroSection />

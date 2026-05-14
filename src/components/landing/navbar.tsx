@@ -12,8 +12,17 @@ import { useRouter } from "next/navigation";
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const { user, signInWithGoogle, signOut, isSigningIn } = useAuth();
   const router = useRouter();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const handleSignIn = async () => {
     if (user) {
@@ -50,7 +59,12 @@ export function Navbar() {
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
-        className="fixed top-0 z-[100] w-full bg-white/80 backdrop-blur-md dark:bg-[#0a0a0a]/80 border-b border-transparent dark:border-white/[0.05]"
+        className={cn(
+          "fixed top-0 z-[100] w-full transition-all duration-300",
+          isScrolled 
+            ? "bg-white/80 backdrop-blur-md dark:bg-[#0a0a0a]/80 border-b border-gray-100 dark:border-white/[0.05]" 
+            : "bg-transparent border-b border-transparent"
+        )}
       >
         <div className="mx-auto flex h-20 md:h-24 max-w-[1440px] items-center justify-between px-6 lg:px-12">
           {/* Logo */}

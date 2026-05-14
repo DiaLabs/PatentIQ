@@ -2,220 +2,96 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useAuth } from "@/context/AuthContext";
-import {
-  LayoutDashboard,
-  FileText,
-  Users,
-  Sliders,
-  BarChart3,
+import { 
+  LayoutDashboard, 
+  Users, 
+  FileText, 
+  Sliders, 
+  BarChart3, 
   Settings,
   LogOut,
+  ChevronRight
 } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
 import { motion } from "framer-motion";
 
-import React, { useState } from "react";
-
-interface NavItem {
-  label: string;
-  href: string;
-  icon: React.ComponentType<{ className?: string }>;
-  description?: string;
-}
-
-const navItems: NavItem[] = [
-  {
-    label: "Overview",
-    href: "/dashboard",
-    icon: LayoutDashboard,
-    description: "Dashboard overview",
-  },
-  {
-    label: "Submissions",
-    href: "/dashboard/submissions",
-    icon: FileText,
-    description: "Manage all submissions",
-  },
-  {
-    label: "Groups",
-    href: "/dashboard/groups",
-    icon: Users,
-    description: "Manage evaluation groups",
-  },
-  {
-    label: "Evaluation Rules",
-    href: "/dashboard/evaluation-rules",
-    icon: Sliders,
-    description: "Configure evaluation criteria",
-  },
-  {
-    label: "Analytics",
-    href: "/dashboard/analytics",
-    icon: BarChart3,
-    description: "View analytics and reports",
-  },
-  {
-    label: "Settings",
-    href: "/dashboard/settings",
-    icon: Settings,
-    description: "Account settings",
-  },
+const navItems = [
+  { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
+  { name: "Groups", href: "/dashboard/groups", icon: Users },
+  { name: "Submissions", href: "/dashboard/submissions", icon: FileText },
+  { name: "Evaluation Rules", href: "/dashboard/evaluation-rules", icon: Sliders },
+  { name: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
+  { name: "Settings", href: "/dashboard/settings", icon: Settings },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
   const { user, signOut } = useAuth();
-  const [isSigningOut, setIsSigningOut] = useState(false);
-
-  const handleSignOut = async () => {
-    setIsSigningOut(true);
-    await signOut();
-  };
-
-  const isNavItemActive = (href: string): boolean => {
-    if (href === "/dashboard") {
-      return pathname === "/dashboard";
-    }
-    return pathname.startsWith(href);
-  };
 
   return (
-    <motion.aside
-      initial={{ x: -300, opacity: 0 }}
-      animate={{ x: 0, opacity: 1 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
-      className="fixed left-0 top-0 h-screen w-64 bg-white dark:bg-[#0a0a0a] border-r border-gray-200 dark:border-zinc-800 flex flex-col z-30 shadow-sm"
-    >
-      {/* Header - Logo Section */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-        className="flex items-center gap-3 px-6 py-6 border-b border-gray-100 dark:border-zinc-800"
-      >
-        <img 
-          src="/icon0.svg" 
-          alt="PatentIQ Logo" 
-          className="w-10 h-10 object-contain"
-        />
-        <span className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
-          PatentIQ
-        </span>
-      </motion.div>
+    <aside className="fixed left-0 top-0 h-screen w-64 border-r border-gray-100 dark:border-zinc-800 bg-white/50 dark:bg-[#0a0a0a]/50 backdrop-blur-xl z-50 flex flex-col">
+      {/* Brand */}
+      <div className="p-8">
+        <Link href="/dashboard" className="flex items-center gap-3">
+          <img src="/icon0.svg" alt="PatentIQ Logo" className="w-9 h-9" />
+          <span className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">PatentIQ</span>
+        </Link>
+      </div>
 
-      {/* Navigation Section */}
-      <motion.nav
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-        className="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto"
-      >
-        {navItems.map((item, index) => {
+      {/* Nav Links */}
+      <nav className="flex-1 px-4 space-y-1">
+        {navItems.map((item) => {
+          const isActive = pathname === item.href;
           const Icon = item.icon;
-          const isActive = isNavItemActive(item.href);
-
+          
           return (
-            <motion.div
-              key={item.href}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{
-                duration: 0.3,
-                delay: 0.15 + index * 0.05,
-                ease: "easeOut",
-              }}
+            <Link
+              key={item.name}
+              href={item.href}
+              className={cn(
+                "group flex items-center gap-3 px-4 py-3 rounded-md text-sm font-semibold transition-all relative overflow-hidden",
+                isActive 
+                  ? "text-indigo-600 dark:text-indigo-400 bg-indigo-50/50 dark:bg-indigo-900/10" 
+                  : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-zinc-800/50"
+              )}
             >
-              <Link
-                href={item.href}
-                className={`group relative flex items-center gap-3 px-4 py-3 rounded-md text-sm font-medium transition-all duration-200 ${
-                  isActive
-                    ? "bg-gradient-to-r from-indigo-50 to-indigo-100 text-indigo-700 shadow-sm dark:from-indigo-900/20 dark:to-indigo-900/10 dark:text-indigo-300"
-                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 hover:text-gray-900 dark:hover:bg-zinc-900 dark:hover:text-gray-200"
-                }`}
-              >
-
-                {/* Icon */}
-                <Icon
-                  className={`h-5 w-5 flex-shrink-0 transition-all duration-200 ${
-                    isActive
-                      ? "text-indigo-600 dark:text-indigo-400"
-                      : "text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300"
-                  }`}
+              {isActive && (
+                <motion.div 
+                  layoutId="active-pill"
+                  className="absolute left-0 w-1 h-6 bg-indigo-600 dark:bg-indigo-400 rounded-r-full"
                 />
-
-                {/* Label */}
-                <span className="flex-1">{item.label}</span>
-
-                {/* Hover indicator */}
-                {!isActive && (
-                  <div className="h-1.5 w-1.5 rounded-full bg-gray-300 dark:bg-gray-600 opacity-0 group-hover:opacity-100 transition-all duration-200" />
-                )}
-              </Link>
-            </motion.div>
+              )}
+              <Icon className={cn("h-5 w-5", isActive ? "text-indigo-600 dark:text-indigo-400" : "text-gray-400 dark:text-zinc-500")} />
+              {item.name}
+              {!isActive && (
+                <ChevronRight className="ml-auto h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+              )}
+            </Link>
           );
         })}
-      </motion.nav>
+      </nav>
 
-      {/* User Section - Fixed at Bottom */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.35 }}
-        className="relative border-t border-gray-100 dark:border-zinc-800 p-4"
-      >
-
-        <div className="relative z-10 space-y-3">
-          {/* User Profile Card */}
-          <div className="px-4 py-3 rounded-md bg-gradient-to-br from-indigo-50 to-indigo-100/50 border border-indigo-200/50 dark:from-indigo-900/20 dark:to-indigo-900/10 dark:border-indigo-800/30">
-            <div className="flex items-center gap-3">
-              {/* Avatar */}
-              {user?.photoURL ? (
-                <motion.img
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{
-                    type: "spring",
-                    stiffness: 200,
-                    damping: 15,
-                    delay: 0.4,
-                  }}
-                  src={user.photoURL}
-                  alt={user.displayName ?? "User"}
-                  className="h-9 w-9 rounded-full object-cover flex-shrink-0 ring-2 ring-white"
-                />
-              ) : (
-                <div className="h-9 w-9 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center flex-shrink-0 ring-2 ring-white text-white">
-                  <span className="text-xs font-bold">
-                    {user?.displayName?.[0]?.toUpperCase() ?? "M"}
-                  </span>
-                </div>
-              )}
-
-              {/* User Info */}
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-bold text-gray-900 dark:text-white truncate">
-                  {user?.displayName || "Mentor"}
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                  {user?.email || "(Not verified)"}
-                </p>
-              </div>
-            </div>
+      {/* User / Bottom */}
+      <div className="p-4 border-t border-gray-100 dark:border-zinc-800">
+        <div className="flex items-center gap-3 px-4 py-3 mb-2">
+          <div className="h-9 w-9 rounded-full bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center text-indigo-700 dark:text-indigo-300 font-bold text-sm uppercase">
+            {user?.displayName?.[0] || user?.email?.[0] || "?"}
           </div>
-
-          {/* Sign Out Button */}
-          <motion.button
-            onClick={handleSignOut}
-            disabled={isSigningOut}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-md bg-gray-50 hover:bg-gray-100 text-gray-700 hover:text-gray-900 dark:bg-zinc-900 dark:hover:bg-zinc-800 dark:text-gray-300 dark:hover:text-gray-100 font-medium text-sm transition-all duration-200 border border-gray-200 dark:border-zinc-800 disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            <LogOut className="h-4 w-4" strokeWidth={2} />
-            <span>{isSigningOut ? "Signing out..." : "Sign out"}</span>
-          </motion.button>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{user?.displayName || "Mentor"}</p>
+            <p className="text-[10px] font-medium text-gray-400 dark:text-gray-500 truncate">{user?.email}</p>
+          </div>
         </div>
-      </motion.div>
-    </motion.aside>
+        
+        <button
+          onClick={signOut}
+          className="flex items-center gap-3 w-full px-4 py-3 text-sm font-semibold text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-md transition-all group"
+        >
+          <LogOut className="h-5 w-5 text-gray-400 group-hover:text-red-500 transition-colors" />
+          Sign Out
+        </button>
+      </div>
+    </aside>
   );
 }

@@ -80,28 +80,28 @@ function GroupCard({ group, index }: { group: Group; index: number }) {
       </div>
 
       {/* Name + Description */}
-      <h3 className="text-base font-bold text-gray-900 mb-0.5 truncate">{group.name}</h3>
-      <p className="text-xs text-gray-400 mb-4 truncate">
+      <h3 className="text-base font-bold text-gray-900 dark:text-white mb-0.5 truncate">{group.name}</h3>
+      <p className="text-xs text-gray-400 dark:text-gray-500 mb-4 truncate">
         {group.is_expired ? "Expired" : `Expires ${formatDate(group.expires_at)}`}
       </p>
 
       {/* Stats row */}
       <div className="flex gap-5 mb-4">
         <div>
-          <p className="text-xl font-bold text-gray-900">{group.stats.total_submissions}</p>
-          <p className="text-xs text-gray-400">Submissions</p>
+          <p className="text-xl font-bold text-gray-900 dark:text-white">{group.stats.total_submissions}</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500">Submissions</p>
         </div>
         <div>
-          <p className={`text-xl font-bold ${avgScore ? scoreColor : "text-gray-300"}`}>
+          <p className={`text-xl font-bold ${avgScore ? scoreColor : "text-gray-300 dark:text-zinc-700"}`}>
             {avgScore ? `${avgScore}/10` : "—"}
           </p>
-          <p className="text-xs text-gray-400">Avg. Score</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500">Avg. Score</p>
         </div>
         <div>
-          <p className={`text-xl font-bold ${flagged > 0 ? "text-red-500" : "text-gray-300"}`}>
+          <p className={`text-xl font-bold ${flagged > 0 ? "text-red-500" : "text-gray-300 dark:text-zinc-700"}`}>
             {flagged}
           </p>
-          <p className="text-xs text-gray-400">Flagged</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500">Flagged</p>
         </div>
       </div>
 
@@ -152,11 +152,11 @@ function StatPill({
         {icon}
       </div>
       <div>
-        <p className="text-xs text-gray-500 font-medium mb-0.5">{label}</p>
+        <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-0.5">{label}</p>
         {loading ? (
-          <div className="h-7 w-16 animate-pulse rounded bg-gray-100" />
+          <div className="h-7 w-16 animate-pulse rounded bg-gray-100 dark:bg-zinc-800" />
         ) : (
-          <p className="text-2xl font-bold text-gray-900">{value}</p>
+          <p className="text-2xl font-bold text-gray-900 dark:text-white">{value}</p>
         )}
       </div>
     </div>
@@ -221,12 +221,12 @@ export default function GroupsPage() {
               placeholder="Search groups..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 pr-4 py-2 text-sm rounded-md border border-gray-200 bg-white placeholder-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all w-52"
+              className="pl-9 pr-4 py-2 text-sm rounded-md border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-gray-900 dark:text-white placeholder-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/40 outline-none transition-all w-52"
             />
           </div>
 
           {/* Filter button */}
-          <button className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-600 rounded-md border border-gray-200 bg-white hover:bg-gray-50 transition-colors">
+          <button className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 rounded-md border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors">
             <Filter className="h-4 w-4" />
             Filter
           </button>

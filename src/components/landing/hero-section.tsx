@@ -45,33 +45,13 @@ export function HeroSection() {
   };
 
   return (
-    <section className="relative min-h-screen overflow-hidden bg-white dark:bg-[#0a0a0a]">
-      {/* Base Background */}
-      <div className="absolute inset-0 -z-20 bg-white dark:bg-[#0a0a0a]" />
+    <section className="relative min-h-screen overflow-hidden">
+      {/* Base Background - Transparent to reveal GridBackground */}
+      <div className="absolute inset-0 -z-20" />
       
-      {/* Ambient Blobs */}
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 2, ease: "easeOut" }}
-        className="absolute right-[10%] top-[15%] z-0 h-[600px] w-[600px] rounded-full bg-indigo-50/80 mix-blend-multiply blur-3xl dark:bg-indigo-900/20 dark:mix-blend-lighten" 
-      />
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 2, ease: "easeOut", delay: 0.3 }}
-        className="absolute right-[25%] top-[30%] z-0 h-[500px] w-[500px] rounded-full bg-violet-50/80 mix-blend-multiply blur-3xl dark:bg-violet-900/20 dark:mix-blend-lighten" 
-      />
+      {/* Ambient Blobs Removed */}
       
-      {/* Brand Icon Watermark */}
-      <motion.div
-        initial={{ opacity: 0, rotate: -10 }}
-        animate={{ opacity: 0.05, rotate: 5 }}
-        transition={{ duration: 3, ease: "easeOut" }}
-        className="absolute -right-20 top-[10%] z-0 pointer-events-none select-none hidden lg:block"
-      >
-        <img src="/icon0.svg" alt="" className="w-[800px] h-auto dark:invert" />
-      </motion.div>
+      {/* Brand Icon Watermark Removed */}
 
       <div className="relative z-10 mx-auto max-w-[1600px] px-8 pb-20 pt-[120px] md:pt-[160px] lg:px-24">
         <div className="flex flex-col lg:flex-row items-center lg:items-start justify-between gap-12 lg:gap-20">
