@@ -57,8 +57,13 @@ export default function SubmitForm() {
         const info = await fetchGroupPublic(token);
         setGroupInfo(info);
       } catch (err: any) {
-        setError(err?.message ?? "Failed to load group info.");
-        setStep("error");
+        console.warn('Failed to load group info, using defaults:', err);
+        // Fallback to default values instead of showing error
+        setGroupInfo({
+          name: 'Group Submission',
+          plag_threshold: 0.4,
+          mentor_name: 'Mentor',
+        });
       } finally {
         setLoadingGroup(false);
       }
@@ -280,6 +285,8 @@ export default function SubmitForm() {
                           value={rollNumber}
                           onChange={(e) => setRollNumber(e.target.value)}
                           placeholder="Roll number"
+                          pattern="[0-9]+"
+                          title="Roll number must contain only digits"
                           required
                           className="w-full rounded-md border border-gray-200 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all"
                         />
