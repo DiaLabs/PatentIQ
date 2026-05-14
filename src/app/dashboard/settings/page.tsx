@@ -7,29 +7,29 @@ import { Button } from "@/components/ui/button";
 const sections = [
   {
     icon: User,
-    iconBg: "bg-indigo-50",
-    iconColor: "text-indigo-600",
+    iconBg: "bg-indigo-50 dark:bg-indigo-900/30",
+    iconColor: "text-indigo-600 dark:text-indigo-400",
     title: "Profile",
     description: "Update your name, email, and profile photo.",
   },
   {
     icon: Bell,
-    iconBg: "bg-orange-50",
-    iconColor: "text-orange-500",
+    iconBg: "bg-orange-50 dark:bg-orange-900/30",
+    iconColor: "text-orange-500 dark:text-orange-400",
     title: "Notifications",
     description: "Choose when and how you receive notifications.",
   },
   {
     icon: Shield,
-    iconBg: "bg-emerald-50",
-    iconColor: "text-emerald-600",
+    iconBg: "bg-emerald-50 dark:bg-emerald-900/30",
+    iconColor: "text-emerald-600 dark:text-emerald-400",
     title: "Security",
     description: "Manage your password, 2FA, and active sessions.",
   },
   {
     icon: Palette,
-    iconBg: "bg-violet-50",
-    iconColor: "text-violet-600",
+    iconBg: "bg-violet-50 dark:bg-violet-900/30",
+    iconColor: "text-violet-600 dark:text-violet-400",
     title: "Appearance",
     description: "Switch between light and dark mode.",
   },
@@ -56,7 +56,7 @@ export default function SettingsPage() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.06 }}
-              className="w-full bg-white rounded-md border border-gray-200 p-5 flex items-center gap-4 hover:shadow-sm hover:border-indigo-200 transition-all group text-left"
+              className="w-full bg-white dark:bg-zinc-900 rounded-md border border-gray-200 dark:border-zinc-800 p-5 flex items-center gap-4 hover:shadow-sm hover:border-indigo-200 transition-all group text-left"
             >
               <div className={`h-10 w-10 rounded-md ${s.iconBg} flex items-center justify-center flex-shrink-0`}>
                 <Icon className={`h-5 w-5 ${s.iconColor}`} />
@@ -72,7 +72,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Danger Zone */}
-      <div className="mt-10 rounded-md border border-red-200 bg-red-50/50 p-5">
+      <div className="mt-10 rounded-md border border-red-200 dark:border-red-900/30 bg-red-50/50 dark:bg-red-900/10 p-5">
         <h3 className="text-sm font-semibold text-red-700 mb-1">Danger Zone</h3>
         <p className="text-xs text-red-400 mb-4">
           Permanently delete your account and all associated data. This action cannot be undone.

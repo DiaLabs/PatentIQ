@@ -137,7 +137,7 @@ export default function OverviewPage() {
                       </td>
                       <td className="px-8 py-6 text-right">
                         {g.avg_score != null ? (
-                          <span className="inline-flex items-center rounded-full bg-[#eeeffe] dark:bg-indigo-900/30 px-4 py-1.5 text-xs font-bold text-[#5c59e8] dark:text-indigo-300">
+                          <span className="inline-flex items-center rounded-full bg-indigo-50 dark:bg-indigo-900/30 px-4 py-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400">
                             {g.avg_score}/100
                           </span>
                         ) : (

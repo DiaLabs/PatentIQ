@@ -55,37 +55,11 @@ export function Navbar() {
         <div className="mx-auto flex h-20 md:h-24 max-w-[1440px] items-center justify-between px-6 lg:px-12">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 relative z-[101]">
-            <svg
-              width="28"
-              height="28"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="text-indigo-600 dark:text-indigo-400"
-            >
-              <path
-                d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2Z"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M14 2V8H20"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <circle cx="10" cy="14" r="2" stroke="currentColor" strokeWidth="2" />
-              <path
-                d="M15 17H9"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+            <img 
+              src="/icon0.svg" 
+              alt="PatentIQ Logo" 
+              className="w-10 h-10 object-contain"
+            />
             <div className="flex items-baseline gap-1.5">
               <span className="text-[20px] md:text-[22px] font-bold tracking-tight text-gray-900 dark:text-white">
                 PatentIQ

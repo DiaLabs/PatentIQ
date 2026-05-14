@@ -1,0 +1,19 @@
+{
+  "name": "PatentIQ",
+  "short_name": "PatentIQ",
+  "icons": [
+    {
+      "src": "/apple-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon1.png",
+      "sizes": "100x100",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#ffffff",
+  "background_color": "#ffffff",
+  "display": "standalone"
+}

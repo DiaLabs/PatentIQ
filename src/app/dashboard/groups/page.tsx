@@ -24,12 +24,12 @@ import Link from "next/link";
 
 // Deterministic color palette for group icons based on index
 const GROUP_COLORS = [
-  { bg: "bg-indigo-100", text: "text-indigo-600", bar: "bg-indigo-500" },
-  { bg: "bg-emerald-100", text: "text-emerald-600", bar: "bg-emerald-500" },
-  { bg: "bg-orange-100", text: "text-orange-600", bar: "bg-orange-500" },
-  { bg: "bg-red-100", text: "text-red-600", bar: "bg-red-500" },
-  { bg: "bg-violet-100", text: "text-violet-600", bar: "bg-violet-500" },
-  { bg: "bg-cyan-100", text: "text-cyan-600", bar: "bg-cyan-500" },
+  { bg: "bg-indigo-100 dark:bg-indigo-900/30", text: "text-indigo-600 dark:text-indigo-400", bar: "bg-indigo-500" },
+  { bg: "bg-emerald-100 dark:bg-emerald-900/30", text: "text-emerald-600 dark:text-emerald-400", bar: "bg-emerald-500" },
+  { bg: "bg-orange-100 dark:bg-orange-900/30", text: "text-orange-600 dark:text-orange-400", bar: "bg-orange-500" },
+  { bg: "bg-red-100 dark:bg-red-900/30", text: "text-red-600 dark:text-red-400", bar: "bg-red-500" },
+  { bg: "bg-violet-100 dark:bg-violet-900/30", text: "text-violet-600 dark:text-violet-400", bar: "bg-violet-500" },
+  { bg: "bg-cyan-100 dark:bg-cyan-900/30", text: "text-cyan-600 dark:text-cyan-400", bar: "bg-cyan-500" },
 ];
 
 function getColor(index: number) {
@@ -67,7 +67,7 @@ function GroupCard({ group, index }: { group: Group; index: number }) {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, delay: index * 0.05 }}
-      className="bg-white rounded-md border border-gray-200 p-5 hover:shadow-md transition-all group relative"
+      className="bg-white dark:bg-zinc-900 rounded-md border border-gray-200 dark:border-zinc-800 p-5 hover:shadow-md transition-all group relative"
     >
       {/* Top Row: Icon + menu */}
       <div className="flex items-start justify-between mb-4">
@@ -106,7 +106,7 @@ function GroupCard({ group, index }: { group: Group; index: number }) {
       </div>
 
       {/* Progress bar */}
-      <div className="h-1 w-full rounded-full bg-gray-100 mb-3 overflow-hidden">
+      <div className="h-1 w-full rounded-full bg-gray-100 dark:bg-zinc-800 mb-3 overflow-hidden">
         <div
           className={`h-full rounded-full ${color.bar} transition-all`}
           style={{
@@ -147,7 +147,7 @@ function StatPill({
   loading: boolean;
 }) {
   return (
-    <div className="bg-white rounded-md border border-gray-200 p-5 flex items-center gap-4 shadow-sm">
+    <div className="bg-white dark:bg-zinc-900 rounded-md border border-gray-200 dark:border-zinc-800 p-5 flex items-center gap-4 shadow-sm">
       <div className={`h-12 w-12 rounded-md ${iconBg} flex items-center justify-center flex-shrink-0`}>
         {icon}
       </div>

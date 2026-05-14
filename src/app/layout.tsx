@@ -11,6 +11,11 @@ export const metadata: Metadata = {
   title: "PatentIQ — Smarter Patent Evaluation, Stronger Innovations",
   description:
     "PatentIQ combines AI, prior art search, and mentor-defined criteria to evaluate patents with accuracy, consistency, and clarity.",
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/apple-icon.png",
+  },
+  manifest: "/manifest.json",
 };
 
 import { AuthProvider } from "@/context/AuthContext";

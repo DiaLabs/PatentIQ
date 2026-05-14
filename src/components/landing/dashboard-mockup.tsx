@@ -144,12 +144,7 @@ export function DashboardMockup() {
               {/* Logo */}
               <div className="mb-6 flex items-center gap-2 px-2">
                 <div className="flex h-6 w-6 items-center justify-center rounded-md bg-indigo-600 text-white">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2Z" />
-                    <path d="M14 2V8H20" />
-                    <circle cx="10" cy="14" r="2" />
-                    <path d="M15 17H9" />
-                  </svg>
+                  <img src="/icon0.svg" alt="" className="h-full w-full object-contain" />
                 </div>
                 <span className="text-base font-bold tracking-tight text-gray-900 dark:text-gray-100">PatentIQ</span>
               </div>

@@ -93,37 +93,11 @@ export function Sidebar() {
         transition={{ duration: 0.5, delay: 0.1 }}
         className="flex items-center gap-3 px-6 py-6 border-b border-gray-100 dark:border-zinc-800"
       >
-        <svg
-          width="44"
-          height="44"
-          viewBox="0 0 24 24"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          className="text-indigo-600 shrink-0"
-        >
-          <path
-            d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2Z"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M14 2V8H20"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <circle cx="10" cy="14" r="2" stroke="currentColor" strokeWidth="2" />
-          <path
-            d="M15 17H9"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+        <img 
+          src="/icon0.svg" 
+          alt="PatentIQ Logo" 
+          className="w-10 h-10 object-contain"
+        />
         <span className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
           PatentIQ
         </span>

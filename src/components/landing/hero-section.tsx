@@ -62,6 +62,16 @@ export function HeroSection() {
         transition={{ duration: 2, ease: "easeOut", delay: 0.3 }}
         className="absolute right-[25%] top-[30%] z-0 h-[500px] w-[500px] rounded-full bg-violet-50/80 mix-blend-multiply blur-3xl dark:bg-violet-900/20 dark:mix-blend-lighten" 
       />
+      
+      {/* Brand Icon Watermark */}
+      <motion.div
+        initial={{ opacity: 0, rotate: -10 }}
+        animate={{ opacity: 0.05, rotate: 5 }}
+        transition={{ duration: 3, ease: "easeOut" }}
+        className="absolute -right-20 top-[10%] z-0 pointer-events-none select-none hidden lg:block"
+      >
+        <img src="/icon0.svg" alt="" className="w-[800px] h-auto dark:invert" />
+      </motion.div>
 
       <div className="relative z-10 mx-auto max-w-[1600px] px-8 pb-20 pt-[120px] md:pt-[160px] lg:px-24">
         <div className="flex flex-col lg:flex-row items-center lg:items-start justify-between gap-12 lg:gap-20">

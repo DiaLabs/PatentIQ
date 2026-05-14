@@ -68,7 +68,7 @@ export function Footer() {
 
         {/* Copyright */}
         <div className="mt-10 flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-500">
-          <FileText className="h-4 w-4" />
+          <img src="/icon0.svg" alt="" className="h-5 w-5 grayscale opacity-50" />
           <span>
             &copy; {new Date().getFullYear()} PatentIQ{" "}
             <a 

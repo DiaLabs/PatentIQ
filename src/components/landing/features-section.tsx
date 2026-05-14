@@ -12,7 +12,13 @@ const mockFiles = [
 
 const features = [
   {
-    Icon: BrainCircuit,
+    Icon: ({ className }: { className?: string }) => (
+      <img 
+        src="/icon1.png" 
+        alt="AI Icon" 
+        className={cn("object-contain p-1 invert dark:invert-0", className)} 
+      />
+    ),
     name: "AI-Powered Analysis",
     description: "Detects vague claims and inconsistencies instantly using advanced NLP.",
     href: "#",

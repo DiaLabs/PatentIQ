@@ -139,10 +139,14 @@ export function DashboardHeader({ userName, onRefresh, isLoading = false }: Dash
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
+      className="flex flex-col gap-1"
     >
-      <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-        Welcome back, {userName} 👋
-      </h1>
+      <div className="flex items-center gap-3">
+        <img src="/icon1.png" alt="" className="h-10 w-10 object-contain invert dark:invert-0" />
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+          Welcome back, {userName} 👋
+        </h1>
+      </div>
       <p className="mt-2 text-base text-gray-500 dark:text-gray-400">
         Here's what's happening with your groups today.
       </p>
