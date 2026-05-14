@@ -22,9 +22,12 @@ import {
   Layers,
   Trash2,
   RotateCcw,
+  FileSpreadsheet,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { ReportModal } from "@/components/dashboard/report-modal";
+import { ExportExcelModal } from "@/components/dashboard/export-excel-modal";
+import { exportGroupExcel } from "@/lib/api";
 
 const STATUS_OPTIONS = [
   { value: "", label: "All Statuses" },
@@ -57,6 +60,7 @@ export default function SubmissionsPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   // Re-evaluate loading
   const [retryingId, setRetryingId] = useState<string | null>(null);
+  const [showExportModal, setShowExportModal] = useState(false);
   const { toast } = useToast();
 
   // Close menu on scroll
@@ -164,12 +168,12 @@ export default function SubmissionsPage() {
         {/* Spacer */}
         <div className="flex-1" />
 
-        {/* Export CSV — right-aligned, away from icons */}
         <Button
           variant="outline"
-          className="rounded-md gap-2 h-[42px] mr-28"
+          onClick={() => setShowExportModal(true)}
+          className="rounded-md gap-2 h-[42px]"
         >
-          <Download className="h-4 w-4" /> Export CSV
+          <FileSpreadsheet className="h-4 w-4 text-emerald-600" /> Export as Excel
         </Button>
       </div>
 
@@ -242,7 +246,7 @@ export default function SubmissionsPage() {
                     <td className="px-6 py-5">
                       {s.score != null ? (
                         <div className="inline-flex items-center px-3 py-1 rounded-full bg-orange-50 dark:bg-orange-900/20 text-xs font-bold text-orange-600 dark:text-orange-400 border border-orange-100 dark:border-orange-900/30">
-                          {s.score}/10
+                          {s.score.toFixed(0)}/100
                         </div>
                       ) : (
                         <span className="text-gray-300 dark:text-zinc-600">—</span>
@@ -464,6 +468,31 @@ export default function SubmissionsPage() {
       {selectedReportId && (
         <ReportModal submissionId={selectedReportId} onClose={() => setSelectedReportId(null)} />
       )}
+
+      {/* Export Excel Modal */}
+      <ExportExcelModal
+        isOpen={showExportModal}
+        onClose={() => setShowExportModal(false)}
+        groups={groupOptions.filter(o => o.value !== "")}
+        onExport={async (groupId) => {
+          toast("Generating Excel report...", "info");
+          try {
+            const blob = await exportGroupExcel(groupId);
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            const groupName = groupOptions.find(o => o.value === groupId)?.label ?? "export";
+            a.download = `PatentIQ_${groupName}_Report_${new Date().toISOString().split('T')[0]}.xlsx`;
+            document.body.appendChild(a);
+            a.click();
+            URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            toast("Excel report downloaded successfully", "success");
+          } catch (err: any) {
+            toast("Export failed: " + err.message, "error");
+          }
+        }}
+      />
     </div>
   );
 }
