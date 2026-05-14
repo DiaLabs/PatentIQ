@@ -12,6 +12,7 @@ import {
 } from "@/lib/api";
 import { FileText, CheckCircle, Check, Upload, AlertCircle, Loader2, Plus, X, Calendar, User, UserPlus, FileIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 
 type Step = "form" | "uploading" | "tracking" | "done" | "error";
 
@@ -83,7 +84,13 @@ export default function SubmitForm() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
-    if (f) setFile(f);
+    if (f) {
+      if (f.size > 2 * 1024 * 1024) {
+        alert("File size exceeds 2MB limit");
+        return;
+      }
+      setFile(f);
+    }
   };
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
@@ -175,44 +182,26 @@ export default function SubmitForm() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col relative">
+    <div className="min-h-screen bg-white dark:bg-[#0a0a0a] flex flex-col relative transition-colors duration-300">
       {/* Absolute Header Logo */}
-      <div className="absolute top-6 left-6 lg:top-8 lg:left-8 flex items-center gap-3 z-10">
-        <svg
-          width="44"
-          height="44"
-          viewBox="0 0 24 24"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          className="text-indigo-600 shrink-0"
-        >
-          <path
-            d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2Z"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+      {/* Fixed Header */}
+      <header className="absolute top-0 left-0 w-full h-24 px-6 lg:px-8 flex items-center justify-between z-20">
+        <div className="flex items-center gap-3">
+          <img 
+            src="/icon0.svg" 
+            alt="PatentIQ Logo" 
+            className="w-10 h-10 object-contain"
           />
-          <path
-            d="M14 2V8H20"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <circle cx="10" cy="14" r="2" stroke="currentColor" strokeWidth="2" />
-          <path
-            d="M15 17H9"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-        <span className="text-2xl font-bold text-gray-900 tracking-tight">
-          PatentIQ
-        </span>
-      </div>
+          <span className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
+            PatentIQ
+          </span>
+        </div>
+
+        <AnimatedThemeToggler
+          duration={400}
+          className="text-gray-500 hover:text-gray-900 dark:hover:text-gray-300 transition-colors"
+        />
+      </header>
 
       <main className="flex-1 flex flex-col items-center justify-center py-12 px-4 w-full">
         <div className="w-full max-w-6xl mt-12 lg:mt-0">
@@ -228,28 +217,24 @@ export default function SubmitForm() {
                   {loadingGroup ? (
                     <div className="h-9 w-64 bg-gray-100 animate-pulse rounded-md mb-4" />
                   ) : (
-                    <h1 className="text-3xl font-bold text-gray-900 mb-4 tracking-tight">
+                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4 tracking-tight">
                       {groupInfo?.name || "Group Submission"}
                     </h1>
                   )}
-                  <div className="flex flex-wrap gap-6 text-sm text-gray-600">
-                    <div className="flex items-center gap-2">
-                      <div className="h-8 w-8 rounded-md bg-indigo-50 flex items-center justify-center">
-                        <Calendar className="w-4 h-4 text-indigo-600" />
-                      </div>
+                  <div className="flex flex-wrap gap-8 text-sm text-gray-500 dark:text-gray-400">
+                    <div className="flex items-center gap-3">
+                      <Calendar className="w-6 h-6 text-indigo-600 dark:text-indigo-400 shrink-0" />
                       <span>
                         Deadline:{" "}
-                        <span className="font-medium text-gray-900">
+                        <span className="font-medium text-gray-900 dark:text-white">
                           {loadingGroup ? "..." : formatDate(groupInfo?.expires_at)}
                         </span>
                       </span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <div className="h-8 w-8 rounded-md bg-indigo-50 flex items-center justify-center">
-                        <User className="w-4 h-4 text-indigo-600" />
-                      </div>
+                    <div className="flex items-center gap-3">
+                      <User className="w-6 h-6 text-indigo-600 dark:text-indigo-400 shrink-0" />
                       <span>
-                        Assignee: <span className="font-medium text-gray-900">{groupInfo?.mentor_name || "Mentor"}</span>
+                        Assignee: <span className="font-medium text-gray-900 dark:text-white">{groupInfo?.mentor_name || "Mentor"}</span>
                       </span>
                     </div>
                   </div>
@@ -257,12 +242,12 @@ export default function SubmitForm() {
 
                 {/* Form Fields */}
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-6">Student Details</h2>
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Student Details</h2>
                   <form id="submission-form" onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                       {/* Submitter Name */}
                       <div>
-                        <label className="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">
+                        <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest px-1 mb-1.5">
                           Your Name *
                         </label>
                         <input
@@ -271,13 +256,13 @@ export default function SubmitForm() {
                           onChange={(e) => setSubmitterName(e.target.value)}
                           placeholder="Full name"
                           required
-                          className="w-full rounded-md border border-gray-200 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all"
+                          className="w-full rounded-md border border-gray-200 dark:border-zinc-800 px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 bg-white dark:bg-zinc-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/40 outline-none transition-all"
                         />
                       </div>
 
                       {/* Roll Number */}
                       <div>
-                        <label className="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">
+                        <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest px-1 mb-1.5">
                           Roll Number *
                         </label>
                         <input
@@ -288,7 +273,7 @@ export default function SubmitForm() {
                           pattern="[0-9]+"
                           title="Roll number must contain only digits"
                           required
-                          className="w-full rounded-md border border-gray-200 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all"
+                          className="w-full rounded-md border border-gray-200 dark:border-zinc-800 px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 bg-white dark:bg-zinc-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/40 outline-none transition-all"
                         />
                       </div>
                     </div>
@@ -296,7 +281,7 @@ export default function SubmitForm() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                       {/* Email */}
                       <div>
-                        <label className="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">
+                        <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest px-1 mb-1.5">
                           Email *
                         </label>
                         <input
@@ -305,13 +290,13 @@ export default function SubmitForm() {
                           onChange={(e) => setEmail(e.target.value)}
                           placeholder="Email address"
                           required
-                          className="w-full rounded-md border border-gray-200 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all"
+                          className="w-full rounded-md border border-gray-200 dark:border-zinc-800 px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 bg-white dark:bg-zinc-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/40 outline-none transition-all"
                         />
                       </div>
 
                       {/* Phone */}
                       <div>
-                        <label className="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">
+                        <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest px-1 mb-1.5">
                           Phone *
                         </label>
                         <input
@@ -322,14 +307,13 @@ export default function SubmitForm() {
                           pattern="[0-9]{10}"
                           title="Please enter a valid 10-digit phone number"
                           required
-                          className="w-full rounded-md border border-gray-200 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all"
+                          className="w-full rounded-md border border-gray-200 dark:border-zinc-800 px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 bg-white dark:bg-zinc-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/40 outline-none transition-all"
                         />
                       </div>
                     </div>
 
-                    {/* Team Members */}
                     <div className="pt-2">
-                      <label className="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">
+                      <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest px-1 mb-1.5">
                         Team Members (optional)
                       </label>
                       <div className="space-y-3">
@@ -340,7 +324,7 @@ export default function SubmitForm() {
                               value={tm}
                               onChange={(e) => updateTeammate(i, e.target.value)}
                               placeholder={`Team member ${i + 1}`}
-                              className="flex-1 rounded-md border border-gray-200 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all"
+                              className="flex-1 rounded-md border border-gray-200 dark:border-zinc-800 px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 bg-white dark:bg-zinc-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/40 outline-none transition-all"
                             />
                             {teammates.length > 1 && (
                               <button
@@ -369,7 +353,9 @@ export default function SubmitForm() {
 
               {/* Right Column: Upload Widget */}
               <div className="lg:col-span-5 lg:pl-12 lg:sticky lg:top-24">
-                <h3 className="text-xl font-bold text-gray-900 mb-6">Upload Document</h3>
+                <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest px-1 mb-6">
+                  Upload Document
+                </label>
                 
                 {/* File Upload */}
                 <div className="mb-8">
@@ -377,8 +363,8 @@ export default function SubmitForm() {
                     onClick={() => fileRef.current?.click()}
                     className={`rounded-md border-2 border-dashed cursor-pointer transition-all p-10 text-center ${
                       file
-                        ? "border-indigo-300 bg-indigo-50"
-                        : "border-gray-200 hover:border-indigo-300 hover:bg-indigo-50/50"
+                        ? "border-indigo-300 bg-indigo-50 dark:bg-indigo-900/20"
+                        : "border-gray-200 dark:border-zinc-800 hover:border-indigo-300 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/10"
                     }`}
                   >
                     <input
@@ -390,42 +376,46 @@ export default function SubmitForm() {
                     />
                     {file ? (
                       <div className="flex flex-col items-center gap-3">
-                        <div className="h-12 w-12 rounded-md bg-indigo-100 flex items-center justify-center">
-                          <FileText className="h-6 w-6 text-indigo-600" />
+                        <div className="h-10 w-10 rounded-md bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center">
+                          <FileIcon className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
                         </div>
-                        <div>
-                          <p className="text-sm font-medium text-indigo-900 mb-1 truncate max-w-[200px]">{file.name}</p>
-                          <p className="text-xs text-indigo-500 font-medium">
+                        <div className="flex-1 min-w-0 max-w-full px-4">
+                          <p className="text-sm font-semibold text-gray-900 dark:text-white truncate text-center" title={file.name}>
+                            {file.name}
+                          </p>
+                          <p className="text-xs text-indigo-500 dark:text-indigo-400 font-medium text-center">
                             {(file.size / 1024 / 1024).toFixed(2)} MB
                           </p>
                         </div>
-                        <button
+                        <Button
                           type="button"
+                          variant="outline"
+                          size="sm"
                           onClick={(e) => { e.stopPropagation(); setFile(null); }}
-                          className="mt-2 text-xs font-semibold text-indigo-600 hover:text-indigo-800 bg-indigo-100/50 px-3 py-1.5 rounded-md transition-colors"
+                          className="mt-2 text-xs h-8 border-indigo-200 dark:border-indigo-900/50 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
                         >
                           Change file
-                        </button>
+                        </Button>
                       </div>
                     ) : (
                       <div className="flex flex-col items-center gap-3">
-                        <div className="h-12 w-12 rounded-md bg-gray-50 flex items-center justify-center group-hover:bg-white transition-colors">
+                        <div className="h-12 w-12 rounded-md bg-gray-50 dark:bg-zinc-800 flex items-center justify-center group-hover:bg-white dark:group-hover:bg-zinc-700 transition-colors">
                           <Upload className="h-6 w-6 text-gray-400" />
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-gray-700 mb-1">
+                          <p className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
                             Click to upload or drag & drop
                           </p>
-                          <p className="text-xs text-gray-400">PDF, DOC, DOCX up to 25MB</p>
+                          <p className="text-xs text-gray-400">PDF, DOC, DOCX up to 2MB</p>
                         </div>
                       </div>
                     )}
                   </div>
                 </div>
 
-                <div className="bg-gray-50 rounded-md p-4 mb-8">
-                   <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Checklist</h4>
-                   <ul className="space-y-2 text-sm text-gray-600">
+                <div className="bg-gray-50 dark:bg-zinc-900 rounded-md p-4 mb-8 border border-gray-100 dark:border-zinc-800">
+                   <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest px-1 mb-2">Checklist</label>
+                   <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                      <li className="flex gap-2 items-start">
                         <Check className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
                         <span>Ensure all team members are listed</span>
@@ -436,7 +426,7 @@ export default function SubmitForm() {
                      </li>
                      <li className="flex gap-2 items-start">
                         <Check className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
-                        <span>File size is under the 25MB limit</span>
+                        <span>File size is under the 2MB limit</span>
                      </li>
                    </ul>
                 </div>
@@ -445,7 +435,7 @@ export default function SubmitForm() {
                   form="submission-form"
                   type="submit"
                   disabled={!file || !submitterName.trim() || !email.trim() || !phone.trim() || !rollNumber.trim()}
-                  className="w-full py-6 text-base"
+                  className="w-full py-7 text-base rounded-md font-bold transition-all bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/20 dark:shadow-none disabled:bg-gray-200 dark:disabled:bg-zinc-800 disabled:text-gray-400"
                 >
                   Submit Patent Evaluation
                 </Button>
@@ -455,22 +445,22 @@ export default function SubmitForm() {
 
           {/* Uploading State */}
           {step === "uploading" && (
-            <div className="max-w-md mx-auto bg-white rounded-md border border-gray-200 shadow-sm p-12 text-center">
+            <div className="max-w-md mx-auto bg-white dark:bg-zinc-900 rounded-md border border-gray-200 dark:border-zinc-800 shadow-sm p-12 text-center">
               <Loader2 className="mx-auto h-12 w-12 text-indigo-500 animate-spin mb-6" />
-              <h2 className="text-xl font-bold text-gray-900">Uploading your document...</h2>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Uploading your document...</h2>
               <p className="text-sm text-gray-500 mt-2">Please don't close this page while we process your submission.</p>
             </div>
           )}
 
           {/* Tracking/Done State */}
           {(step === "tracking" || step === "done") && statusData && (
-            <div className="max-w-xl mx-auto bg-white rounded-md border border-gray-200 shadow-sm overflow-hidden">
-              <div className="px-8 py-12 text-center">
-                <div className="inline-flex items-center justify-center h-24 w-24 rounded-full bg-emerald-50 mb-6 border-4 border-white shadow-sm">
-                  <CheckCircle className="h-12 w-12 text-emerald-600" strokeWidth={1.5} />
+            <div className="max-w-xl mx-auto w-full transition-colors duration-300">
+              <div className="py-12 text-center">
+                <div className="inline-flex items-center justify-center h-24 w-24 rounded-full bg-emerald-50 dark:bg-emerald-900/20 mb-8 border-4 border-white dark:border-[#0a0a0a] shadow-sm">
+                  <CheckCircle className="h-12 w-12 text-emerald-600 dark:text-emerald-400" strokeWidth={1.5} />
                 </div>
 
-                <h2 className="text-3xl font-bold text-gray-900 mb-3 tracking-tight">
+                <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4 tracking-tight">
                   Submitted Successfully!
                 </h2>
 
@@ -478,25 +468,32 @@ export default function SubmitForm() {
                   Your patent has been received and is now getting evaluated. Your mentor will review the results soon.
                 </p>
 
-                <div className="rounded-md bg-gray-50 border border-gray-100 p-6 mb-8 text-left space-y-3">
-                  <div className="flex justify-between border-b border-gray-200 pb-3">
-                    <span className="text-sm font-semibold text-gray-500">Name</span>
-                    <span className="text-sm font-medium text-gray-900">{submitterName}</span>
+                <div className="rounded-md bg-gray-50/50 dark:bg-zinc-900/50 border border-gray-100 dark:border-zinc-800/50 p-6 mb-10 text-left space-y-4">
+                  <div className="flex justify-between items-center border-b border-gray-100 dark:border-zinc-800 pb-4">
+                    <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Name</span>
+                    <span className="text-sm font-semibold text-gray-900 dark:text-white">{submitterName}</span>
                   </div>
-                  <div className="flex justify-between border-b border-gray-200 pb-3">
-                    <span className="text-sm font-semibold text-gray-500">Roll Number</span>
-                    <span className="text-sm font-medium text-gray-900">{rollNumber}</span>
+                  <div className="flex justify-between items-center border-b border-gray-100 dark:border-zinc-800 pb-4">
+                    <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Roll Number</span>
+                    <span className="text-sm font-semibold text-gray-900 dark:text-white">{rollNumber}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm font-semibold text-gray-500">Document</span>
-                    <span className="text-sm font-medium text-gray-900 truncate max-w-[150px]">{file?.name}</span>
+                  <div className="flex justify-between items-center border-b border-gray-100 dark:border-zinc-800 pb-4">
+                    <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Group</span>
+                    <span className="text-sm font-semibold text-gray-900 dark:text-white">{groupInfo?.name || "N/A"}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Document</span>
+                    <span className="text-sm font-semibold text-gray-900 dark:text-white" title={file?.name}>
+                      {file?.name && file.name.length > 20 
+                        ? `${file.name.substring(0, 10)}...${file.name.substring(file.name.length - 8)}` 
+                        : file?.name}
+                    </span>
                   </div>
                 </div>
 
                 <Button
                   onClick={() => window.location.reload()}
-                  variant="outline"
-                  className="w-full"
+                  className="w-full py-7 text-base rounded-md font-bold transition-all bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/20 dark:shadow-none"
                 >
                   Submit Another Document
                 </Button>
