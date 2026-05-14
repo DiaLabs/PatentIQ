@@ -312,6 +312,8 @@ export default function SubmitForm() {
                           value={phone}
                           onChange={(e) => setPhone(e.target.value)}
                           placeholder="Phone number"
+                          pattern="[0-9]{10}"
+                          title="Please enter a valid 10-digit phone number"
                           required
                           className="w-full rounded-md border border-gray-200 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all"
                         />
