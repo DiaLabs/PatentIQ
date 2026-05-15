@@ -466,7 +466,7 @@ export default function GroupDetailPage() {
                       <div className="flex flex-col">
                         <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">{s.submitter_name}</span>
                         <span className="text-[10px] text-gray-400">
-                          {s.team_member_names.length > 0 ? `${s.team_member_names.length + 1} Members` : "Individual"}
+                          {(() => { const additionalMembers = s.team_member_names.filter(n => n && n.trim() !== "" && n !== s.submitter_name); return additionalMembers.length > 0 ? `${additionalMembers.length + 1} Members` : "Individual"; })()}
                         </span>
                       </div>
                     </td>
