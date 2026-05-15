@@ -337,7 +337,7 @@ export default function GroupDetailPage() {
             className={cn(
               "gap-2 h-[42px] rounded-md font-semibold transition-all border-indigo-100 dark:border-indigo-900/30",
               isSelectionMode 
-                ? "bg-indigo-600 text-white hover:bg-indigo-700 border-indigo-600" 
+                ? "bg-indigo-600 text-white hover:bg-indigo-700 hover:text-white border-indigo-600" 
                 : "text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/10"
             )}
           >
