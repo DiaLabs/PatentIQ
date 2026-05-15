@@ -142,9 +142,27 @@ export function PipelineDetails({ phases, status, currentStage = 0, loading = fa
                     </div>
                   )}
 
+                  {phase.metadata?.validated_metadata && phase.metadata.validated_metadata.length > 0 && (
+                    <div className="bg-white rounded p-3 border border-emerald-100 col-span-2">
+                      <p className="text-xs text-emerald-600 font-bold uppercase tracking-wider mb-2">Verified Context (SerpAPI)</p>
+                      <div className="space-y-2">
+                        {phase.metadata.validated_metadata.map((m: any) => (
+                          <div key={m.patent_id} className="text-[11px] border-l-2 border-emerald-500 pl-2 py-1 bg-emerald-50/30 rounded-r">
+                            <div className="flex justify-between items-start">
+                              <span className="font-bold text-emerald-800">{m.patent_id}</span>
+                              <span className="text-[9px] bg-emerald-100 text-emerald-700 px-1 rounded uppercase font-bold">Verified</span>
+                            </div>
+                            <p className="text-gray-800 font-medium line-clamp-1 mt-0.5">{m.title}</p>
+                            <p className="text-gray-500 italic mt-0.5">{m.assignee || 'Assignee N/A'}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {phase.metadata?.invalid_ids && phase.metadata.invalid_ids.length > 0 && (
-                    <div className="bg-white rounded p-2 border border-gray-200 col-span-2">
-                      <p className="text-xs text-red-500 font-medium">Invalid/Not Found Patent IDs</p>
+                    <div className="bg-white rounded p-2 border border-red-100 col-span-2">
+                      <p className="text-xs text-red-500 font-medium">Unverified Patent IDs</p>
                       <div className="flex flex-wrap gap-1 mt-1">
                         {phase.metadata.invalid_ids.map((id: string) => (
                           <span key={id} className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-red-50 text-red-700 border border-red-100 line-through">
