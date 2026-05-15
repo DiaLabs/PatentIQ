@@ -8,8 +8,9 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, Zap, AlertTriangle, CheckCircle2, Clock, Loader2 } from "lucide-react";
+import { ChevronDown, Zap, AlertTriangle, CheckCircle2, Clock } from "lucide-react";
 import type { PipelinePhase } from "@/lib/api";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 interface PipelineDetailsProps {
   phases: PipelinePhase[];
@@ -23,9 +24,9 @@ export function PipelineDetails({ phases, status, currentStage = 0, loading = fa
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-8">
-        <Loader2 className="h-6 w-6 text-indigo-600 animate-spin mr-2" />
-        <p className="text-sm text-gray-600">Loading pipeline data...</p>
+      <div className="flex flex-col items-center justify-center py-12 gap-4">
+        <LoadingSpinner size="md" />
+        <p className="text-sm font-medium text-gray-500 animate-pulse">Loading pipeline data...</p>
       </div>
     );
   }
