@@ -95,7 +95,7 @@ export default function SubmitForm() {
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!file || !submitterName.trim() || !email.trim() || !phone.trim() || !rollNumber.trim() || !token) return;
+    if (!file || !submitterName.trim() || !email.trim() || !rollNumber.trim() || !token) return;
 
     setStep("uploading");
     setError(null);
@@ -297,7 +297,7 @@ export default function SubmitForm() {
                       {/* Phone */}
                       <div>
                         <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest px-1 mb-1.5">
-                          Phone *
+                          Phone (optional)
                         </label>
                         <input
                           type="tel"
@@ -306,7 +306,6 @@ export default function SubmitForm() {
                           placeholder="Phone number"
                           pattern="[0-9]{10}"
                           title="Please enter a valid 10-digit phone number"
-                          required
                           className="w-full rounded-md border border-gray-200 dark:border-zinc-800 px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 bg-white dark:bg-zinc-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/40 outline-none transition-all"
                         />
                       </div>
@@ -439,7 +438,7 @@ export default function SubmitForm() {
                 <Button
                   form="submission-form"
                   type="submit"
-                  disabled={!file || !submitterName.trim() || !email.trim() || !phone.trim() || !rollNumber.trim()}
+                  disabled={!file || !submitterName.trim() || !email.trim() || !rollNumber.trim()}
                   className="w-full py-7 text-base rounded-md font-bold transition-all bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/20 dark:shadow-none disabled:bg-gray-200 dark:disabled:bg-zinc-800 disabled:text-gray-400"
                 >
                   Submit Patent Evaluation
