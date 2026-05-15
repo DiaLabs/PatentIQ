@@ -7,6 +7,7 @@ import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { StatusBadge } from "@/components/dashboard/status-badge";
 import { Button } from "@/components/ui/button";
 import { CustomSelect } from "@/components/ui/custom-select";
+import { cn } from "@/lib/utils";
 import { useToast } from "@/context/ToastContext";
 import {
   FileText,
@@ -23,8 +24,13 @@ import {
   Trash2,
   RotateCcw,
   FileSpreadsheet,
+  CheckSquare,
+  Square,
+  MousePointer2,
+  X,
+  Check,
 } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { ReportModal } from "@/components/dashboard/report-modal";
 import { ExportExcelModal } from "@/components/dashboard/export-excel-modal";
 import { exportGroupExcel } from "@/lib/api";
@@ -62,6 +68,12 @@ export default function SubmissionsPage() {
   const [retryingId, setRetryingId] = useState<string | null>(null);
   const [showExportModal, setShowExportModal] = useState(false);
   const { toast } = useToast();
+
+  // Selection State
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isBulkOperating, setIsBulkOperating] = useState(false);
+  const [bulkActionConfirm, setBulkActionConfirm] = useState<'delete' | 'reevaluate' | null>(null);
 
   // Close menu on scroll
   useEffect(() => {
@@ -123,6 +135,76 @@ export default function SubmissionsPage() {
     return () => clearTimeout(timer);
   }, [load]);
 
+  const toggleSelectAll = () => {
+    if (!data) return;
+    if (selectedIds.size === data.submissions.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(data.submissions.map(s => s.submission_id)));
+    }
+  };
+
+  const toggleSelect = (id: string) => {
+    const next = new Set(selectedIds);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    setSelectedIds(next);
+  };
+
+  const handleBulkDelete = async () => {
+    setIsBulkOperating(true);
+    let successCount = 0;
+    const ids = Array.from(selectedIds);
+    
+    try {
+      for (const id of ids) {
+        try {
+          await deleteSubmission(id);
+          successCount++;
+        } catch (err) {
+          console.error(`Failed to delete ${id}`, err);
+        }
+      }
+      toast(`Successfully deleted ${successCount} submissions`, "success");
+      setSelectedIds(new Set());
+      setIsSelectionMode(false);
+      load();
+    } catch (err: any) {
+      toast("Bulk delete encountered errors", "error");
+    } finally {
+      setIsBulkOperating(false);
+      setBulkActionConfirm(null);
+    }
+  };
+
+  const handleBulkReevaluate = async () => {
+    setIsBulkOperating(true);
+    let successCount = 0;
+    const ids = Array.from(selectedIds);
+
+    try {
+      for (const id of ids) {
+        const sub = data?.submissions.find(s => s.submission_id === id);
+        if (!sub) continue;
+        try {
+          await retrySubmissionEvaluation(sub.group_id, id, true);
+          successCount++;
+        } catch (err) {
+          console.error(`Failed to re-evaluate ${id}`, err);
+        }
+      }
+      toast(`Queued ${successCount} submissions for re-evaluation`, "success");
+      setSelectedIds(new Set());
+      setIsSelectionMode(false);
+      load();
+    } catch (err: any) {
+      toast("Bulk re-evaluation encountered errors", "error");
+    } finally {
+      setIsBulkOperating(false);
+      setBulkActionConfirm(null);
+    }
+  };
+
   return (
     <div className="px-12 py-8 min-h-screen relative">
       {/* Page Title */}
@@ -168,13 +250,35 @@ export default function SubmissionsPage() {
         {/* Spacer */}
         <div className="flex-1" />
 
-        <Button
-          variant="outline"
-          onClick={() => setShowExportModal(true)}
-          className="rounded-md gap-2 h-[42px]"
-        >
-          <FileSpreadsheet className="h-4 w-4 text-emerald-600" /> Export as Excel
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={() => {
+              setIsSelectionMode(!isSelectionMode);
+              setSelectedIds(new Set());
+            }}
+            className={cn(
+              "gap-2 h-[42px] rounded-md font-semibold transition-all border-indigo-100 dark:border-indigo-900/30",
+              isSelectionMode 
+                ? "bg-indigo-600 text-white hover:bg-indigo-700 border-indigo-600" 
+                : "text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/10"
+            )}
+          >
+            {isSelectionMode ? (
+              <><X className="h-4 w-4" /> Cancel Selection</>
+            ) : (
+              <><MousePointer2 className="h-4 w-4" /> Select</>
+            )}
+          </Button>
+
+          <Button
+            variant="outline"
+            onClick={() => setShowExportModal(true)}
+            className="rounded-md gap-2 h-[42px]"
+          >
+            <FileSpreadsheet className="h-4 w-4 text-emerald-600" /> Export as Excel
+          </Button>
+        </div>
       </div>
 
       {/* Error */}
@@ -191,7 +295,23 @@ export default function SubmissionsPage() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-50 dark:border-zinc-800 bg-gray-50/30 dark:bg-zinc-800/20">
-                <th className="px-8 py-5 text-left text-[11px] font-bold text-gray-400 uppercase tracking-widest">Document</th>
+                {isSelectionMode && (
+                  <th className="pl-8 pr-2 py-5 text-left w-10">
+                    <button
+                      onClick={toggleSelectAll}
+                      className="group/cb flex items-center justify-center h-5 w-5 rounded border border-gray-300 dark:border-zinc-700 transition-all hover:border-indigo-500"
+                    >
+                      {data && selectedIds.size === data.submissions.length && data.submissions.length > 0 ? (
+                        <div className="h-full w-full bg-indigo-600 rounded-[3px] flex items-center justify-center text-white">
+                          <Check className="h-3 w-3 stroke-[4]" />
+                        </div>
+                      ) : (
+                        <div className="h-3 w-3 rounded-[1px] bg-gray-100 dark:bg-zinc-800 opacity-0 group-hover/cb:opacity-100 transition-opacity" />
+                      )}
+                    </button>
+                  </th>
+                )}
+                <th className={cn("py-5 text-left text-[11px] font-bold text-gray-400 uppercase tracking-widest", isSelectionMode ? "px-2" : "px-8")}>Document</th>
                 <th className="px-6 py-5 text-left text-[11px] font-bold text-gray-400 uppercase tracking-widest">Student</th>
                 <th className="px-6 py-5 text-left text-[11px] font-bold text-gray-400 uppercase tracking-widest">Group</th>
                 <th className="px-6 py-5 text-left text-[11px] font-bold text-gray-400 uppercase tracking-widest">Status</th>
@@ -215,9 +335,28 @@ export default function SubmissionsPage() {
                   <motion.tr
                     layout
                     key={s.submission_id}
-                    className="group transition-colors hover:bg-gray-50/50 dark:hover:bg-zinc-800/20"
+                    onClick={() => isSelectionMode && toggleSelect(s.submission_id)}
+                    className={cn(
+                      "group transition-colors",
+                      isSelectionMode ? "cursor-pointer" : "",
+                      selectedIds.has(s.submission_id)
+                        ? "bg-indigo-50/40 dark:bg-indigo-900/10"
+                        : "hover:bg-gray-50/50 dark:hover:bg-zinc-800/20"
+                    )}
                   >
-                    <td className="px-8 py-5">
+                    {isSelectionMode && (
+                      <td className="pl-8 pr-2 py-5">
+                        <div className={cn(
+                          "flex items-center justify-center h-5 w-5 rounded border transition-all",
+                          selectedIds.has(s.submission_id)
+                            ? "bg-indigo-600 border-indigo-600 text-white shadow-sm shadow-indigo-600/20"
+                            : "border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 group-hover:border-indigo-400"
+                        )}>
+                          {selectedIds.has(s.submission_id) && <Check className="h-3 w-3 stroke-[4]" />}
+                        </div>
+                      </td>
+                    )}
+                    <td className={cn("py-5", isSelectionMode ? "px-2" : "px-8")}>
                       <div className="flex items-center gap-3">
                         <div className="h-10 w-10 rounded-md bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center shrink-0">
                           <FileText className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
@@ -400,26 +539,24 @@ export default function SubmissionsPage() {
                 </button>
               )}
 
-              {/* Re-evaluate — only for failed/rejected */}
-              {(activeRow.status === "FAILED" || activeRow.status === "REJECTED") && (
-                <button
-                  onClick={async () => {
-                    setOpenMenuId(null); setMenuAnchor(null);
-                    setRetryingId(activeRow.submission_id);
-                    try {
-                      await retrySubmissionEvaluation(activeRow.group_id, activeRow.submission_id);
-                      toast("Re-evaluation queued", "success");
-                      load();
-                    } catch (err: any) { toast("Re-evaluate failed: " + err.message, "error"); }
-                    finally { setRetryingId(null); }
-                  }}
-                  disabled={retryingId === activeRow.submission_id}
-                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/10 transition-colors disabled:opacity-50"
-                >
-                  <RotateCcw className={`h-4 w-4 ${retryingId === activeRow.submission_id ? "animate-spin" : ""}`} />
-                  Re-evaluate
-                </button>
-              )}
+              {/* Re-evaluate */}
+              <button
+                onClick={async () => {
+                  setOpenMenuId(null); setMenuAnchor(null);
+                  setRetryingId(activeRow.submission_id);
+                  try {
+                    await retrySubmissionEvaluation(activeRow.group_id, activeRow.submission_id, true);
+                    toast("Re-evaluation queued", "success");
+                    load();
+                  } catch (err: any) { toast("Re-evaluate failed: " + err.message, "error"); }
+                  finally { setRetryingId(null); }
+                }}
+                disabled={retryingId === activeRow.submission_id}
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/10 transition-colors disabled:opacity-50"
+              >
+                <RotateCcw className={`h-4 w-4 ${retryingId === activeRow.submission_id ? "animate-spin" : ""}`} />
+                Re-evaluate
+              </button>
 
               <div className="h-px bg-gray-100 dark:bg-zinc-800 my-1" />
 
@@ -492,6 +629,91 @@ export default function SubmissionsPage() {
             toast("Export failed: " + err.message, "error");
           }
         }}
+      />
+      {/* Floating Bulk Actions Bar */}
+      <AnimatePresence>
+        {isSelectionMode && selectedIds.size > 0 && (
+          <Portal>
+            <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] w-full max-w-xl px-4">
+              <motion.div
+                initial={{ y: 100, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: 100, opacity: 0 }}
+                className="bg-white dark:bg-zinc-900 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)] p-3 pl-5 flex items-center justify-between gap-4 border border-gray-100 dark:border-zinc-800"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-md bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center">
+                    <CheckSquare className="h-4.5 w-4.5 text-indigo-600 dark:text-indigo-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-gray-900 dark:text-white leading-none mb-0.5">
+                      {selectedIds.size} Selected
+                    </p>
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                      Actions
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      setSelectedIds(new Set());
+                      setIsSelectionMode(false);
+                    }}
+                    className="h-9 text-gray-500 font-bold text-xs px-3"
+                  >
+                    Clear
+                  </Button>
+                  
+                  <div className="w-px h-6 bg-gray-100 dark:bg-zinc-800 mx-1" />
+
+                  <Button
+                    onClick={() => setBulkActionConfirm('reevaluate')}
+                    disabled={isBulkOperating}
+                    className="h-9 gap-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md font-bold text-xs px-4 shadow-sm shadow-indigo-600/10"
+                  >
+                    <RotateCcw className={cn("h-3.5 w-3.5", isBulkOperating && bulkActionConfirm === 'reevaluate' && "animate-spin")} />
+                    Re-evaluate
+                  </Button>
+
+                  <Button
+                    onClick={() => setBulkActionConfirm('delete')}
+                    disabled={isBulkOperating}
+                    className="h-9 gap-2 bg-red-600 hover:bg-red-700 text-white rounded-md font-bold text-xs px-4 shadow-sm shadow-red-600/10"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    Delete
+                  </Button>
+                </div>
+              </motion.div>
+            </div>
+          </Portal>
+        )}
+      </AnimatePresence>
+
+      {/* Bulk Action Confirmation Dialogs */}
+      <ConfirmationDialog
+        isOpen={bulkActionConfirm === 'delete'}
+        onClose={() => setBulkActionConfirm(null)}
+        onConfirm={handleBulkDelete}
+        title="Delete Submissions?"
+        description={`Are you sure you want to delete ${selectedIds.size} selected submissions? This action is irreversible.`}
+        confirmLabel={isBulkOperating ? "Deleting..." : "Delete All"}
+        isLoading={isBulkOperating}
+        variant="danger"
+      />
+
+      <ConfirmationDialog
+        isOpen={bulkActionConfirm === 'reevaluate'}
+        onClose={() => setBulkActionConfirm(null)}
+        onConfirm={handleBulkReevaluate}
+        title="Re-evaluate Submissions?"
+        description={`This will re-evaluate all ${selectedIds.size} selected submissions. This might take a while.`}
+        confirmLabel={isBulkOperating ? "Queuing..." : "Confirm Re-evaluate"}
+        isLoading={isBulkOperating}
+        variant="info"
       />
     </div>
   );
