@@ -122,6 +122,9 @@ export interface Group {
 export interface Submission {
   submission_id: string;
   submitter_name: string;
+  submitter_email?: string;
+  unique_id?: string;
+  invention_title?: string;
   team_member_names: string[];
   status: SubmissionStatus;
   current_stage: number | null;

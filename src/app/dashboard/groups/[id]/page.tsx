@@ -422,7 +422,8 @@ export default function GroupDetailPage() {
                     </button>
                   </th>
                 )}
-                <th className={cn("py-5 text-left text-[11px] font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-widest", isSelectionMode ? "px-2" : "px-8")}>Document</th>
+                <th className={cn("py-5 text-left text-[11px] font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-widest", isSelectionMode ? "px-2" : "px-8")}>Document & Title</th>
+                <th className="px-6 py-5 text-left text-[11px] font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-widest">Unique ID</th>
                 <th className="px-6 py-5 text-left text-[11px] font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-widest">Student</th>
                 <th className="px-6 py-5 text-left text-[11px] font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-widest">Status</th>
                 <th className="px-6 py-5 text-left text-[11px] font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-widest">Score</th>
@@ -472,17 +473,24 @@ export default function GroupDetailPage() {
                         </div>
                         <div className="min-w-0">
                           <p className="text-sm font-semibold text-gray-900 dark:text-white truncate max-w-[220px]">
-                            {s.file_name || `Submission_${s.submission_id.slice(0, 8)}.pdf`}
+                            {s.invention_title || s.file_name || `Submission_${s.submission_id.slice(0, 8)}`}
                           </p>
-                          <p className="text-[10px] text-gray-400 font-medium uppercase mt-0.5">PDF Document</p>
+                          <p className="text-[10px] text-gray-400 font-medium uppercase mt-0.5 truncate max-w-[200px]">
+                            {s.file_name}
+                          </p>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-5">
+                      <span className="text-sm font-mono text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-zinc-800 px-2 py-1 rounded">
+                        {s.unique_id || "—"}
+                      </span>
+                    </td>
+                    <td className="px-6 py-5">
                       <div className="flex flex-col">
-                        <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">{s.submitter_name}</span>
-                        <span className="text-[10px] text-gray-400">
-                          {(() => { const additionalMembers = s.team_member_names.filter(n => n && n.trim() !== "" && n !== s.submitter_name); return additionalMembers.length > 0 ? `${additionalMembers.length + 1} Members` : "Individual"; })()}
+                        <span className="text-sm text-gray-700 dark:text-gray-300 font-bold">{s.submitter_name}</span>
+                        <span className="text-[10px] text-gray-400 truncate max-w-[150px]">
+                          {s.submitter_email}
                         </span>
                       </div>
                     </td>

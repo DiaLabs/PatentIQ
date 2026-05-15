@@ -247,7 +247,8 @@ export default function OverviewPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-50 dark:border-zinc-800 bg-gray-50/20 dark:bg-zinc-800/10">
-                  <th className="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">Document</th>
+                  <th className="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">Document & Title</th>
+                  <th className="px-4 py-4 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">Unique ID</th>
                   <th className="px-4 py-4 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">Student</th>
                   <th className="px-4 py-4 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">Group</th>
                   <th className="px-4 py-4 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">Status</th>
@@ -271,13 +272,24 @@ export default function OverviewPage() {
                           <div className="h-8 w-8 rounded-md bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center shrink-0">
                             <FileText className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
                           </div>
-                          <span className="text-sm font-semibold text-gray-900 dark:text-white max-w-[140px] truncate">
-                            {s.file_name}
-                          </span>
+                          <div className="min-w-0">
+                            <p className="text-sm font-semibold text-gray-900 dark:text-white max-w-[140px] truncate">
+                              {s.invention_title || s.file_name}
+                            </p>
+                            <p className="text-[9px] text-gray-400 truncate max-w-[120px]">{s.file_name}</p>
+                          </div>
                         </div>
                       </td>
                       <td className="px-4 py-4">
-                        <span className="text-sm text-gray-600 dark:text-gray-300 font-medium">{s.submitter_name}</span>
+                        <span className="text-xs font-mono text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-zinc-800 px-2 py-0.5 rounded">
+                          {s.unique_id || "—"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="flex flex-col">
+                          <span className="text-sm text-gray-700 dark:text-gray-300 font-bold">{s.submitter_name}</span>
+                          <span className="text-[10px] text-gray-400 truncate max-w-[120px]">{s.submitter_email}</span>
+                        </div>
                       </td>
                       <td className="px-4 py-4">
                         <span className="text-xs text-gray-500 dark:text-gray-400">{s.group_name}</span>

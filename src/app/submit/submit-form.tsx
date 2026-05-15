@@ -40,9 +40,9 @@ export default function SubmitForm() {
 
   // Form state
   const [submitterName, setSubmitterName] = useState("");
-  const [rollNumber, setRollNumber] = useState("");
-  const [email, setEmail] = useState("");
+  const [uniqueId, setUniqueId] = useState("");
   const [inventionTitle, setInventionTitle] = useState("");
+  const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [teammates, setTeammates] = useState<string[]>([""]);
   const [file, setFile] = useState<File | null>(null);
@@ -96,7 +96,7 @@ export default function SubmitForm() {
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!file || !submitterName.trim() || !email.trim() || !rollNumber.trim() || !inventionTitle.trim() || !token) return;
+    if (!file || !submitterName.trim() || !email.trim() || !uniqueId.trim() || !inventionTitle.trim() || !token) return;
 
     setStep("uploading");
     setError(null);
@@ -107,17 +107,16 @@ export default function SubmitForm() {
       
       const idempotencyKey = crypto.randomUUID();
       
-      const filteredTeams = teammates.filter((t) => t.trim());
-      const teamMembers = filteredTeams.length > 0 ? filteredTeams : [submitterName];
-
+      const confirmedTeammates = teammates.filter((t) => t.trim());
+      
       const prep = await prepareUpload({
         access_token: token,
         submitter_name: submitterName.trim(),
-        unique_id: rollNumber.trim(),
+        unique_id: uniqueId.trim(),
         submitter_email: email.trim(),
         invention_title: inventionTitle.trim(),
         phone: phone.trim(),
-        team_member_names: teamMembers,
+        team_member_names: confirmedTeammates,
         group_name: groupInfo?.name || "Submitted Group",
         file_name: file.name,
         file_type: ext,
@@ -139,7 +138,7 @@ export default function SubmitForm() {
       setError(err?.message ?? "Submission failed. Please try again.");
       setStep("error");
     }
-  }, [file, submitterName, rollNumber, email, inventionTitle, phone, token, teammates, groupInfo]);
+  }, [file, submitterName, uniqueId, email, inventionTitle, phone, token, teammates, groupInfo]);
 
   // Poll for status
   useEffect(() => {
@@ -262,44 +261,10 @@ export default function SubmitForm() {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                      {/* Submitter Name */}
+                      {/* Email Address */}
                       <div>
                         <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest px-1 mb-1.5">
-                          Your Name *
-                        </label>
-                        <input
-                          type="text"
-                          value={submitterName}
-                          onChange={(e) => setSubmitterName(e.target.value)}
-                          placeholder="Full name"
-                          required
-                          className="w-full rounded-md border border-gray-200 dark:border-zinc-800 px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 bg-white dark:bg-zinc-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/40 outline-none transition-all"
-                        />
-                      </div>
-
-                      {/* Roll Number */}
-                      <div>
-                        <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest px-1 mb-1.5">
-                          Roll Number *
-                        </label>
-                        <input
-                          type="text"
-                          value={rollNumber}
-                          onChange={(e) => setRollNumber(e.target.value)}
-                          placeholder="Roll number"
-                          pattern="[0-9]+"
-                          title="Roll number must contain only digits"
-                          required
-                          className="w-full rounded-md border border-gray-200 dark:border-zinc-800 px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 bg-white dark:bg-zinc-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/40 outline-none transition-all"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                      {/* Email */}
-                      <div>
-                        <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest px-1 mb-1.5">
-                          Email *
+                          Email Address *
                         </label>
                         <input
                           type="email"
@@ -311,18 +276,49 @@ export default function SubmitForm() {
                         />
                       </div>
 
-                      {/* Phone */}
+                      {/* Full Name */}
                       <div>
                         <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest px-1 mb-1.5">
-                          Phone (optional)
+                          Full Name *
                         </label>
                         <input
-                          type="tel"
-                          value={phone}
-                          onChange={(e) => setPhone(e.target.value)}
-                          placeholder="Phone number"
-                          pattern="[0-9]{10}"
-                          title="Please enter a valid 10-digit phone number"
+                          type="text"
+                          value={submitterName}
+                          onChange={(e) => setSubmitterName(e.target.value)}
+                          placeholder="Full name"
+                          required
+                          className="w-full rounded-md border border-gray-200 dark:border-zinc-800 px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 bg-white dark:bg-zinc-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/40 outline-none transition-all"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      {/* Unique Id */}
+                      <div>
+                        <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest px-1 mb-1.5">
+                          Unique Id *
+                        </label>
+                        <input
+                          type="text"
+                          value={uniqueId}
+                          onChange={(e) => setUniqueId(e.target.value)}
+                          placeholder="Student ID / Unique ID"
+                          required
+                          className="w-full rounded-md border border-gray-200 dark:border-zinc-800 px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 bg-white dark:bg-zinc-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/40 outline-none transition-all"
+                        />
+                      </div>
+
+                      {/* Patent Title */}
+                      <div>
+                        <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest px-1 mb-1.5">
+                          Patent Title / Name of Invention *
+                        </label>
+                        <input
+                          type="text"
+                          value={inventionTitle}
+                          onChange={(e) => setInventionTitle(e.target.value)}
+                          placeholder="Title of your invention"
+                          required
                           className="w-full rounded-md border border-gray-200 dark:border-zinc-800 px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 bg-white dark:bg-zinc-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/40 outline-none transition-all"
                         />
                       </div>
@@ -455,7 +451,7 @@ export default function SubmitForm() {
                 <Button
                   form="submission-form"
                   type="submit"
-                  disabled={!file || !submitterName.trim() || !email.trim() || !rollNumber.trim() || !inventionTitle.trim()}
+                  disabled={!file || !submitterName.trim() || !email.trim() || !uniqueId.trim() || !inventionTitle.trim()}
                   className="w-full py-7 text-base rounded-md font-bold transition-all bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/20 dark:shadow-none disabled:bg-gray-200 dark:disabled:bg-zinc-800 disabled:text-gray-400"
                 >
                   Submit Patent Evaluation
@@ -499,8 +495,8 @@ export default function SubmitForm() {
                     <span className="text-sm font-semibold text-gray-900 dark:text-white">{submitterName}</span>
                   </div>
                   <div className="flex justify-between items-center border-b border-gray-100 dark:border-zinc-800 pb-4">
-                    <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Roll Number</span>
-                    <span className="text-sm font-semibold text-gray-900 dark:text-white">{rollNumber}</span>
+                    <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Unique Id</span>
+                    <span className="text-sm font-semibold text-gray-900 dark:text-white">{uniqueId}</span>
                   </div>
                   <div className="flex justify-between items-center border-b border-gray-100 dark:border-zinc-800 pb-4">
                     <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Group</span>
