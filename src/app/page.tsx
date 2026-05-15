@@ -10,6 +10,7 @@ import { Footer } from "@/components/landing/footer";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { LoadingScreen } from "../components/ui/loading-screen";
 
 export default function Home() {
   const { user, loading } = useAuth();
@@ -20,6 +21,10 @@ export default function Home() {
       router.replace("/dashboard");
     }
   }, [user, loading, router]);
+
+  if (loading || user) {
+    return <LoadingScreen />;
+  }
 
   return (
     <div className="flex min-h-screen flex-col">
