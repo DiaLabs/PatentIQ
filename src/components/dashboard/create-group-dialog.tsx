@@ -133,7 +133,8 @@ export function CreateGroupDialog({ onClose, onCreated }: Props) {
                     step={5}
                     value={plagThreshold}
                     onChange={(e) => setPlagThreshold(Number(e.target.value))}
-                    className="w-full h-1.5 bg-gray-100 dark:bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-indigo-600 transition-all"
+                    className="w-full h-1.5 rounded-lg appearance-none cursor-pointer transition-all slider-custom-track"
+                    style={{ "--slider-percent": `${((plagThreshold - 10) / (90 - 10)) * 100}%` } as React.CSSProperties}
                   />
                   <div className="flex justify-between mt-2 text-[10px] font-bold text-gray-400 uppercase tracking-tight">
                     <span>Strict (10%)</span>

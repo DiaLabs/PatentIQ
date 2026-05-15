@@ -159,6 +159,89 @@
   .dark ::-webkit-scrollbar-thumb {
     @apply bg-indigo-400/20 hover:bg-indigo-400/40;
   }
+
+  /* Custom Slider Track */
+  .slider-custom-track {
+    appearance: none !important;
+    background: transparent !important;
+    height: 6px !important;
+    border-radius: 9999px;
+  }
+
+  /* Webkit (Chrome, Safari, Edge) */
+  .slider-custom-track::-webkit-slider-runnable-track {
+    height: 6px;
+    border-radius: 9999px;
+    background: linear-gradient(
+      to right,
+      #4f46e5 0%,
+      #4f46e5 var(--slider-percent, 0%),
+      #f3f4f6 var(--slider-percent, 0%),
+      #f3f4f6 100%
+    );
+  }
+
+  .dark .slider-custom-track::-webkit-slider-runnable-track {
+    background: linear-gradient(
+      to right,
+      #818cf8 0%,
+      #818cf8 var(--slider-percent, 0%),
+      #27272a var(--slider-percent, 0%),
+      #27272a 100%
+    );
+  }
+
+  /* Firefox */
+  .slider-custom-track::-moz-range-track {
+    height: 6px;
+    border-radius: 9999px;
+    background: #f3f4f6;
+  }
+  .dark .slider-custom-track::-moz-range-track {
+    background: #27272a;
+  }
+  .slider-custom-track::-moz-range-progress {
+    height: 6px;
+    border-radius: 9999px;
+    background: #4f46e5;
+  }
+  .dark .slider-custom-track::-moz-range-progress {
+    background: #818cf8;
+  }
+
+  /* Thumb styling is often required when appearance: none is used on the track */
+  .slider-custom-track::-webkit-slider-thumb {
+    appearance: none;
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    background: #4f46e5;
+    border: 2px solid white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    margin-top: -5px; /* center it on the 6px track */
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .slider-custom-track::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  }
+  .dark .slider-custom-track::-webkit-slider-thumb {
+    background: #818cf8;
+    border-color: #18181b;
+  }
+  .slider-custom-track::-moz-range-thumb {
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    background: #4f46e5;
+    border: 2px solid white;
+    cursor: pointer;
+  }
+  .dark .slider-custom-track::-moz-range-thumb {
+    background: #818cf8;
+    border-color: #18181b;
+  }
 }
 
 /* Disable default view transition cross-fade for the theme toggler */
