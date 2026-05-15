@@ -448,40 +448,42 @@ export default function GroupDetailPage() {
       {/* Modals */}
       <AnimatePresence>
         {showDeleteConfirm && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white dark:bg-zinc-900 rounded-md shadow-2xl w-full max-w-sm p-8 border border-gray-100 dark:border-zinc-800"
-            >
-              <div className="h-12 w-12 rounded-md bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-600 dark:text-red-400 mb-6">
-                <Trash2 className="h-6 w-6" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight mb-2">
-                Delete Group?
-              </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed mb-8">
-                This will permanently delete <strong className="text-gray-900 dark:text-white">{data?.group.name}</strong> and all its associated data. This action is irreversible.
-              </p>
-              <div className="grid grid-cols-2 gap-3">
-                <Button
-                  onClick={() => setShowDeleteConfirm(false)}
-                  variant="outline"
-                  className="rounded-md py-3"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleDelete}
-                  disabled={deleting}
-                  className="rounded-md py-3 bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-600/20 disabled:opacity-50"
-                >
-                  {deleting ? "Deleting..." : "Confirm Delete"}
-                </Button>
-              </div>
-            </motion.div>
-          </div>
+          <Portal>
+            <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="bg-white dark:bg-zinc-900 rounded-md shadow-2xl w-full max-w-sm p-8 border border-gray-100 dark:border-zinc-800"
+              >
+                <div className="h-12 w-12 rounded-md bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-600 dark:text-red-400 mb-6">
+                  <Trash2 className="h-6 w-6" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight mb-2">
+                  Delete Group?
+                </h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed mb-8">
+                  This will permanently delete <strong className="text-gray-900 dark:text-white">{data?.group.name}</strong> and all its associated data. This action is irreversible.
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                  <Button
+                    onClick={() => setShowDeleteConfirm(false)}
+                    variant="outline"
+                    className="rounded-md py-3"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleDelete}
+                    disabled={deleting}
+                    className="rounded-md py-3 bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-600/20 disabled:opacity-50"
+                  >
+                    {deleting ? "Deleting..." : "Confirm Delete"}
+                  </Button>
+                </div>
+              </motion.div>
+            </div>
+          </Portal>
         )}
       </AnimatePresence>
 
@@ -587,44 +589,6 @@ export default function GroupDetailPage() {
         variant="danger"
       />
 
-      <AnimatePresence>
-        {showDeleteConfirm && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white dark:bg-zinc-900 rounded-md shadow-2xl w-full max-w-sm p-8 border border-gray-100 dark:border-zinc-800"
-            >
-              <div className="h-12 w-12 rounded-md bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-600 dark:text-red-400 mb-6">
-                <Trash2 className="h-6 w-6" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight mb-2">
-                Delete Group?
-              </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed mb-8">
-                This will permanently delete <strong className="text-gray-900 dark:text-white">{data?.group.name}</strong> and all its associated data. This action is irreversible.
-              </p>
-              <div className="grid grid-cols-2 gap-3">
-                <Button
-                  onClick={() => setShowDeleteConfirm(false)}
-                  variant="outline"
-                  className="rounded-md py-3"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleDelete}
-                  disabled={deleting}
-                  className="rounded-md py-3 bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-600/20 disabled:opacity-50"
-                >
-                  {deleting ? "Deleting..." : "Confirm Delete"}
-                </Button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
 
       {/* Report Modal */}
       {selectedSubmissionReport && (

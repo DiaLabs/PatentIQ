@@ -1,7 +1,7 @@
 "use client";
 
 import { StatusBadge } from "./status-badge";
-import { FileText, AlertTriangle, CheckCircle2, TrendingUp, ShieldAlert, Zap } from "lucide-react";
+import { FileText, AlertTriangle, CheckCircle2, TrendingUp, ShieldAlert, Zap, X } from "lucide-react";
 
 interface ReportContentProps {
   data: any;
@@ -152,11 +152,46 @@ export function ReportContent({ data }: ReportContentProps) {
         </section>
       )}
 
-      {/* 4. Major Weaknesses and Improvements */}
-      {(data.major_weaknesses_and_improvements) && (
+      {/* 4. Patent Identifiers & Validation */}
+      {(data.stage_1?.patent_ids || data.patent_identifiers) && (
         <section className="mb-12">
           <div className="flex items-center gap-3 mb-6">
             <div className="h-8 w-8 rounded-md bg-gray-900 dark:bg-white flex items-center justify-center text-white dark:text-gray-900 font-bold">4</div>
+            <h3 className="text-xl font-bold uppercase tracking-tight">Reference Patents</h3>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {(data.stage_1?.patent_ids || data.patent_identifiers || []).map((id: string, i: number) => {
+              const isValid = data.stage_1?.valid_ids?.includes(id);
+              const isInvalid = data.stage_1?.invalid_ids?.includes(id);
+              
+              return (
+                <div key={i} className="flex items-center justify-between p-3 rounded-md border border-gray-100 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-800/20">
+                  <span className="text-sm font-mono font-bold text-gray-700 dark:text-gray-300">{id}</span>
+                  {isValid ? (
+                    <div className="flex items-center gap-1 text-emerald-600">
+                      <CheckCircle2 className="h-4 w-4" />
+                      <span className="text-[10px] font-bold uppercase">Verified</span>
+                    </div>
+                  ) : isInvalid ? (
+                    <div className="flex items-center gap-1 text-red-500">
+                      <X className="h-4 w-4" />
+                      <span className="text-[10px] font-bold uppercase">Invalid</span>
+                    </div>
+                  ) : (
+                    <span className="text-[10px] font-bold text-gray-400 uppercase">Extracted</span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* 5. Major Weaknesses and Improvements */}
+      {(data.major_weaknesses_and_improvements) && (
+        <section className="mb-12">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="h-8 w-8 rounded-md bg-gray-900 dark:bg-white flex items-center justify-center text-white dark:text-gray-900 font-bold">5</div>
             <h3 className="text-xl font-bold uppercase tracking-tight">Major Weaknesses</h3>
           </div>
           <div className="overflow-hidden rounded-md border border-gray-100 dark:border-zinc-800\">
@@ -182,11 +217,11 @@ export function ReportContent({ data }: ReportContentProps) {
         </section>
       )}
 
-      {/* 5. Improved Core Inventive Concept */}
+      {/* 6. Improved Core Inventive Concept */}
       {(data.improved_core_inventive_concept) && (
         <section className="mb-12">
           <div className="flex items-center gap-3 mb-6">
-            <div className="h-8 w-8 rounded-md bg-gray-900 dark:bg-white flex items-center justify-center text-white dark:text-gray-900 font-bold">5</div>
+            <div className="h-8 w-8 rounded-md bg-gray-900 dark:bg-white flex items-center justify-center text-white dark:text-gray-900 font-bold">6</div>
             <h3 className="text-xl font-bold uppercase tracking-tight">Inventive Concept</h3>
           </div>
           <div className="p-6 rounded-md bg-indigo-50/30 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-900/20 italic text-gray-700 dark:text-gray-300 leading-relaxed">
@@ -195,11 +230,11 @@ export function ReportContent({ data }: ReportContentProps) {
         </section>
       )}
 
-      {/* 6. Claim Structure */}
+      {/* 7. Claim Structure */}
       {(data.recommended_claim_structure) && (
         <section className="mb-12">
           <div className="flex items-center gap-3 mb-6">
-            <div className="h-8 w-8 rounded-md bg-gray-900 dark:bg-white flex items-center justify-center text-white dark:text-gray-900 font-bold">6</div>
+            <div className="h-8 w-8 rounded-md bg-gray-900 dark:bg-white flex items-center justify-center text-white dark:text-gray-900 font-bold">7</div>
             <h3 className="text-xl font-bold uppercase tracking-tight">Claim Structure</h3>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
