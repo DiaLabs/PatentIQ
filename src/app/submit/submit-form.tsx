@@ -96,7 +96,7 @@ export default function SubmitForm() {
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!file || !submitterName.trim() || !email.trim() || !uniqueId.trim() || !inventionTitle.trim() || !phone.trim() || !token) return;
+    if (!file || !submitterName.trim() || !email.trim() || !uniqueId.trim() || !inventionTitle.trim() || !token) return;
 
     setStep("uploading");
     setError(null);
@@ -115,7 +115,7 @@ export default function SubmitForm() {
         unique_id: uniqueId.trim(),
         submitter_email: email.trim(),
         invention_title: inventionTitle.trim(),
-        phone: phone.trim(),
+        phone: "N/A",
         team_member_names: confirmedTeammates,
         group_name: groupInfo?.name || "Submitted Group",
         file_name: file.name,
@@ -187,7 +187,7 @@ export default function SubmitForm() {
       {/* Absolute Header Logo */}
       {/* Fixed Header */}
       <header className="absolute top-0 left-0 w-full h-24 px-6 lg:px-8 flex items-center justify-between z-20">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1">
           <img 
             src="/icon0.svg" 
             alt="PatentIQ Logo" 
@@ -248,13 +248,13 @@ export default function SubmitForm() {
                     {/* Invention Title */}
                     <div>
                       <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest px-1 mb-1.5">
-                        Invention / Patent Title *
+                        Title *
                       </label>
                       <input
                         type="text"
                         value={inventionTitle}
                         onChange={(e) => setInventionTitle(e.target.value)}
-                        placeholder="Enter the full title of your invention"
+                        placeholder="Enter the title of your invention"
                         required
                         className="w-full rounded-md border border-gray-200 dark:border-zinc-800 px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 bg-white dark:bg-zinc-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/40 outline-none transition-all"
                       />
@@ -303,21 +303,6 @@ export default function SubmitForm() {
                           value={uniqueId}
                           onChange={(e) => setUniqueId(e.target.value)}
                           placeholder="Student ID / Unique ID"
-                          required
-                          className="w-full rounded-md border border-gray-200 dark:border-zinc-800 px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 bg-white dark:bg-zinc-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/40 outline-none transition-all"
-                        />
-                      </div>
-
-                      {/* Phone Number */}
-                      <div>
-                        <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest px-1 mb-1.5">
-                          Phone Number *
-                        </label>
-                        <input
-                          type="tel"
-                          value={phone}
-                          onChange={(e) => setPhone(e.target.value)}
-                          placeholder="Contact phone number"
                           required
                           className="w-full rounded-md border border-gray-200 dark:border-zinc-800 px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 bg-white dark:bg-zinc-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/40 outline-none transition-all"
                         />
@@ -451,7 +436,7 @@ export default function SubmitForm() {
                 <Button
                   form="submission-form"
                   type="submit"
-                  disabled={!file || !submitterName.trim() || !email.trim() || !uniqueId.trim() || !inventionTitle.trim() || !phone.trim()}
+                  disabled={!file || !submitterName.trim() || !email.trim() || !uniqueId.trim() || !inventionTitle.trim()}
                   className="w-full py-7 text-base rounded-md font-bold transition-all bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/20 dark:shadow-none disabled:bg-gray-200 dark:disabled:bg-zinc-800 disabled:text-gray-400"
                 >
                   Submit Patent Evaluation
@@ -471,47 +456,42 @@ export default function SubmitForm() {
 
           {/* Tracking/Done State */}
           {(step === "tracking" || step === "done") && statusData && (
-            <div className="max-w-xl mx-auto w-full transition-colors duration-300">
-              <div className="py-12 text-center">
-                <div className="inline-flex items-center justify-center h-24 w-24 rounded-full bg-emerald-50 dark:bg-emerald-900/20 mb-8 border-4 border-white dark:border-[#0a0a0a] shadow-sm">
-                  <CheckCircle className="h-12 w-12 text-emerald-600 dark:text-emerald-400" strokeWidth={1.5} />
+            <div className="max-w-2xl mx-auto w-full transition-colors duration-300">
+              <div className="py-6 text-center">
+                <div className="flex items-center justify-center gap-4 mb-4">
+                  <div className="inline-flex items-center justify-center h-12 w-12 rounded-full bg-emerald-50 dark:bg-emerald-900/20 border-2 border-white dark:border-[#0a0a0a] shadow-sm">
+                    <CheckCircle className="h-6 w-6 text-emerald-600 dark:text-emerald-400" strokeWidth={2} />
+                  </div>
+                  <h2 className="text-4xl font-bold text-gray-900 dark:text-white tracking-tight">
+                    Submitted Successfully!
+                  </h2>
                 </div>
 
-                <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4 tracking-tight">
-                  Submitted Successfully!
-                </h2>
-
-                <p className="text-gray-500 mb-8 max-w-sm mx-auto leading-relaxed">
+                <p className="text-gray-500 mb-6 max-w-lg mx-auto leading-relaxed text-sm">
                   Your patent has been received and is now getting evaluated. Your mentor will review the results soon.
                 </p>
 
-                <div className="rounded-md bg-gray-50/50 dark:bg-zinc-900/50 border border-gray-100 dark:border-zinc-800/50 p-6 mb-10 text-left space-y-4">
-                  <div className="flex justify-between items-center border-b border-gray-100 dark:border-zinc-800 pb-4">
-                    <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Invention</span>
-                    <span className="text-sm font-semibold text-gray-900 dark:text-white truncate max-w-[200px] text-right">{inventionTitle}</span>
+                <div className="rounded-md bg-gray-50/50 dark:bg-zinc-900/50 border border-gray-100 dark:border-zinc-800/50 p-5 mb-8 text-left space-y-3.5">
+                  <div className="flex justify-between items-center border-b border-gray-100 dark:border-zinc-800 pb-3">
+                    <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Title</span>
+                    <span className="text-sm font-semibold text-gray-900 dark:text-white truncate max-w-[250px] text-right">{inventionTitle}</span>
                   </div>
-                  <div className="flex justify-between items-center border-b border-gray-100 dark:border-zinc-800 pb-4">
-                    <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Name</span>
-                    <span className="text-sm font-semibold text-gray-900 dark:text-white">{submitterName}</span>
+                  <div className="flex justify-between items-center border-b border-gray-100 dark:border-zinc-800 pb-3">
+                    <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Name / Unique ID</span>
+                    <span className="text-sm font-semibold text-gray-900 dark:text-white">{submitterName} <span className="text-gray-400 mx-1">·</span> {uniqueId}</span>
                   </div>
-                  <div className="flex justify-between items-center border-b border-gray-100 dark:border-zinc-800 pb-4">
-                    <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Unique Id</span>
-                    <span className="text-sm font-semibold text-gray-900 dark:text-white">{uniqueId}</span>
+                  <div className="flex justify-between items-center border-b border-gray-100 dark:border-zinc-800 pb-3">
+                    <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Email</span>
+                    <span className="text-sm font-semibold text-gray-900 dark:text-white">{email}</span>
                   </div>
-                  <div className="flex justify-between items-center border-b border-gray-100 dark:border-zinc-800 pb-4">
-                    <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Phone</span>
-                    <span className="text-sm font-semibold text-gray-900 dark:text-white">{phone}</span>
-                  </div>
-                  <div className="flex justify-between items-center border-b border-gray-100 dark:border-zinc-800 pb-4">
+                  <div className="flex justify-between items-center border-b border-gray-100 dark:border-zinc-800 pb-3">
                     <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Group</span>
                     <span className="text-sm font-semibold text-gray-900 dark:text-white">{groupInfo?.name || "N/A"}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Document</span>
-                    <span className="text-sm font-semibold text-gray-900 dark:text-white" title={file?.name}>
-                      {file?.name && file.name.length > 20 
-                        ? `${file.name.substring(0, 10)}...${file.name.substring(file.name.length - 8)}` 
-                        : file?.name}
+                    <span className="text-sm font-semibold text-gray-900 dark:text-white truncate max-w-[200px]" title={file?.name}>
+                      {file?.name}
                     </span>
                   </div>
                 </div>
