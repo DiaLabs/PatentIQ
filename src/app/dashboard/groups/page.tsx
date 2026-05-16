@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { fetchGroups, type Group } from "@/lib/api";
 import { CreateGroupDialog } from "@/components/dashboard/create-group-dialog";
 import { Button } from "@/components/ui/button";
@@ -185,11 +185,14 @@ export default function GroupsPage() {
     }
   }, [setRefreshing]);
 
+  const lastRefreshProcessed = useRef(refreshTrigger);
+
   useEffect(() => { load(); }, [load]);
 
   // Listen for global refresh trigger
   useEffect(() => {
-    if (refreshTrigger > 0) {
+    if (refreshTrigger > lastRefreshProcessed.current) {
+      lastRefreshProcessed.current = refreshTrigger;
       load(true);
     }
   }, [refreshTrigger, load]);
@@ -215,7 +218,6 @@ export default function GroupsPage() {
 
   return (
     <motion.div 
-      key={refreshTrigger}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       className="px-12 py-8"
@@ -335,9 +337,30 @@ export default function GroupsPage() {
 
       {/* Groups Grid */}
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="h-52 animate-pulse rounded-md bg-gray-100 dark:bg-zinc-800/50" />
+            <div key={i} className="h-[210px] animate-pulse rounded-md border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 flex flex-col justify-between shadow-sm">
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-md bg-gray-100 dark:bg-zinc-800" />
+                  <div className="space-y-2">
+                    <div className="h-4 w-32 bg-gray-100 dark:bg-zinc-800 rounded" />
+                    <div className="h-3 w-20 bg-gray-50 dark:bg-zinc-800/50 rounded" />
+                  </div>
+                </div>
+                <div className="space-y-2 pt-2">
+                  <div className="h-2 w-full bg-gray-50 dark:bg-zinc-800/50 rounded" />
+                  <div className="h-2 w-2/3 bg-gray-50 dark:bg-zinc-800/50 rounded" />
+                </div>
+              </div>
+              <div className="flex items-center justify-between pt-4 border-t border-gray-50 dark:border-zinc-800/50">
+                <div className="flex gap-4">
+                  <div className="h-4 w-12 bg-gray-100 dark:bg-zinc-800 rounded" />
+                  <div className="h-4 w-12 bg-gray-100 dark:bg-zinc-800 rounded" />
+                </div>
+                <div className="h-4 w-16 bg-gray-100 dark:bg-zinc-800 rounded" />
+              </div>
+            </div>
           ))}
         </div>
       ) : filtered.length === 0 ? (

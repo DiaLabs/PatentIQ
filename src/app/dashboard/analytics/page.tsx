@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { BarChart3, TrendingUp, Users, FileText, Star, CheckCircle2 } from "lucide-react";
 import { useRefresh } from "@/context/RefreshContext";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 
 const stats = [
   { label: "Total Evaluations", value: "128", icon: FileText, iconBg: "bg-indigo-50 dark:bg-indigo-900/30", iconColor: "text-indigo-600 dark:text-indigo-400", trend: "+12%", trendColor: "text-emerald-600 dark:text-emerald-400" },
@@ -37,15 +37,17 @@ export default function AnalyticsPage() {
     setRefreshing(false);
   }, [setRefreshing]);
 
+  const lastRefreshProcessed = useRef(refreshTrigger);
+
   useEffect(() => {
-    if (refreshTrigger > 0) {
+    if (refreshTrigger > lastRefreshProcessed.current) {
+      lastRefreshProcessed.current = refreshTrigger;
       load(true);
     }
   }, [refreshTrigger, load]);
 
   return (
     <motion.div 
-      key={refreshTrigger}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       className="px-12 py-8"

@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Sliders, Plus, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRefresh } from "@/context/RefreshContext";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 
 const rules = [
   { id: 1, name: "Novelty Check", description: "Checks if the patent claim is novel against prior art.", weight: 30, enabled: true },
@@ -27,15 +27,17 @@ export default function EvaluationRulesPage() {
     setRefreshing(false);
   }, [setRefreshing]);
 
+  const lastRefreshProcessed = useRef(refreshTrigger);
+
   useEffect(() => {
-    if (refreshTrigger > 0) {
+    if (refreshTrigger > lastRefreshProcessed.current) {
+      lastRefreshProcessed.current = refreshTrigger;
       load(true);
     }
   }, [refreshTrigger, load]);
 
   return (
     <motion.div 
-      key={refreshTrigger}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       className="px-12 py-8"

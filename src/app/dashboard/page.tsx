@@ -56,18 +56,20 @@ export default function OverviewPage() {
     }
   }, [setRefreshing]);
 
+  const lastRefreshProcessed = useRef(refreshTrigger);
+
   useEffect(() => { load(); }, [load]);
 
   // Listen for global refresh trigger
   useEffect(() => {
-    if (refreshTrigger > 0) {
+    if (refreshTrigger > lastRefreshProcessed.current) {
+      lastRefreshProcessed.current = refreshTrigger;
       load(true);
     }
   }, [refreshTrigger, load]);
 
   return (
     <motion.div 
-      key={refreshTrigger}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       className="px-12 py-8 min-h-screen relative"
@@ -132,8 +134,10 @@ export default function OverviewPage() {
             <div className="flex flex-col items-center justify-center p-6 rounded-md bg-gray-50/30 dark:bg-zinc-800/20 border border-gray-100/50 dark:border-zinc-800/50">
               <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-4">Total Submissions</p>
               <div className="text-center">
-                <span className="text-5xl font-bold text-indigo-600 dark:text-indigo-400">
-                  {loading ? "—" : dashboard?.overview.total_submissions}
+                <span className="text-6xl font-black text-gray-900 dark:text-white leading-none">
+                  {loading ? (
+                    <div className="h-[60px] w-24 bg-gray-100 dark:bg-zinc-800 rounded animate-pulse" />
+                  ) : dashboard?.overview.total_submissions}
                 </span>
                 <p className="mt-3 text-[11px] font-bold text-gray-500 dark:text-gray-400 max-w-[140px] mx-auto leading-tight">
                   Evaluated student documents across all groups
@@ -146,8 +150,10 @@ export default function OverviewPage() {
               <div className="flex-1 p-5 rounded-md bg-emerald-50/30 dark:bg-emerald-900/10 border border-emerald-100/30 dark:border-emerald-900/20">
                 <p className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1">Active Groups</p>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-3xl font-bold text-gray-900 dark:text-white">
-                    {loading ? "—" : dashboard?.overview.total_groups}
+                  <span className="text-3xl font-bold text-gray-900 dark:text-white leading-none">
+                    {loading ? (
+                      <div className="h-8 w-12 bg-gray-100 dark:bg-zinc-800 rounded animate-pulse" />
+                    ) : dashboard?.overview.total_groups}
                   </span>
                   <span className="text-xs text-emerald-600 font-bold">Cohorts</span>
                 </div>
@@ -155,10 +161,12 @@ export default function OverviewPage() {
               <div className="flex-1 p-5 rounded-md bg-red-50/30 dark:bg-red-900/10 border border-red-100/30 dark:border-red-900/20">
                 <p className="text-[9px] font-bold text-red-600 dark:text-red-400 uppercase tracking-widest mb-1">Flagged Items</p>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-3xl font-bold text-gray-900 dark:text-white">
-                    {loading ? "—" : dashboard?.overview.total_rejected}
+                  <span className="text-3xl font-bold text-gray-900 dark:text-white leading-none">
+                    {loading ? (
+                      <div className="h-8 w-12 bg-gray-100 dark:bg-zinc-800 rounded animate-pulse" />
+                    ) : dashboard?.overview.total_rejected}
                   </span>
-                  <span className="text-xs text-red-500 font-bold uppercase tracking-tighter">Action Required</span>
+                  <span className="text-[10px] text-red-500 font-bold uppercase tracking-tighter">Action Required</span>
                 </div>
               </div>
             </div>
@@ -260,8 +268,20 @@ export default function OverviewPage() {
               <tbody className="divide-y divide-gray-50 dark:divide-zinc-800">
                 {loading ? (
                   [1, 2, 3].map((i) => (
-                    <tr key={i} className="animate-pulse">
-                      <td colSpan={7} className="px-6 py-6 h-16 bg-gray-50/30"></td>
+                    <tr key={i} className="animate-pulse border-b border-gray-50/50 dark:border-zinc-800/50">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2.5">
+                          <div className="h-8 w-8 rounded-md bg-gray-100 dark:bg-zinc-800" />
+                          <div className="space-y-1.5">
+                            <div className="h-3 w-24 bg-gray-100 dark:bg-zinc-800 rounded" />
+                            <div className="h-2 w-16 bg-gray-50 dark:bg-zinc-800/50 rounded" />
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-4"><div className="h-3 w-16 bg-gray-100 dark:bg-zinc-800 rounded" /></td>
+                      <td className="px-4 py-4"><div className="h-3 w-20 bg-gray-100 dark:bg-zinc-800 rounded" /></td>
+                      <td className="px-4 py-4"><div className="h-3 w-16 bg-gray-100 dark:bg-zinc-800 rounded" /></td>
+                      <td className="px-4 py-4"><div className="h-5 w-14 bg-gray-100 dark:bg-zinc-800 rounded-full" /></td>
                     </tr>
                   ))
                 ) : dashboard && (dashboard.recent_submissions?.length ?? 0) > 0 ? (

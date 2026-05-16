@@ -131,6 +131,8 @@ export default function GroupDetailPage() {
     }
   }, [groupId, page, statusFilter, search, setRefreshing]);
 
+  const lastRefreshProcessed = useRef(refreshTrigger);
+
   useEffect(() => {
     const timer = setTimeout(() => { load(); }, 300);
     return () => clearTimeout(timer);
@@ -138,7 +140,8 @@ export default function GroupDetailPage() {
 
   // Listen for global refresh trigger
   useEffect(() => {
-    if (refreshTrigger > 0) {
+    if (refreshTrigger > lastRefreshProcessed.current) {
+      lastRefreshProcessed.current = refreshTrigger;
       load(true);
     }
   }, [refreshTrigger, load]);
@@ -235,7 +238,6 @@ export default function GroupDetailPage() {
 
   return (
     <motion.div 
-      key={refreshTrigger}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       className="px-12 py-8 min-h-screen space-y-12"
@@ -437,8 +439,24 @@ export default function GroupDetailPage() {
             <tbody className="divide-y divide-gray-50 dark:divide-zinc-800">
               {loading ? (
                 [1, 2, 3, 4, 5].map((i) => (
-                  <tr key={i} className="animate-pulse">
-                    <td colSpan={8} className="px-8 py-6 h-20 bg-gray-50/10 dark:bg-zinc-800/10" />
+                  <tr key={i} className="animate-pulse border-b border-gray-50 dark:border-zinc-800">
+                    <td className="px-8 py-5">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-md bg-gray-100 dark:bg-zinc-800" />
+                        <div className="space-y-2">
+                          <div className="h-4 w-32 bg-gray-100 dark:bg-zinc-800 rounded" />
+                          <div className="h-3 w-20 bg-gray-50 dark:bg-zinc-800/50 rounded" />
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-5"><div className="h-4 w-20 bg-gray-100 dark:bg-zinc-800 rounded" /></td>
+                    <td className="px-6 py-5"><div className="h-4 w-24 bg-gray-100 dark:bg-zinc-800 rounded" /></td>
+                    <td className="px-6 py-5"><div className="h-6 w-16 bg-gray-100 dark:bg-zinc-800 rounded-full" /></td>
+                    <td className="px-6 py-5"><div className="h-6 w-12 bg-gray-100 dark:bg-zinc-800 rounded-md" /></td>
+                    <td className="px-6 py-5"><div className="h-4 w-20 bg-gray-100 dark:bg-zinc-800 rounded" /></td>
+                    <td className="px-6 py-5"><div className="h-4 w-20 bg-gray-100 dark:bg-zinc-800 rounded" /></td>
+                    <td className="px-4 py-5"><div className="h-8 w-24 bg-gray-100 dark:bg-zinc-800 rounded-md" /></td>
+                    <td className="px-6 py-5 text-right"><div className="h-8 w-8 bg-gray-100 dark:bg-zinc-800 rounded ml-auto" /></td>
                   </tr>
                 ))
               ) : data && data.submissions.length > 0 ? (
