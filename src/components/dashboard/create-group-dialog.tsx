@@ -24,7 +24,7 @@ export function CreateGroupDialog({ onClose, onCreated }: Props) {
   const [plagThreshold, setPlagThreshold] = useState(40);
   const [expiryDate, setExpiryDate] = useState<string>(() => {
     const d = new Date();
-    d.setDate(d.getDate() + 30);
+    d.setDate(d.getDate() + 7);
     return d.toISOString().split("T")[0];
   });
 
@@ -55,8 +55,9 @@ export function CreateGroupDialog({ onClose, onCreated }: Props) {
   }, [name, plagThreshold, expiryDate, onCreated]);
 
   const handleCopy = useCallback(() => {
-    if (!created?.student_link) return;
-    navigator.clipboard.writeText(created.student_link);
+    if (!created?.group_id) return;
+    const link = `${window.location.origin}/submit?token=${created.group_id}`;
+    navigator.clipboard.writeText(link);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }, [created]);
@@ -191,7 +192,15 @@ export function CreateGroupDialog({ onClose, onCreated }: Props) {
                   </div>
                   <h4 className="text-lg font-bold text-gray-900 dark:text-white">{created?.name}</h4>
                   <p className="text-xs text-gray-500 mt-1 uppercase font-bold tracking-widest">
-                    Live Until {new Date(created?.expires_at ?? "").toLocaleDateString()}
+                    Live Until {(() => {
+                      const val = created?.expires_at;
+                      if (!val) return "—";
+                      // If it's a number or numeric string (UNIX timestamp in seconds), multiply by 1000
+                      const date = !isNaN(Number(val)) && Number(val) < 10000000000 
+                        ? new Date(Number(val) * 1000) 
+                        : new Date(val);
+                      return date.toLocaleDateString();
+                    })()}
                   </p>
                 </div>
 
@@ -201,7 +210,7 @@ export function CreateGroupDialog({ onClose, onCreated }: Props) {
                   </label>
                   <div className="group relative flex items-center gap-2 rounded-md border border-gray-200 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-800/50 px-4 py-3.5 transition-all hover:border-indigo-200 dark:hover:border-indigo-900/50">
                     <p className="flex-1 text-xs text-gray-600 dark:text-gray-300 truncate font-mono">
-                      {created?.student_link}
+                      {window.location.origin}/submit?token={created?.group_id}
                     </p>
                     <button
                       onClick={handleCopy}
@@ -222,7 +231,7 @@ export function CreateGroupDialog({ onClose, onCreated }: Props) {
                   </div>
                 </div>
 
-                <Button className="w-full h-12 font-bold rounded-md bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-gray-100 transition-all" onClick={onClose}>
+                <Button className="w-full h-12 font-bold rounded-md bg-indigo-600 hover:bg-indigo-700 text-white transition-all shadow-lg shadow-indigo-500/10" onClick={onClose}>
                   Back to Dashboard
                 </Button>
               </div>
