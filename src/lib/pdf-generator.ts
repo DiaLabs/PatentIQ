@@ -154,7 +154,7 @@ export const generatePatentReport = (data: any, logoBase64?: string) => {
             ],
             ...data.detailed_scoring.map((item: any) => [
               { text: item.parameter, bold: true, fontSize: 10, color: '#111827' },
-              { text: `${item.score} / 100`, color: '#6366f1', bold: true, fontSize: 10 },
+              { text: `${(parseFloat(item.score) / 10).toFixed(0)} / 10`, color: '#6366f1', bold: true, fontSize: 10 },
               { text: item.review_comment, fontSize: 9, color: '#6b7280', lineHeight: 1.3 }
             ])
           ]
