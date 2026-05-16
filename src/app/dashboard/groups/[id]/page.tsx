@@ -38,6 +38,7 @@ import {
   CheckSquare,
   Square,
   MousePointer2,
+  Loader2,
 } from "lucide-react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -112,7 +113,7 @@ export default function GroupDetailPage() {
 
   const load = useCallback(async (isManual = false) => {
     if (isManual) setRefreshing(true);
-    setLoading(true);
+    else setLoading(true);
     setError(null);
     try {
       const result = await fetchGroupDetails(groupId, {
@@ -156,8 +157,8 @@ export default function GroupDetailPage() {
   }, [groupId, router, toast]);
 
   const handleCopy = () => {
-    const link = data?.group.student_link;
-    if (!link) return;
+    if (!data) return;
+    const link = `${window.location.origin}/submit?token=${data.group.group_id}`;
     navigator.clipboard.writeText(link);
     setCopied(true);
     toast("Link copied to clipboard", "info");
@@ -259,7 +260,7 @@ export default function GroupDetailPage() {
           </div>
           <div className="space-y-4">
             <div className="flex items-center gap-4">
-              <h2 className="text-4xl font-black text-gray-900 dark:text-white tracking-tight leading-none">
+              <h2 className="text-4xl font-semibold text-gray-900 dark:text-white tracking-tight leading-none">
                 {loading ? "..." : data?.group.name}
               </h2>
               {data && (
@@ -304,7 +305,7 @@ export default function GroupDetailPage() {
             <ExternalLink className="h-3.5 w-3.5 text-gray-300" />
           </div>
           <p className="text-xs font-mono text-gray-500 dark:text-gray-400 break-all leading-relaxed mb-4 pb-2 border-b border-gray-100 dark:border-zinc-800">
-            {data?.group.student_link || "Link not generated"}
+            {data ? `${window.location.origin}/submit?token=${data.group.group_id}` : "Link not generated"}
           </p>
           <Button
             onClick={handleCopy}
@@ -605,36 +606,62 @@ export default function GroupDetailPage() {
       <AnimatePresence>
         {showDeleteConfirm && (
           <Portal>
-            <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+              {/* Backdrop */}
               <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                className="bg-white dark:bg-zinc-900 rounded-md shadow-2xl w-full max-w-sm p-8 border border-gray-100 dark:border-zinc-800"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setShowDeleteConfirm(false)}
+                className="absolute inset-0 bg-zinc-950/40 backdrop-blur-sm"
+              />
+
+              {/* Modal Content */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                className="relative bg-white dark:bg-zinc-900 rounded-md shadow-2xl w-full max-w-md p-8 border border-gray-100 dark:border-zinc-800"
               >
-                <div className="h-12 w-12 rounded-md bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-600 dark:text-red-400 mb-6">
-                  <Trash2 className="h-6 w-6" />
+                {/* Header */}
+                <div className="flex items-start justify-between mb-8">
+                  <div>
+                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
+                      Delete Group?
+                    </h3>
+                    <p className="mt-1.5 text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+                      This will permanently delete <strong className="text-gray-900 dark:text-white">{data?.group.name}</strong> and all its associated data. This action is irreversible.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setShowDeleteConfirm(false)}
+                    className="p-1 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-md transition-colors"
+                  >
+                    <X className="h-5 w-5 text-gray-400" />
+                  </button>
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight mb-2">
-                  Delete Group?
-                </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed mb-8">
-                  This will permanently delete <strong className="text-gray-900 dark:text-white">{data?.group.name}</strong> and all its associated data. This action is irreversible.
-                </p>
-                <div className="grid grid-cols-2 gap-3">
+
+                <div className="grid grid-cols-2 gap-4">
                   <Button
                     onClick={() => setShowDeleteConfirm(false)}
                     variant="outline"
-                    className="rounded-md py-3"
+                    className="h-12 font-bold rounded-md"
                   >
                     Cancel
                   </Button>
                   <Button
                     onClick={handleDelete}
                     disabled={deleting}
-                    className="rounded-md py-3 bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-600/20 disabled:opacity-50"
+                    className="h-12 bg-red-600 hover:bg-red-700 text-white font-bold rounded-md shadow-lg shadow-red-600/10 flex items-center justify-center gap-2 group transition-all"
                   >
-                    {deleting ? "Deleting..." : "Confirm Delete"}
+                    {deleting ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <>
+                        Confirm Delete
+                        <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                      </>
+                    )}
                   </Button>
                 </div>
               </motion.div>
