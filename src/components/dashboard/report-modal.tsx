@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { fetchSubmissionReport } from "@/lib/api";
 import { generatePatentReport } from "@/lib/pdf-generator";
-import { X, Loader2, Download, FileText, AlertTriangle, Share2 } from "lucide-react";
+import { X, Loader2, Download, FileText, AlertTriangle, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ReportContent } from "./report-content";
 import { Portal } from "@/components/ui/portal";
@@ -118,8 +118,8 @@ export function ReportModal({ submissionId, groupId, onClose }: ReportModalProps
           <div className="flex items-center justify-between px-8 py-5 border-b border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex-shrink-0">
             <div className="flex items-center gap-4">
               {/* Icon */}
-              <div className="h-10 w-10 rounded-md bg-indigo-600 flex items-center justify-center shadow-md shadow-indigo-200 dark:shadow-none">
-                <FileText className="h-5 w-5 text-white" />
+              <div className="h-10 w-10 flex items-center justify-center">
+                <img src="/icon0.svg" alt="Logo" className="h-10 w-10" />
               </div>
               <div>
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white">
@@ -137,21 +137,21 @@ export function ReportModal({ submissionId, groupId, onClose }: ReportModalProps
                   <Button
                     onClick={handleShare}
                     variant="outline"
-                    className="rounded-md border-gray-200 dark:border-zinc-700 text-gray-600 dark:text-gray-300 px-4 gap-2 h-9 text-sm font-semibold shadow-sm hover:bg-gray-50 dark:hover:bg-zinc-800"
+                    className="rounded-md border-gray-200 dark:border-zinc-700 text-gray-600 dark:text-gray-300 px-4 gap-2 h-[42px] text-sm font-semibold shadow-sm hover:bg-gray-50 dark:hover:bg-zinc-800 transition-all active:scale-95"
                   >
-                    <Share2 className="h-3.5 w-3.5" />
-                    Share
+                    <Link2 className="h-4 w-4" />
+                    Copy link
                   </Button>
                   
                   <Button
                     onClick={handleDownload}
                     disabled={generatingPdf}
-                    className="rounded-md bg-indigo-600 hover:bg-indigo-700 text-white px-5 gap-2 h-9 text-sm font-semibold shadow-sm"
+                    className="rounded-md bg-indigo-600 hover:bg-indigo-700 text-white px-5 gap-2 h-[42px] text-sm font-semibold shadow-sm transition-all active:scale-95"
                   >
                   {generatingPdf ? (
-                    <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Preparing PDF…</>
+                    <><Loader2 className="h-4 w-4 animate-spin" /> Preparing PDF…</>
                   ) : (
-                    <><Download className="h-3.5 w-3.5" /> Download PDF</>
+                    <><Download className="h-4 w-4" /> Download PDF</>
                   )}
                 </Button>
                 </>
