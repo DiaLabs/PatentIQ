@@ -138,16 +138,16 @@ export default function PublicReportPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-[#0a0a0a]">
       {/* Sticky Header */}
       <header className="sticky top-0 z-50 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border-b border-gray-100 dark:border-zinc-800">
-        <div className="max-w-full px-10 h-20 flex items-center justify-between">
+        <div className="max-w-full px-4 sm:px-10 h-16 sm:h-20 flex items-center justify-between">
           <div className="flex items-center gap-10">
             <Link href="/" className="flex items-center gap-1.5 transition-all active:scale-95 group">
-              <img src="/icon0.svg" alt="Logo" className="w-10 h-10 group-hover:rotate-12 transition-transform duration-500" />
-              <span className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">PatentIQ</span>
+              <img src="/icon0.svg" alt="Logo" className="w-8 h-8 sm:w-10 sm:h-10 group-hover:rotate-12 transition-transform duration-500" />
+              <span className="text-xl sm:text-2xl font-bold tracking-tight text-gray-900 dark:text-white">PatentIQ</span>
             </Link>
             <div className="h-8 w-px bg-gray-200 dark:bg-zinc-800 hidden md:block" />
-            <div className="hidden md:flex flex-col">
+            <div className="hidden sm:flex flex-col">
                <span className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-[0.2em] mb-0.5">Report</span>
-               <h1 className="text-[11px] font-medium text-gray-400 truncate max-w-[400px]">
+               <h1 className="text-[11px] font-medium text-gray-400 truncate max-w-[150px] md:max-w-[400px]">
                 {reportData.file_name}
               </h1>
             </div>
@@ -186,13 +186,13 @@ export default function PublicReportPage() {
       </header>
 
       {/* Content */}
-      <main className="max-w-full px-10 mx-auto py-6 sm:py-10">
+      <main className="max-w-full px-0 sm:px-10 mx-auto py-0 sm:py-6 overflow-x-hidden">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="overflow-hidden"
+          className=""
         >
-          <div className="py-2">
+          <div className="py-0 sm:py-2">
              <ReportContent data={reportData} />
           </div>
         </motion.div>
@@ -200,7 +200,7 @@ export default function PublicReportPage() {
         {/* Footer info */}
         <footer className="mt-12 text-center pb-12">
           <p className="text-xs text-gray-400">
-            &copy; {new Date().getFullYear()} PatentIQ Evaluation Suite. All rights reserved.
+            &copy; {new Date().getFullYear()} PatentIQ by <a href="https://dialabs.tech" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-500 transition-colors font-medium">DiaLabs</a>. All rights reserved.
           </p>
         </footer>
       </main>
