@@ -23,6 +23,7 @@ import {
 import Link from "next/link";
 import { CustomSelect } from "@/components/ui/custom-select";
 import { cn } from "@/lib/utils";
+import { useRefresh } from "@/context/RefreshContext";
 
 // Deterministic color palette for group icons based on index
 const GROUP_COLORS = [
@@ -161,6 +162,7 @@ const SORT_OPTIONS = [
 ];
 
 export default function GroupsPage() {
+  const { refreshTrigger, setRefreshing } = useRefresh();
   const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -168,7 +170,8 @@ export default function GroupsPage() {
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<"name" | "recent">("recent");
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (isManual = false) => {
+    if (isManual) setRefreshing(true);
     setLoading(true);
     setError(null);
     try {
@@ -178,10 +181,18 @@ export default function GroupsPage() {
       setError(e?.message ?? "Failed to load groups.");
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
-  }, []);
+  }, [setRefreshing]);
 
   useEffect(() => { load(); }, [load]);
+
+  // Listen for global refresh trigger
+  useEffect(() => {
+    if (refreshTrigger > 0) {
+      load(true);
+    }
+  }, [refreshTrigger, load]);
 
   const totalSubmissions = groups.reduce((a, g) => a + g.stats.total_submissions, 0);
   const totalCompleted = groups.reduce((a, g) => a + g.stats.completed, 0);
@@ -203,7 +214,12 @@ export default function GroupsPage() {
     });
 
   return (
-    <div className="px-12 py-8">
+    <motion.div 
+      key={refreshTrigger}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="px-12 py-8"
+    >
       {/* Page Title */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Groups</h1>
@@ -358,6 +374,6 @@ export default function GroupsPage() {
           onCreated={load}
         />
       )}
-    </div>
+    </motion.div>
   );
 }

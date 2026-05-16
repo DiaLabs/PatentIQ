@@ -14,6 +14,7 @@ import {
   type SubmissionStatus,
   type Submission,
 } from "@/lib/api";
+import { useRefresh } from "@/context/RefreshContext";
 import { StatusBadge } from "@/components/dashboard/status-badge";
 import { cn } from "@/lib/utils";
 import {
@@ -71,6 +72,7 @@ export default function GroupDetailPage() {
   const router = useRouter();
   const groupId = params.id as string;
   const { toast } = useToast();
+  const { refreshTrigger, setRefreshing } = useRefresh();
 
   const [data, setData] = useState<GroupDetails | null>(null);
   const [loading, setLoading] = useState(true);
@@ -108,7 +110,8 @@ export default function GroupDetailPage() {
     }).catch(console.error);
   }, [groupId]);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (isManual = false) => {
+    if (isManual) setRefreshing(true);
     setLoading(true);
     setError(null);
     try {
@@ -123,13 +126,21 @@ export default function GroupDetailPage() {
       setError(e?.message ?? "Failed to load group.");
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
-  }, [groupId, page, statusFilter, search]);
+  }, [groupId, page, statusFilter, search, setRefreshing]);
 
   useEffect(() => {
     const timer = setTimeout(() => { load(); }, 300);
     return () => clearTimeout(timer);
   }, [load]);
+
+  // Listen for global refresh trigger
+  useEffect(() => {
+    if (refreshTrigger > 0) {
+      load(true);
+    }
+  }, [refreshTrigger, load]);
 
   const handleDelete = useCallback(async () => {
     setDeleting(true);
@@ -222,7 +233,12 @@ export default function GroupDetailPage() {
   };
 
   return (
-    <div className="px-12 py-8 min-h-screen space-y-12">
+    <motion.div 
+      key={refreshTrigger}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="px-12 py-8 min-h-screen space-y-12"
+    >
       {/* Page Header - Matching Groups Page Style */}
       <div>
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Groups</h1>
@@ -815,6 +831,6 @@ export default function GroupDetailPage() {
           onClose={() => setSelectedSubmissionReport(null)}
         />
       )}
-    </div>
+    </motion.div>
   );
 }

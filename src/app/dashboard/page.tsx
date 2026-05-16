@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { fetchDashboard, deleteSubmission, downloadSubmissionFile, type DashboardData } from "@/lib/api";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
+import { useRefresh } from "@/context/RefreshContext";
 import { StatusBadge } from "@/components/dashboard/status-badge";
 import { useToast } from "@/context/ToastContext";
 import { Button } from "@/components/ui/button";
@@ -30,6 +31,7 @@ import { motion, AnimatePresence } from "framer-motion";
 export default function OverviewPage() {
   const { user } = useAuth();
   const router = useRouter();
+  const { refreshTrigger, setRefreshing } = useRefresh();
   const [dashboard, setDashboard] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -39,7 +41,8 @@ export default function OverviewPage() {
     setMounted(true);
   }, []);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (isManual = false) => {
+    if (isManual) setRefreshing(true);
     setLoading(true);
     setError(null);
     try {
@@ -48,13 +51,26 @@ export default function OverviewPage() {
       setError(e?.message ?? "Failed to load dashboard.");
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
-  }, []);
+  }, [setRefreshing]);
 
   useEffect(() => { load(); }, [load]);
 
+  // Listen for global refresh trigger
+  useEffect(() => {
+    if (refreshTrigger > 0) {
+      load(true);
+    }
+  }, [refreshTrigger, load]);
+
   return (
-    <div className="px-12 py-8 min-h-screen relative">
+    <motion.div 
+      key={refreshTrigger}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="px-12 py-8 min-h-screen relative"
+    >
       {/* Welcome greeting — Overview only */}
       <DashboardHeader
         userName={mounted ? (user?.displayName?.split(" ")[0] ?? "Mentor") : "Mentor"}
@@ -346,7 +362,7 @@ export default function OverviewPage() {
         </motion.div>
       </div>
 
-    </div>
+    </motion.div>
   );
 }
 

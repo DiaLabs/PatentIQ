@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { CustomSelect } from "@/components/ui/custom-select";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/context/ToastContext";
+import { useRefresh } from "@/context/RefreshContext";
 import {
   FileText,
   Search,
@@ -68,6 +69,7 @@ export default function SubmissionsPage() {
   const [retryingId, setRetryingId] = useState<string | null>(null);
   const [showExportModal, setShowExportModal] = useState(false);
   const { toast } = useToast();
+  const { refreshTrigger, setRefreshing } = useRefresh();
 
   // Selection State
   const [isSelectionMode, setIsSelectionMode] = useState(false);
@@ -96,7 +98,8 @@ export default function SubmissionsPage() {
       .catch(() => {});
   }, []);
 
-  const load = useCallback(async (isPolling = false) => {
+  const load = useCallback(async (isPolling = false, isManual = false) => {
+    if (!isPolling && isManual) setRefreshing(true);
     if (!isPolling) setLoading(true);
     if (!isPolling) setError(null);
     try {
@@ -112,9 +115,12 @@ export default function SubmissionsPage() {
     } catch (e: any) {
       if (!isPolling) setError(e?.message ?? "Failed to load submissions.");
     } finally {
-      if (!isPolling) setLoading(false);
+      if (!isPolling) {
+        setLoading(false);
+        setRefreshing(false);
+      }
     }
-  }, [search, status, group, page]);
+  }, [search, status, group, page, setRefreshing]);
 
   // Polling for processing submissions
   useEffect(() => {
@@ -134,6 +140,13 @@ export default function SubmissionsPage() {
     const timer = setTimeout(() => { load(false); }, 300);
     return () => clearTimeout(timer);
   }, [load]);
+
+  // Listen for global refresh trigger
+  useEffect(() => {
+    if (refreshTrigger > 0) {
+      load(false, true);
+    }
+  }, [refreshTrigger, load]);
 
   const toggleSelectAll = () => {
     if (!data) return;
@@ -206,7 +219,12 @@ export default function SubmissionsPage() {
   };
 
   return (
-    <div className="px-12 py-8 min-h-screen relative">
+    <motion.div 
+      key={refreshTrigger}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="px-12 py-8 min-h-screen relative"
+    >
       {/* Page Title */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">All Submissions</h1>
@@ -715,7 +733,7 @@ export default function SubmissionsPage() {
         isLoading={isBulkOperating}
         variant="info"
       />
-    </div>
+    </motion.div>
   );
 }
 

@@ -3,6 +3,8 @@
 import { motion } from "framer-motion";
 import { Settings, User, Bell, Shield, Palette, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useRefresh } from "@/context/RefreshContext";
+import { useState, useCallback, useEffect } from "react";
 
 const sections = [
   {
@@ -36,8 +38,31 @@ const sections = [
 ];
 
 export default function SettingsPage() {
+  const { refreshTrigger, setRefreshing } = useRefresh();
+  const [loading, setLoading] = useState(false);
+
+  const load = useCallback(async () => {
+    setRefreshing(true);
+    setLoading(true);
+    // Mock fetch for now as data is static
+    await new Promise(resolve => setTimeout(resolve, 500));
+    setLoading(false);
+    setRefreshing(false);
+  }, [setRefreshing]);
+
+  useEffect(() => {
+    if (refreshTrigger > 0) {
+      load();
+    }
+  }, [refreshTrigger, load]);
+
   return (
-    <div className="px-12 py-8 max-w-2xl">
+    <motion.div 
+      key={refreshTrigger}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="px-12 py-8 max-w-2xl"
+    >
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Settings</h1>
@@ -81,6 +106,6 @@ export default function SettingsPage() {
           Delete Account
         </Button>
       </div>
-    </div>
+    </motion.div>
   );
 }

@@ -2,6 +2,8 @@
 
 import { motion } from "framer-motion";
 import { BarChart3, TrendingUp, Users, FileText, Star, CheckCircle2 } from "lucide-react";
+import { useRefresh } from "@/context/RefreshContext";
+import { useState, useCallback, useEffect } from "react";
 
 const stats = [
   { label: "Total Evaluations", value: "128", icon: FileText, iconBg: "bg-indigo-50 dark:bg-indigo-900/30", iconColor: "text-indigo-600 dark:text-indigo-400", trend: "+12%", trendColor: "text-emerald-600 dark:text-emerald-400" },
@@ -23,8 +25,31 @@ const monthlyData = [
 const maxVal = Math.max(...monthlyData.map((d) => d.submissions));
 
 export default function AnalyticsPage() {
+  const { refreshTrigger, setRefreshing } = useRefresh();
+  const [loading, setLoading] = useState(false);
+
+  const load = useCallback(async () => {
+    setRefreshing(true);
+    setLoading(true);
+    // Mock fetch for now as data is static
+    await new Promise(resolve => setTimeout(resolve, 800));
+    setLoading(false);
+    setRefreshing(false);
+  }, [setRefreshing]);
+
+  useEffect(() => {
+    if (refreshTrigger > 0) {
+      load();
+    }
+  }, [refreshTrigger, load]);
+
   return (
-    <div className="px-12 py-8">
+    <motion.div 
+      key={refreshTrigger}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="px-12 py-8"
+    >
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Analytics</h1>
@@ -95,6 +120,6 @@ export default function AnalyticsPage() {
           ))}
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
