@@ -92,7 +92,7 @@ export default function GroupDetailPage() {
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
   const [isDeletingSubmission, setIsDeletingSubmission] = useState(false);
   const [retryingId, setRetryingId] = useState<string | null>(null);
-  const [selectedSubmissionReport, setSelectedSubmissionReport] = useState<string | null>(null);
+  const [selectedSubmissionReport, setSelectedSubmissionReport] = useState<{ id: string; submitterName: string; uniqueId?: string } | null>(null);
 
   // Selection State
   const [isSelectionMode, setIsSelectionMode] = useState(false);
@@ -548,7 +548,11 @@ export default function GroupDetailPage() {
                     <td className="px-4 py-5">
                       {s.status === "COMPLETED" ? (
                         <button
-                          onClick={() => setSelectedSubmissionReport(s.submission_id)}
+                          onClick={() => setSelectedSubmissionReport({ 
+                            id: s.submission_id, 
+                            submitterName: s.submitter_name, 
+                            uniqueId: s.unique_id 
+                          })}
                           className="text-xs font-semibold text-indigo-500 dark:text-indigo-400 underline underline-offset-2 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
                         >
                           View Report
@@ -727,7 +731,15 @@ export default function GroupDetailPage() {
 
               {activeRow.status === "COMPLETED" && (
                 <button
-                  onClick={() => { setOpenMenuId(null); setMenuAnchor(null); setSelectedSubmissionReport(activeRow.submission_id); }}
+                  onClick={() => { 
+                    setOpenMenuId(null); 
+                    setMenuAnchor(null); 
+                    setSelectedSubmissionReport({ 
+                      id: activeRow.submission_id, 
+                      submitterName: activeRow.submitter_name, 
+                      uniqueId: activeRow.unique_id 
+                    }); 
+                  }}
                   className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors"
                 >
                   <FileText className="h-4 w-4 text-emerald-500" />
@@ -880,8 +892,10 @@ export default function GroupDetailPage() {
       {/* Report Modal */}
       {selectedSubmissionReport && (
         <ReportModal
-          submissionId={selectedSubmissionReport}
+          submissionId={selectedSubmissionReport.id}
           groupId={groupId}
+          submitterName={selectedSubmissionReport.submitterName}
+          uniqueId={selectedSubmissionReport.uniqueId}
           onClose={() => setSelectedSubmissionReport(null)}
         />
       )}

@@ -13,10 +13,12 @@ import { useToast } from "@/context/ToastContext";
 interface ReportModalProps {
   submissionId: string;
   groupId: string;
+  submitterName?: string;
+  uniqueId?: string;
   onClose: () => void;
 }
 
-export function ReportModal({ submissionId, groupId, onClose }: ReportModalProps) {
+export function ReportModal({ submissionId, groupId, submitterName, uniqueId, onClose }: ReportModalProps) {
   const [loading, setLoading] = useState(true);
   const [generatingPdf, setGeneratingPdf] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -100,8 +102,9 @@ export function ReportModal({ submissionId, groupId, onClose }: ReportModalProps
         (pdf as any).vfs = (pdfMake as any).vfs;
       }
       
-      const sName = reportData.submitter_name || 'Student';
-      const uId = reportData.unique_id || reportData.submission_id?.slice(0, 8);
+      // Use props first, then reportData, then fallbacks
+      const sName = submitterName || reportData.submitter_name || 'Student';
+      const uId = uniqueId || reportData.unique_id || reportData.submission_id?.slice(0, 8) || submissionId.slice(0, 8);
       const fileName = `Evaluation_Report_${sName}_${uId}_PatentIQ.pdf`.replace(/\s+/g, '_');
       (pdf as any).download(fileName);
       toast("Report downloaded", "success");
