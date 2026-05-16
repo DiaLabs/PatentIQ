@@ -152,11 +152,27 @@ export const generatePatentReport = (data: any, logoBase64?: string) => {
               { text: 'Score', style: 'tableHeader' },
               { text: 'Review Comment', style: 'tableHeader' }
             ],
-            ...data.detailed_scoring.map((item: any) => [
-              { text: item.parameter, bold: true, fontSize: 10, color: '#111827' },
-              { text: `${item.score} / 100`, color: '#6366f1', bold: true, fontSize: 10 },
-              { text: item.review_comment, fontSize: 9, color: '#6b7280', lineHeight: 1.3 }
-            ])
+            ...data.detailed_scoring.map((item: any) => {
+              const maxScores: Record<string, number> = {
+                "Problem relevance": 5,
+                "Novelty potential": 15,
+                "Inventive step": 20,
+                "Technical disclosure": 10,
+                "Claim readiness": 5,
+                "Prior-art differentiation": 5,
+                "Commercial potential": 5,
+                "Prototype readiness": 5,
+                "Drafting quality": 5,
+                "Patentability strength": 10,
+                "Research integrity": 15
+              };
+              const maxScore = maxScores[item.parameter] || 100;
+              return [
+                { text: item.parameter, bold: true, fontSize: 10, color: '#111827' },
+                { text: `${item.score} / ${maxScore}`, color: '#6366f1', bold: true, fontSize: 10 },
+                { text: item.review_comment, fontSize: 9, color: '#6b7280', lineHeight: 1.3 }
+              ];
+            })
           ]
         },
         layout: {

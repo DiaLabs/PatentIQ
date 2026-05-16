@@ -123,25 +123,61 @@ export function ReportContent({ data }: ReportContentProps) {
                   </thead>
                   <tbody className="divide-y divide-gray-50 dark:divide-zinc-800">
                     {data.detailed_scoring ? (
-                      data.detailed_scoring.map((item: any, i: number) => (
-                        <tr key={i} className="hover:bg-gray-50/50 dark:hover:bg-zinc-800/30 transition-colors">
-                          <td className="px-6 py-5 text-sm font-bold text-gray-900 dark:text-white">{item.parameter}</td>
-                          <td className="px-6 py-5">
-                            <span className="text-sm font-black text-indigo-600">{parseFloat(item.score).toFixed(0)}/100</span>
-                          </td>
-                          <td className="px-6 py-5 text-[12px] text-gray-500 leading-relaxed">{item.review_comment}</td>
-                        </tr>
-                      ))
+                      data.detailed_scoring.map((item: any, i: number) => {
+                        const maxScores: Record<string, number> = {
+                          "Problem relevance": 5,
+                          "Novelty potential": 15,
+                          "Inventive step": 20,
+                          "Technical disclosure": 10,
+                          "Claim readiness": 5,
+                          "Prior-art differentiation": 5,
+                          "Commercial potential": 5,
+                          "Prototype readiness": 5,
+                          "Drafting quality": 5,
+                          "Patentability strength": 10,
+                          "Research integrity": 15
+                        };
+                        const maxScore = maxScores[item.parameter] || 100;
+                        return (
+                          <tr key={i} className="hover:bg-gray-50/50 dark:hover:bg-zinc-800/30 transition-colors">
+                            <td className="px-6 py-5 text-sm font-bold text-gray-900 dark:text-white">{item.parameter}</td>
+                            <td className="px-6 py-5">
+                              <span className="text-sm font-black text-indigo-600">
+                                {parseFloat(item.score).toFixed(0)}/{maxScore}
+                              </span>
+                            </td>
+                            <td className="px-6 py-5 text-[12px] text-gray-500 leading-relaxed">{item.review_comment}</td>
+                          </tr>
+                        );
+                      })
                     ) : (
-                      Object.entries(data.analysis || {}).map(([key, val]: any, i: number) => (
-                        <tr key={i} className="hover:bg-gray-50/50 dark:hover:bg-zinc-800/30 transition-colors">
-                          <td className="px-6 py-5 text-sm font-bold text-gray-900 dark:text-white">{key}</td>
-                          <td className="px-6 py-5">
-                            <span className="text-sm font-black text-indigo-600">{parseFloat(val).toFixed(0)}/100</span>
-                          </td>
-                          <td className="px-6 py-5 text-[12px] text-gray-500 leading-relaxed">Detailed analysis available in PDF.</td>
-                        </tr>
-                      ))
+                      Object.entries(data.analysis || {}).map(([key, val]: any, i: number) => {
+                        const maxScores: Record<string, number> = {
+                          "Problem relevance": 5,
+                          "Novelty potential": 15,
+                          "Inventive step": 20,
+                          "Technical disclosure": 10,
+                          "Claim readiness": 5,
+                          "Prior-art differentiation": 5,
+                          "Commercial potential": 5,
+                          "Prototype readiness": 5,
+                          "Drafting quality": 5,
+                          "Patentability strength": 10,
+                          "Research integrity": 15
+                        };
+                        const maxScore = maxScores[key] || 100;
+                        return (
+                          <tr key={i} className="hover:bg-gray-50/50 dark:hover:bg-zinc-800/30 transition-colors">
+                            <td className="px-6 py-5 text-sm font-bold text-gray-900 dark:text-white">{key}</td>
+                            <td className="px-6 py-5">
+                              <span className="text-sm font-black text-indigo-600">
+                                {parseFloat(val).toFixed(0)}/{maxScore}
+                              </span>
+                            </td>
+                            <td className="px-6 py-5 text-[12px] text-gray-500 leading-relaxed">Detailed analysis available in PDF.</td>
+                          </tr>
+                        );
+                      })
                     )}
                   </tbody>
                 </table>
@@ -426,7 +462,7 @@ export function ReportContent({ data }: ReportContentProps) {
                 </div>
                 <div className="p-6 rounded-md bg-emerald-50/30 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-900/20 mb-6 flex items-center justify-between">
                   <span className="text-sm font-bold text-emerald-800 dark:text-emerald-400">Market Potential Score</span>
-                  <span className="text-2xl font-black text-emerald-600">{data.commercialization_feedback.score}/10</span>
+                  <span className="text-2xl font-black text-emerald-600">{data.commercialization_feedback.score}/5</span>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div>
