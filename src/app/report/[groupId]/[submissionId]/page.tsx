@@ -4,9 +4,10 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { fetchPublicReportData } from "@/lib/api";
 import { generatePatentReport } from "@/lib/pdf-generator";
-import { Loader2, Download, FileText, AlertTriangle, ChevronLeft } from "lucide-react";
+import { Loader2, Download, FileText, AlertTriangle, ChevronLeft, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ReportContent } from "@/components/dashboard/report-content";
+import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 import { motion } from "framer-motion";
 import { useToast } from "@/context/ToastContext";
 import Link from "next/link";
@@ -42,6 +43,11 @@ export default function PublicReportPage() {
     };
     load();
   }, [groupId, submissionId]);
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    toast("Link copied to clipboard", "success");
+  };
 
   const handleDownload = async () => {
     if (!reportData) return;
@@ -113,40 +119,61 @@ export default function PublicReportPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-[#0a0a0a]">
       {/* Sticky Header */}
       <header className="sticky top-0 z-50 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border-b border-gray-100 dark:border-zinc-800">
-        <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link href="/" className="flex items-center gap-2 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors">
-              <img src="/icon0.svg" alt="Logo" className="w-7 h-7" />
-              <span className="text-sm font-bold tracking-tight hidden sm:inline-block">PatentIQ</span>
+        <div className="max-w-full px-10 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-10">
+            <Link href="/" className="flex items-center gap-1.5 transition-all active:scale-95 group">
+              <img src="/icon0.svg" alt="Logo" className="w-10 h-10 group-hover:rotate-12 transition-transform duration-500" />
+              <span className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">PatentIQ</span>
             </Link>
-            <div className="h-4 w-px bg-gray-200 dark:bg-zinc-800" />
-            <h1 className="text-sm font-bold text-gray-900 dark:text-white truncate max-w-[200px] sm:max-w-none">
-              Report: {reportData.file_name}
-            </h1>
+            <div className="h-8 w-px bg-gray-200 dark:bg-zinc-800 hidden md:block" />
+            <div className="hidden md:flex flex-col">
+               <span className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-[0.2em] mb-0.5">Report</span>
+               <h1 className="text-[11px] font-medium text-gray-400 truncate max-w-[400px]">
+                {reportData.file_name}
+              </h1>
+            </div>
           </div>
 
-          <Button
-            onClick={handleDownload}
-            disabled={generatingPdf}
-            className="rounded-md bg-indigo-600 hover:bg-indigo-700 text-white px-4 gap-2 h-9 text-xs font-bold shadow-sm"
-          >
-            {generatingPdf ? (
-              <><Loader2 className="h-3 w-3 animate-spin" /> Preparing PDF…</>
-            ) : (
-              <><Download className="h-3 w-3" /> Download PDF</>
-            )}
-          </Button>
+          <div className="flex items-center gap-4">
+            <Button
+              onClick={handleCopyLink}
+              variant="outline"
+              className="rounded-md border-gray-200 dark:border-zinc-700 text-gray-600 dark:text-gray-300 px-4 gap-2 h-[42px] text-sm font-semibold shadow-sm hover:bg-gray-50 dark:hover:bg-zinc-800 transition-all active:scale-95"
+            >
+              <Link2 className="h-4 w-4" />
+              <span className="hidden sm:inline">Copy link</span>
+            </Button>
+
+            <Button
+              onClick={handleDownload}
+              disabled={generatingPdf}
+              className="rounded-md bg-indigo-600 hover:bg-indigo-700 text-white px-5 gap-2 h-[42px] text-sm font-semibold shadow-sm transition-all active:scale-95"
+            >
+              {generatingPdf ? (
+                <><Loader2 className="h-4 w-4 animate-spin" /> <span className="hidden sm:inline">Preparing PDF…</span></>
+              ) : (
+                <><Download className="h-4 w-4" /> <span className="hidden sm:inline">Download PDF</span></>
+              )}
+            </Button>
+
+            <div className="h-6 w-px bg-gray-200 dark:bg-zinc-800 hidden sm:block mx-1" />
+
+            <AnimatedThemeToggler
+              duration={400}
+              className="flex h-10 w-10 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-zinc-800 dark:hover:text-gray-300 [&>svg]:h-5 [&>svg]:w-5"
+            />
+          </div>
         </div>
       </header>
 
       {/* Content */}
-      <main className="max-w-5xl mx-auto p-6 sm:p-10">
+      <main className="max-w-full px-10 mx-auto py-6 sm:py-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white dark:bg-zinc-900 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none border border-gray-100 dark:border-zinc-800 overflow-hidden"
+          className="overflow-hidden"
         >
-          <div className="p-1">
+          <div className="py-2">
              <ReportContent data={reportData} />
           </div>
         </motion.div>
