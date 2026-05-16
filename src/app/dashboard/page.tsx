@@ -44,7 +44,7 @@ export default function OverviewPage() {
 
   const load = useCallback(async (isManual = false) => {
     if (isManual) setRefreshing(true);
-    setLoading(true);
+    else setLoading(true);
     setError(null);
     try {
       setDashboard(await fetchDashboard());
@@ -95,8 +95,8 @@ export default function OverviewPage() {
         >
           <div className="flex items-center justify-between mb-10">
             <div>
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Global Performance</h2>
-              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">System-wide evaluation overview</p>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Global Performance</h2>
+              <p className="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">System-wide evaluation overview</p>
             </div>
             <TrendingUp className="h-5 w-5 text-indigo-500" />
           </div>
@@ -120,10 +120,10 @@ export default function OverviewPage() {
                   />
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-2xl font-black text-gray-900 dark:text-white">
+                  <span className="text-2xl font-bold text-gray-900 dark:text-white">
                     {loading ? "—" : Math.round(dashboard?.overview.avg_overall_score ?? 0)}
                   </span>
-                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">Percent</span>
+                  <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-tighter">Percent</span>
                 </div>
               </div>
             </div>
@@ -132,7 +132,7 @@ export default function OverviewPage() {
             <div className="flex flex-col items-center justify-center p-6 rounded-md bg-gray-50/30 dark:bg-zinc-800/20 border border-gray-100/50 dark:border-zinc-800/50">
               <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-4">Total Submissions</p>
               <div className="text-center">
-                <span className="text-5xl font-black text-indigo-600 dark:text-indigo-400">
+                <span className="text-5xl font-bold text-indigo-600 dark:text-indigo-400">
                   {loading ? "—" : dashboard?.overview.total_submissions}
                 </span>
                 <p className="mt-3 text-[11px] font-bold text-gray-500 dark:text-gray-400 max-w-[140px] mx-auto leading-tight">
@@ -146,7 +146,7 @@ export default function OverviewPage() {
               <div className="flex-1 p-5 rounded-md bg-emerald-50/30 dark:bg-emerald-900/10 border border-emerald-100/30 dark:border-emerald-900/20">
                 <p className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1">Active Groups</p>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-3xl font-black text-gray-900 dark:text-white">
+                  <span className="text-3xl font-bold text-gray-900 dark:text-white">
                     {loading ? "—" : dashboard?.overview.total_groups}
                   </span>
                   <span className="text-xs text-emerald-600 font-bold">Cohorts</span>
@@ -155,7 +155,7 @@ export default function OverviewPage() {
               <div className="flex-1 p-5 rounded-md bg-red-50/30 dark:bg-red-900/10 border border-red-100/30 dark:border-red-900/20">
                 <p className="text-[9px] font-bold text-red-600 dark:text-red-400 uppercase tracking-widest mb-1">Flagged Items</p>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-3xl font-black text-gray-900 dark:text-white">
+                  <span className="text-3xl font-bold text-gray-900 dark:text-white">
                     {loading ? "—" : dashboard?.overview.total_rejected}
                   </span>
                   <span className="text-xs text-red-500 font-bold uppercase tracking-tighter">Action Required</span>
@@ -173,8 +173,8 @@ export default function OverviewPage() {
           className="bg-white dark:bg-zinc-900 rounded-md border border-gray-100 dark:border-zinc-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none p-8 h-full flex flex-col"
         >
           <div className="flex items-center justify-between mb-8">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Recent Groups</h2>
-            <Link href="/dashboard/groups" className="text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Recent Groups</h2>
+            <Link href="/dashboard/groups" className="text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">
               View all
             </Link>
           </div>
@@ -184,7 +184,7 @@ export default function OverviewPage() {
               [1, 2, 3, 4].map(i => (
                 <div key={i} className="h-16 animate-pulse rounded-md bg-gray-50 dark:bg-zinc-800/50" />
               ))
-            ) : dashboard?.active_groups?.map((g, i) => {
+            ) : dashboard?.active_groups?.slice(0, 3).map((g, i) => {
               const colors = [
                 "bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400",
                 "bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400",
@@ -236,8 +236,8 @@ export default function OverviewPage() {
           className="lg:col-span-2 bg-white dark:bg-zinc-900 rounded-md border border-gray-100 dark:border-zinc-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none relative"
         >
           <div className="px-8 py-7 flex items-center justify-between border-b border-gray-50 dark:border-zinc-800">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Recent Submissions</h2>
-            <Link href="/dashboard/submissions" className="text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Recent Submissions</h2>
+            <Link href="/dashboard/submissions" className="text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">
               View all
             </Link>
           </div>

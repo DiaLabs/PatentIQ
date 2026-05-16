@@ -141,10 +141,10 @@ export function DashboardHeader({ userName, onRefresh, isLoading = false }: Dash
       transition={{ duration: 0.3, ease: "easeOut" }}
       className="flex flex-col gap-1"
     >
-      <h1 className="text-4xl font-black text-gray-900 dark:text-white tracking-tight">
+      <h1 className="text-4xl font-bold text-gray-900 dark:text-white tracking-tight">
         Welcome back, {userName} 👋
       </h1>
-      <p className="mt-1 text-lg font-medium text-gray-500 dark:text-gray-400">
+      <p className="mt-1 text-lg font-normal text-gray-500 dark:text-gray-400">
         Here's what's happening with your groups today.
       </p>
     </motion.div>

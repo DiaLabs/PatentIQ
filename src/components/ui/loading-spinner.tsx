@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 interface LoadingSpinnerProps {
   className?: string;
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "xl";
 }
 
 export function LoadingSpinner({ className, size = "md" }: LoadingSpinnerProps) {
@@ -14,6 +14,7 @@ export function LoadingSpinner({ className, size = "md" }: LoadingSpinnerProps) 
     sm: "h-8 w-8",
     md: "h-16 w-16",
     lg: "h-32 w-32",
+    xl: "h-20 w-20",
   };
 
   return (
