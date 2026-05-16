@@ -96,7 +96,7 @@ export default function SubmitForm() {
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!file || !submitterName.trim() || !email.trim() || !uniqueId.trim() || !inventionTitle.trim() || !token) return;
+    if (!file || !submitterName.trim() || !email.trim() || !uniqueId.trim() || !inventionTitle.trim() || !phone.trim() || !token) return;
 
     setStep("uploading");
     setError(null);
@@ -308,16 +308,16 @@ export default function SubmitForm() {
                         />
                       </div>
 
-                      {/* Patent Title */}
+                      {/* Phone Number */}
                       <div>
                         <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest px-1 mb-1.5">
-                          Patent Title / Name of Invention *
+                          Phone Number *
                         </label>
                         <input
-                          type="text"
-                          value={inventionTitle}
-                          onChange={(e) => setInventionTitle(e.target.value)}
-                          placeholder="Title of your invention"
+                          type="tel"
+                          value={phone}
+                          onChange={(e) => setPhone(e.target.value)}
+                          placeholder="Contact phone number"
                           required
                           className="w-full rounded-md border border-gray-200 dark:border-zinc-800 px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 bg-white dark:bg-zinc-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/40 outline-none transition-all"
                         />
@@ -451,7 +451,7 @@ export default function SubmitForm() {
                 <Button
                   form="submission-form"
                   type="submit"
-                  disabled={!file || !submitterName.trim() || !email.trim() || !uniqueId.trim() || !inventionTitle.trim()}
+                  disabled={!file || !submitterName.trim() || !email.trim() || !uniqueId.trim() || !inventionTitle.trim() || !phone.trim()}
                   className="w-full py-7 text-base rounded-md font-bold transition-all bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/20 dark:shadow-none disabled:bg-gray-200 dark:disabled:bg-zinc-800 disabled:text-gray-400"
                 >
                   Submit Patent Evaluation
@@ -497,6 +497,10 @@ export default function SubmitForm() {
                   <div className="flex justify-between items-center border-b border-gray-100 dark:border-zinc-800 pb-4">
                     <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Unique Id</span>
                     <span className="text-sm font-semibold text-gray-900 dark:text-white">{uniqueId}</span>
+                  </div>
+                  <div className="flex justify-between items-center border-b border-gray-100 dark:border-zinc-800 pb-4">
+                    <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Phone</span>
+                    <span className="text-sm font-semibold text-gray-900 dark:text-white">{phone}</span>
                   </div>
                   <div className="flex justify-between items-center border-b border-gray-100 dark:border-zinc-800 pb-4">
                     <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Group</span>
