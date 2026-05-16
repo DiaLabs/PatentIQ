@@ -91,7 +91,10 @@ export interface RecentSubmission {
   group_id: string;
   group_name: string;
   submitter_name: string;
+  submitter_email?: string;
   file_name: string;
+  invention_title?: string;
+  unique_id?: string;
   status: SubmissionStatus;
   score: number | null;
   submitted_at: number;
