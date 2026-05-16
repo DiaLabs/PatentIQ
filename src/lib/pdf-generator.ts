@@ -35,14 +35,14 @@ export const generatePatentReport = (data: any, logoBase64?: string) => {
     },
 
     header: (currentPage) => {
+      if (currentPage !== 1) return null;
       return {
         columns: [
           {
-            // Placeholder for logo as text/vector
             stack: [
               {
                 text: 'PatentIQ Evaluation Report',
-                fontSize: 11,
+                fontSize: 14,
                 bold: true,
                 color: '#6366f1',
                 margin: [40, 30, 0, 0]
@@ -185,20 +185,39 @@ export const generatePatentReport = (data: any, logoBase64?: string) => {
       } : { text: 'Detailed scoring data unavailable.', style: 'paragraph', italics: true },
 
       { text: '3. KEY STRENGTHS', style: 'sectionHeader', margin: [0, 30, 0, 15] },
-      data.key_strengths && data.key_strengths.length > 0 ? {
-        columns: data.key_strengths.map((s: any, i: number) => ({
-          width: '50%',
-          stack: [
-            { text: s.title, bold: true, color: '#059669', fontSize: 11, margin: [0, 0, 0, 6] },
-            { text: s.description, fontSize: 9, color: '#4b5563', lineHeight: 1.4 }
-          ],
-          margin: [i % 2 === 0 ? 0 : 10, 0, i % 2 === 0 ? 10 : 0, 20]
-        }))
-      } : { text: 'Key strengths data unavailable.', style: 'paragraph', italics: true },
+      (() => {
+        const rawStrengths = data.key_strengths || data.strengths || [];
+        if (rawStrengths.length === 0) return { text: 'Key strengths data unavailable.', style: 'paragraph', italics: true };
+
+        // Normalize to object format { title, description }
+        const normalized = rawStrengths.map((s: any, i: number) => {
+          if (typeof s === 'object') return s;
+          return { title: `Strength ${i + 1}`, description: s };
+        });
+
+        // Chunk into pairs for 2-column layout
+        const chunks = [];
+        for (let i = 0; i < normalized.length; i += 2) {
+          chunks.push(normalized.slice(i, i + 2));
+        }
+
+        return {
+          stack: chunks.map(chunk => ({
+            columns: chunk.map((s: any, idx: number) => ({
+              width: '50%',
+              stack: [
+                { text: s.title, bold: true, color: '#059669', fontSize: 11, margin: [0, 0, 0, 6] },
+                { text: s.description, fontSize: 9, color: '#4b5563', lineHeight: 1.4 }
+              ],
+              margin: [idx === 0 ? 0 : 10, 0, idx === 0 ? 10 : 0, 15]
+            }))
+          }))
+        };
+      })(),
 
       // Section 4: Reference Validity
       { text: '4. REFERENCE VALIDITY', style: 'sectionHeader', margin: [0, 30, 0, 15] },
-      (data.stage_1?.patent_ids || data.patent_identifiers || []).length > 0 ? {
+      (data.stage_1?.patent_ids || data.patent_identifiers || data.valid_patent_ids || []).length > 0 ? {
         table: {
           widths: [150, '*'],
           body: [
@@ -206,9 +225,9 @@ export const generatePatentReport = (data: any, logoBase64?: string) => {
               { text: 'PATENT ID', style: 'tableHeader' },
               { text: 'VALIDATION STATUS', style: 'tableHeader' }
             ],
-            ...(data.stage_1?.patent_ids || data.patent_identifiers || []).map((id: string) => {
-              const isValid = data.stage_1?.valid_ids?.includes(id);
-              const isInvalid = data.stage_1?.invalid_ids?.includes(id);
+            ...(data.stage_1?.patent_ids || data.patent_identifiers || data.valid_patent_ids || []).map((id: string) => {
+              const isValid = data.stage_1?.valid_ids?.includes(id) || data.valid_patent_ids?.includes(id);
+              const isInvalid = data.stage_1?.invalid_ids?.includes(id) || data.invalid_patent_ids?.includes(id);
               let statusText = 'EXTRACTED';
               let statusColor = '#9ca3af';
               let statusBold = false;
