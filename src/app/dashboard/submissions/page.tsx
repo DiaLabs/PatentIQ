@@ -100,7 +100,7 @@ export default function SubmissionsPage() {
 
   const load = useCallback(async (isPolling = false, isManual = false) => {
     if (!isPolling && isManual) setRefreshing(true);
-    if (!isPolling) setLoading(true);
+    if (!isPolling && !isManual) setLoading(true);
     if (!isPolling) setError(null);
     try {
       const res = await fetchAllSubmissions({

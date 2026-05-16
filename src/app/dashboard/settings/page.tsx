@@ -41,9 +41,9 @@ export default function SettingsPage() {
   const { refreshTrigger, setRefreshing } = useRefresh();
   const [loading, setLoading] = useState(false);
 
-  const load = useCallback(async () => {
-    setRefreshing(true);
-    setLoading(true);
+  const load = useCallback(async (isManual = false) => {
+    if (isManual) setRefreshing(true);
+    else setLoading(true);
     // Mock fetch for now as data is static
     await new Promise(resolve => setTimeout(resolve, 500));
     setLoading(false);
@@ -52,7 +52,7 @@ export default function SettingsPage() {
 
   useEffect(() => {
     if (refreshTrigger > 0) {
-      load();
+      load(true);
     }
   }, [refreshTrigger, load]);
 

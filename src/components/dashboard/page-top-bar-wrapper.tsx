@@ -17,7 +17,6 @@ export function PageTopBarWrapper() {
         <PageTopBar 
           onRefresh={() => {
             refresh();
-            router.refresh();
           }} 
           isLoading={isRefreshing}
         />
