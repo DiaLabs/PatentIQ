@@ -373,7 +373,7 @@ export default function GroupDetailPage() {
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement("a");
                 a.href = url;
-                a.download = `PatentIQ_${data?.group.name}_Report.xlsx`;
+                a.download = `Evaluation_Report_${data?.group.name}.xlsx`;
                 document.body.appendChild(a);
                 a.click();
                 URL.revokeObjectURL(url);

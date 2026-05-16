@@ -663,7 +663,7 @@ export default function SubmissionsPage() {
             const a = document.createElement("a");
             a.href = url;
             const groupName = groupOptions.find(o => o.value === groupId)?.label ?? "export";
-            a.download = `PatentIQ_${groupName}_Report_${new Date().toISOString().split('T')[0]}.xlsx`;
+            a.download = `Evaluation_Report_${groupName}.xlsx`;
             document.body.appendChild(a);
             a.click();
             URL.revokeObjectURL(url);
