@@ -77,12 +77,24 @@ export default function SubmissionsPage() {
   const [isBulkOperating, setIsBulkOperating] = useState(false);
   const [bulkActionConfirm, setBulkActionConfirm] = useState<'delete' | 'reevaluate' | null>(null);
 
-  // Close menu on scroll
+  // Close menu on scroll or click outside
   useEffect(() => {
     const close = () => { setOpenMenuId(null); setMenuAnchor(null); };
     window.addEventListener("scroll", close, true);
-    return () => window.removeEventListener("scroll", close, true);
-  }, []);
+    
+    const handleOutsideClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (openMenuId && !target.closest('.menu-container') && !target.closest('.menu-trigger')) {
+        close();
+      }
+    };
+    window.addEventListener("mousedown", handleOutsideClick);
+    
+    return () => {
+      window.removeEventListener("scroll", close, true);
+      window.removeEventListener("mousedown", handleOutsideClick);
+    };
+  }, [openMenuId]);
 
   // Fetch group names for dropdown (once)
   useEffect(() => {
@@ -483,7 +495,7 @@ export default function SubmissionsPage() {
                             setOpenMenuId(s.submission_id);
                           }
                         }}
-                        className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                        className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors menu-trigger"
                       >
                         <MoreVertical className="h-4 w-4" />
                       </button>
@@ -523,21 +535,42 @@ export default function SubmissionsPage() {
               of <span className="font-semibold text-gray-900 dark:text-white">{data.pagination.total}</span> results
             </p>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" className="rounded-md h-9 w-9 p-0" disabled={page === 1} onClick={() => setPage(page - 1)}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-md gap-2 px-3 font-semibold h-9"
+                disabled={page === 1}
+                onClick={() => setPage(page - 1)}
+              >
                 <ChevronLeft className="h-4 w-4" />
+                <span>Previous</span>
               </Button>
-              {[...Array(data.pagination.total_pages)].map((_, i) => (
-                <Button
-                  key={i + 1}
-                  variant={page === i + 1 ? "default" : "outline"}
-                  size="sm"
-                  className={`rounded-md h-9 w-9 p-0 font-semibold ${page === i + 1 ? "bg-indigo-600 hover:bg-indigo-700" : ""}`}
-                  onClick={() => setPage(i + 1)}
-                >
-                  {i + 1}
-                </Button>
-              ))}
-              <Button variant="outline" size="sm" className="rounded-md h-9 w-9 p-0" disabled={page === data.pagination.total_pages} onClick={() => setPage(page + 1)}>
+              
+              <div className="flex items-center gap-1 mx-2">
+                {[...Array(data.pagination.total_pages)].map((_, i) => (
+                  <Button
+                    key={i + 1}
+                    variant={page === i + 1 ? "default" : "outline"}
+                    size="sm"
+                    className={cn(
+                      "rounded-md h-9 w-9 p-0 font-bold",
+                      page === i + 1 ? "bg-indigo-600 hover:bg-indigo-700 text-white" : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                    )}
+                    onClick={() => setPage(i + 1)}
+                  >
+                    {i + 1}
+                  </Button>
+                ))}
+              </div>
+
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-md gap-2 px-3 font-semibold h-9"
+                disabled={page === data.pagination.total_pages}
+                onClick={() => setPage(page + 1)}
+              >
+                <span>Next</span>
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
@@ -547,21 +580,15 @@ export default function SubmissionsPage() {
 
       {/* Portal-rendered context menu — renders at document root, never clips */}
       {openMenuId && menuAnchor && (() => {
-        const menuHeight = 160; // approx height
+        const menuHeight = 200; // Expected height
         const spaceBelow = window.innerHeight - menuAnchor.bottom;
-        const showAbove = spaceBelow < menuHeight + 8;
+        const showAbove = spaceBelow < menuHeight + 20;
         const activeRow = data?.submissions.find(s => s.submission_id === openMenuId);
         if (!activeRow) return null;
         return (
           <Portal>
-            {/* invisible full-screen close target — does NOT block scroll */}
             <div
-              className="fixed inset-0 z-40"
-              style={{ pointerEvents: "auto" }}
-              onMouseDown={() => { setOpenMenuId(null); setMenuAnchor(null); }}
-            />
-            <div
-              className="fixed z-50 w-52 bg-white dark:bg-zinc-900 rounded-md border border-gray-100 dark:border-zinc-800 shadow-2xl overflow-hidden py-1"
+              className="fixed z-50 w-52 bg-white dark:bg-zinc-900 rounded-md border border-gray-100 dark:border-zinc-800 shadow-2xl overflow-hidden py-1 menu-container"
               style={{
                 top: showAbove ? menuAnchor.top - menuHeight - 4 : menuAnchor.bottom + 4,
                 left: menuAnchor.right - 208,
