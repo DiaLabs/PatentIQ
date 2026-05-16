@@ -77,6 +77,7 @@ export default function GroupDetailPage() {
 
   const [data, setData] = useState<GroupDetails | null>(null);
   const [loading, setLoading] = useState(true);
+  const [tableLoading, setTableLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
@@ -113,12 +114,17 @@ export default function GroupDetailPage() {
 
   const load = useCallback(async (isManual = false) => {
     if (isManual) setRefreshing(true);
-    else setLoading(true);
+    else {
+      // If first load, show full page skeleton
+      if (!data) setLoading(true);
+      // Otherwise only show table skeleton
+      else setTableLoading(true);
+    }
     setError(null);
     try {
       const result = await fetchGroupDetails(groupId, {
         page,
-        limit: 20,
+        limit: 15,
         status: statusFilter || undefined,
         search: search || undefined,
       });
@@ -127,9 +133,10 @@ export default function GroupDetailPage() {
       setError(e?.message ?? "Failed to load group.");
     } finally {
       setLoading(false);
+      setTableLoading(false);
       setRefreshing(false);
     }
-  }, [groupId, page, statusFilter, search, setRefreshing]);
+  }, [groupId, page, statusFilter, search, setRefreshing, !!data]);
 
   const lastRefreshProcessed = useRef(refreshTrigger);
 
@@ -259,7 +266,7 @@ export default function GroupDetailPage() {
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="px-12 py-8 min-h-screen space-y-12"
+      className="px-6 py-8 min-h-screen space-y-12"
     >
       {/* Page Header - Matching Groups Page Style */}
       <div>
@@ -444,38 +451,35 @@ export default function GroupDetailPage() {
                     </button>
                   </th>
                 )}
-                <th className={cn("py-5 text-left text-[11px] font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-widest", isSelectionMode ? "px-2" : "px-8")}>Document & Title</th>
-                <th className="px-6 py-5 text-left text-[11px] font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-widest">Unique ID</th>
-                <th className="px-6 py-5 text-left text-[11px] font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-widest">Student</th>
-                <th className="px-6 py-5 text-left text-[11px] font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-widest">Status</th>
-                <th className="px-6 py-5 text-left text-[11px] font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-widest">Score</th>
-                <th className="px-6 py-5 text-left text-[11px] font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-widest">Verdict</th>
-                <th className="px-6 py-5 text-left text-[11px] font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-widest">Submitted</th>
-                <th className="px-4 py-5 text-left text-[11px] font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-widest">Report</th>
-                <th className="px-6 py-5 text-right" />
+                <th className={cn("py-5 text-left text-[11px] font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-widest", isSelectionMode ? "px-2" : "px-6")}>Document & Title</th>
+                <th className="px-4 py-5 text-left text-[11px] font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-widest">Unique ID</th>
+                <th className="px-4 py-5 text-left text-[11px] font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-widest">Student</th>
+                <th className="px-4 py-5 text-left text-[11px] font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-widest">Status</th>
+                <th className="px-4 py-5 text-left text-[11px] font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-widest">Score</th>
+                <th className="px-4 py-5 text-left text-[11px] font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-widest">Verdict</th>
+                <th className="px-4 py-5 text-left text-[11px] font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-widest">Submitted</th>
+                <th className="px-3 py-5 text-left text-[11px] font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-widest">Report</th>
+                <th className="px-4 py-5 text-right" />
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50 dark:divide-zinc-800">
-              {loading ? (
-                [1, 2, 3, 4, 5].map((i) => (
+              {loading || tableLoading ? (
+                [...Array(15)].map((_, i) => (
                   <tr key={i} className="animate-pulse border-b border-gray-50 dark:border-zinc-800">
-                    <td className="px-8 py-5">
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-md bg-gray-100 dark:bg-zinc-800" />
-                        <div className="space-y-2">
-                          <div className="h-4 w-32 bg-gray-100 dark:bg-zinc-800 rounded" />
-                          <div className="h-3 w-20 bg-gray-50 dark:bg-zinc-800/50 rounded" />
-                        </div>
+                    <td className="px-6 py-5">
+                      <div className="min-w-0">
+                        <div className="h-4 w-32 bg-gray-100 dark:bg-zinc-800 rounded mb-2" />
+                        <div className="h-3 w-20 bg-gray-50 dark:bg-zinc-800/50 rounded" />
                       </div>
                     </td>
-                    <td className="px-6 py-5"><div className="h-4 w-20 bg-gray-100 dark:bg-zinc-800 rounded" /></td>
-                    <td className="px-6 py-5"><div className="h-4 w-24 bg-gray-100 dark:bg-zinc-800 rounded" /></td>
-                    <td className="px-6 py-5"><div className="h-6 w-16 bg-gray-100 dark:bg-zinc-800 rounded-full" /></td>
-                    <td className="px-6 py-5"><div className="h-6 w-12 bg-gray-100 dark:bg-zinc-800 rounded-md" /></td>
-                    <td className="px-6 py-5"><div className="h-4 w-20 bg-gray-100 dark:bg-zinc-800 rounded" /></td>
-                    <td className="px-6 py-5"><div className="h-4 w-20 bg-gray-100 dark:bg-zinc-800 rounded" /></td>
-                    <td className="px-4 py-5"><div className="h-8 w-24 bg-gray-100 dark:bg-zinc-800 rounded-md" /></td>
-                    <td className="px-6 py-5 text-right"><div className="h-8 w-8 bg-gray-100 dark:bg-zinc-800 rounded ml-auto" /></td>
+                    <td className="px-4 py-5"><div className="h-4 w-20 bg-gray-100 dark:bg-zinc-800 rounded" /></td>
+                    <td className="px-4 py-5"><div className="h-4 w-24 bg-gray-100 dark:bg-zinc-800 rounded" /></td>
+                    <td className="px-4 py-5"><div className="h-6 w-16 bg-gray-100 dark:bg-zinc-800 rounded-full" /></td>
+                    <td className="px-4 py-5"><div className="h-6 w-12 bg-gray-100 dark:bg-zinc-800 rounded-md" /></td>
+                    <td className="px-4 py-5"><div className="h-4 w-20 bg-gray-100 dark:bg-zinc-800 rounded" /></td>
+                    <td className="px-4 py-5"><div className="h-4 w-20 bg-gray-100 dark:bg-zinc-800 rounded" /></td>
+                    <td className="px-3 py-5"><div className="h-8 w-24 bg-gray-100 dark:bg-zinc-800 rounded-md" /></td>
+                    <td className="px-4 py-5 text-right"><div className="h-8 w-8 bg-gray-100 dark:bg-zinc-800 rounded ml-auto" /></td>
                   </tr>
                 ))
               ) : data && data.submissions.length > 0 ? (
@@ -504,19 +508,14 @@ export default function GroupDetailPage() {
                         </div>
                       </td>
                     )}
-                    <td className={cn("py-5", isSelectionMode ? "px-2" : "px-8")}>
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-md bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center shrink-0">
-                          <FileText className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-sm font-semibold text-gray-900 dark:text-white truncate max-w-[220px]">
-                            {s.invention_title || s.file_name || `Submission_${s.submission_id.slice(0, 8)}`}
-                          </p>
-                          <p className="text-[10px] text-gray-400 font-medium uppercase mt-0.5 truncate max-w-[200px]">
-                            {s.file_name}
-                          </p>
-                        </div>
+                    <td className={cn("py-5", isSelectionMode ? "px-2" : "px-6")}>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-gray-900 dark:text-white truncate max-w-[240px]">
+                          {s.invention_title || s.file_name || `Submission_${s.submission_id.slice(0, 8)}`}
+                        </p>
+                        <p className="text-[10px] text-gray-400 font-medium uppercase mt-0.5 truncate max-w-[200px]">
+                          {s.file_name}
+                        </p>
                       </div>
                     </td>
                     <td className="px-6 py-5">
@@ -535,22 +534,40 @@ export default function GroupDetailPage() {
                     <td className="px-6 py-5">
                       <StatusBadge status={s.status as SubmissionStatus} />
                     </td>
-                    <td className="px-6 py-5">
+                    <td className="px-4 py-5">
                       {s.overall_score != null ? (
-                        <div className="inline-flex items-center px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-900/20 text-xs font-bold text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/30">
+                        <div className={cn(
+                          "inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border",
+                          s.overall_score >= 90 ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20" :
+                          s.overall_score >= 80 ? "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20" :
+                          s.overall_score >= 70 ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20" :
+                          s.overall_score >= 60 ? "bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20" :
+                          "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20"
+                        )}>
                           {s.overall_score}/100
                         </div>
                       ) : (
                         <span className="text-gray-300 dark:text-zinc-600">—</span>
                       )}
                     </td>
-                    <td className="px-6 py-5">
+                    <td className="px-4 py-5">
                       {s.verdict ? (
                         <span className={cn(
-                          "text-xs font-bold px-2.5 py-1 rounded-md",
-                          s.verdict.toLowerCase().includes("patentable") 
-                            ? "text-emerald-600 bg-emerald-50 dark:bg-emerald-900/10" 
-                            : "text-amber-600 bg-amber-50 dark:bg-amber-900/10"
+                          "text-[10px] font-bold px-2.5 py-1.5 rounded-md uppercase tracking-wider leading-tight inline-block max-w-[150px] text-center",
+                          s.overall_score != null ? (
+                            s.overall_score >= 90 ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20" :
+                            s.overall_score >= 80 ? "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20" :
+                            s.overall_score >= 70 ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20" :
+                            s.overall_score >= 60 ? "bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20" :
+                            "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20"
+                          ) : (
+                            s.verdict.toLowerCase().includes("very strong") ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20" :
+                            s.verdict.toLowerCase().includes("strong") ? "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20" :
+                            s.verdict.toLowerCase().includes("moderate") ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20" :
+                            s.verdict.toLowerCase().includes("weak") ? "bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20" :
+                            s.verdict.toLowerCase().includes("reject") ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20" :
+                            "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
+                          )
                         )}>
                           {s.verdict}
                         </span>
@@ -610,20 +627,18 @@ export default function GroupDetailPage() {
             </tbody>
           </table>
         </div>
-
         {/* Pagination */}
         {data && data.pagination.total_pages > 1 && (
-          <div className="px-8 py-6 border-t border-gray-50 dark:border-zinc-800 flex items-center justify-between bg-gray-50/30 dark:bg-zinc-800/20">
-            <p className="text-sm text-gray-500">
-              Showing <span className="font-semibold text-gray-900 dark:text-white">{(page - 1) * 20 + 1}</span> to{" "}
-              <span className="font-semibold text-gray-900 dark:text-white">{Math.min(page * 20, data.pagination.total)}</span>{" "}
-              of <span className="font-semibold text-gray-900 dark:text-white">{data.pagination.total}</span> results
-            </p>
-            <div className="flex items-center gap-2">
+          <div className="px-8 py-6 border-t border-gray-50 dark:border-zinc-800 flex items-center bg-gray-50/30 dark:bg-zinc-800/20">
+            {/* Left Spacer */}
+            <div className="flex-1" />
+
+            {/* Center Navigation */}
+            <div className="flex items-center gap-6">
               <Button
-                variant="outline"
+                variant="ghost"
                 size="sm"
-                className="rounded-md gap-2 px-3 font-semibold h-9"
+                className="gap-2 px-3 font-semibold h-9 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 transition-colors"
                 disabled={page === 1}
                 onClick={() => setPage(page - 1)}
               >
@@ -631,33 +646,30 @@ export default function GroupDetailPage() {
                 <span>Previous</span>
               </Button>
               
-              <div className="flex items-center gap-1 mx-2">
-                {[...Array(data.pagination.total_pages)].map((_, i) => (
-                  <Button
-                    key={i + 1}
-                    variant={page === i + 1 ? "default" : "outline"}
-                    size="sm"
-                    className={cn(
-                      "rounded-md h-9 w-9 p-0 font-bold",
-                      page === i + 1 ? "bg-indigo-600 hover:bg-indigo-700 text-white" : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-                    )}
-                    onClick={() => setPage(i + 1)}
-                  >
-                    {i + 1}
-                  </Button>
-                ))}
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-500">Page {page}</span>
+                <span className="text-sm text-gray-400">of</span>
+                <span className="text-sm text-gray-400 font-medium">{data.pagination.total_pages}</span>
               </div>
 
               <Button
-                variant="outline"
+                variant="ghost"
                 size="sm"
-                className="rounded-md gap-2 px-3 font-semibold h-9"
+                className="gap-2 px-3 font-semibold h-9 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 transition-colors"
                 disabled={page >= data.pagination.total_pages}
                 onClick={() => setPage(page + 1)}
               >
                 <span>Next</span>
                 <ChevronRight className="h-4 w-4" />
               </Button>
+            </div>
+
+            {/* Right-aligned Stats */}
+            <div className="flex-1 flex justify-end">
+              <p className="text-sm text-gray-500 font-medium">
+                Showing <span className="text-gray-900 dark:text-white font-bold">{Math.min(page * 15, data.pagination.total)}</span>{" "}
+                of <span className="text-gray-900 dark:text-white font-bold">{data.pagination.total}</span>
+              </p>
             </div>
           </div>
         )}
