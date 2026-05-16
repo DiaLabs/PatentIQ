@@ -172,7 +172,10 @@ export default function GroupsPage() {
 
   const load = useCallback(async (isManual = false) => {
     if (isManual) setRefreshing(true);
-    else setLoading(true);
+    else {
+      setLoading(true);
+      setGroups([]);
+    }
     setError(null);
     try {
       const data = await fetchGroups();
