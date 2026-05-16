@@ -190,7 +190,7 @@ export function ReportContent({ data }: ReportContentProps) {
             <section className="mb-20">
               <div className="flex items-center gap-3 mb-8">
                 <div className="h-8 w-8 rounded-md bg-gray-900 dark:bg-white flex items-center justify-center text-white dark:text-gray-900 font-bold text-sm">4</div>
-                <h3 className="text-lg font-bold uppercase tracking-widest">Reference Patents</h3>
+                <h3 className="text-lg font-bold uppercase tracking-widest">Reference Validity</h3>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
                 {(data.stage_1?.patent_ids || data.patent_identifiers || []).map((id: string, i: number) => {
@@ -201,15 +201,9 @@ export function ReportContent({ data }: ReportContentProps) {
                     <div key={i} className="flex items-center justify-between p-4 rounded-md border border-gray-100 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-800/20">
                       <span className="text-[13px] font-mono font-bold text-gray-700 dark:text-gray-300">{id}</span>
                       {isValid ? (
-                        <div className="flex items-center gap-1 text-emerald-600">
-                          <CheckCircle2 className="h-4 w-4" />
-                          <span className="text-[9px] font-bold uppercase tracking-tighter">Verified</span>
-                        </div>
+                        <CheckCircle2 className="h-5 w-5 text-emerald-600" />
                       ) : isInvalid ? (
-                        <div className="flex items-center gap-1 text-red-500">
-                          <X className="h-4 w-4" />
-                          <span className="text-[9px] font-bold uppercase tracking-tighter">Invalid</span>
-                        </div>
+                        <X className="h-5 w-5 text-red-500" />
                       ) : (
                         <span className="text-[9px] font-bold text-gray-400 uppercase tracking-tighter">Extracted</span>
                       )}
@@ -300,14 +294,272 @@ export function ReportContent({ data }: ReportContentProps) {
             </section>
           )}
 
-          {/* Footer Disclaimer */}
-          <div className="mt-auto pt-12 border-t border-gray-100 dark:border-zinc-800 text-[10px] text-gray-400 text-center leading-relaxed max-w-2xl mx-auto italic">
-            <p>
-              <strong>DISCLAIMER:</strong> {data.document_metadata?.important_note || "This report is an automated assessment and does not constitute legal advice."}
-            </p>
-          </div>
+          {/* 8. Risk Assessment */}
+          {(data.risk_areas || data.risk_score_framework) && (
+            <section className="mb-20">
+              <div className="flex items-center gap-3 mb-8">
+                <div className="h-8 w-8 rounded-md bg-gray-900 dark:bg-white flex items-center justify-center text-white dark:text-gray-900 font-bold text-sm">8</div>
+                <h3 className="text-lg font-bold uppercase tracking-widest">Risk Assessment</h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-4">
+                  <h4 className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">Risk Areas</h4>
+                  {data.risk_areas?.map((r: any, i: number) => (
+                    <div key={i} className="flex items-center justify-between p-4 rounded-md border border-gray-100 dark:border-zinc-800 bg-gray-50/30">
+                      <span className="text-sm font-medium">{r.risk_area}</span>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                        r.risk_level === 'High' ? 'bg-red-100 text-red-600' : 
+                        r.risk_level === 'Medium' ? 'bg-amber-100 text-amber-600' : 
+                        'bg-emerald-100 text-emerald-600'
+                      }`}>
+                        {r.risk_level}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                {data.risk_score_framework && (
+                  <div className="p-6 rounded-md bg-zinc-50 dark:bg-zinc-800/30 border border-zinc-100 dark:border-zinc-800">
+                    <h4 className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-4">Framework</h4>
+                    <p className="text-xs text-gray-500 font-mono leading-relaxed mb-4">{data.risk_score_framework.formula}</p>
+                    <div className="space-y-3">
+                      {data.risk_score_framework.parameters?.map((p: any, i: number) => (
+                        <div key={i} className="text-[11px] text-gray-600 flex justify-between">
+                          <span className="font-bold">{p.symbol} ({p.meaning})</span>
+                          <span>Threshold: {p.threshold}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </section>
+          )}
         </ReportPage>
       )}
+
+        {/* Page 5: Prior Art & Technical Roadmap */}
+        {(data.prior_art_differentiation_matrix || data.missing_technical_details || data.prototype_component_table) && (
+          <ReportPage>
+            {/* 9. Prior Art Differentiation Matrix */}
+            {data.prior_art_differentiation_matrix && (
+              <section className="mb-20">
+                <div className="flex items-center gap-3 mb-8">
+                  <div className="h-8 w-8 rounded-md bg-gray-900 dark:bg-white flex items-center justify-center text-white dark:text-gray-900 font-bold text-sm">9</div>
+                  <h3 className="text-lg font-bold uppercase tracking-widest">Prior Art Matrix</h3>
+                </div>
+                <div className="overflow-hidden rounded-md border border-gray-100 dark:border-zinc-800">
+                  <table className="w-full text-left">
+                    <thead>
+                      <tr className="bg-gray-50 dark:bg-zinc-800/50">
+                        <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Prior Art Type</th>
+                        <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Limitation</th>
+                        <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Differentiation</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-50 dark:divide-zinc-800">
+                      {data.prior_art_differentiation_matrix.map((item: any, i: number) => (
+                        <tr key={i} className="hover:bg-gray-50/50 dark:hover:bg-zinc-800/30 transition-colors">
+                          <td className="px-6 py-5 text-sm font-bold text-gray-900 dark:text-white">{item.prior_art_type}</td>
+                          <td className="px-6 py-5 text-[12px] text-gray-500 leading-relaxed">{item.limitation}</td>
+                          <td className="px-6 py-5 text-[12px] font-medium text-indigo-600 dark:text-indigo-400">{item.differentiation}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            )}
+
+            {/* 10. Technical Roadmap */}
+            {(data.missing_technical_details || data.prototype_component_table) && (
+              <section>
+                <div className="flex items-center gap-3 mb-8">
+                  <div className="h-8 w-8 rounded-md bg-gray-900 dark:bg-white flex items-center justify-center text-white dark:text-gray-900 font-bold text-sm">10</div>
+                  <h3 className="text-lg font-bold uppercase tracking-widest">Technical Roadmap</h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div>
+                    <h4 className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-4">Missing Details</h4>
+                    <div className="space-y-4">
+                      {Object.entries(data.missing_technical_details || {}).map(([cat, details]: any, i: number) => (
+                        <div key={i}>
+                          <p className="text-[10px] font-black text-indigo-500 uppercase mb-2">{cat}</p>
+                          <ul className="space-y-1">
+                            {details.map((d: string, j: number) => (
+                              <li key={j} className="text-xs text-gray-600 flex items-start gap-2">
+                                <div className="h-1 w-1 rounded-full bg-gray-300 mt-1.5" /> {d}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  {data.prototype_component_table && (
+                    <div>
+                      <h4 className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-4">Implementation Path</h4>
+                      <div className="space-y-3">
+                        {data.prototype_component_table.map((item: any, i: number) => (
+                          <div key={i} className="p-4 rounded-md border border-gray-100 dark:border-zinc-800 bg-zinc-50/50">
+                            <p className="text-xs font-bold mb-1">{item.component}</p>
+                            <p className="text-[11px] text-gray-500 leading-relaxed">{item.implementation}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </section>
+            )}
+          </ReportPage>
+        )}
+
+        {/* Page 6: Commercial & Drafting */}
+        {(data.commercialization_feedback || data.improved_drafting_text || data.final_recommendation || data.expected_improved_score_after_revision) && (
+          <ReportPage>
+            {/* 11. Commercial Potential */}
+            {data.commercialization_feedback && (
+              <section className="mb-20">
+                <div className="flex items-center gap-3 mb-8">
+                  <div className="h-8 w-8 rounded-md bg-gray-900 dark:bg-white flex items-center justify-center text-white dark:text-gray-900 font-bold text-sm">11</div>
+                  <h3 className="text-lg font-bold uppercase tracking-widest">Commercial Potential</h3>
+                </div>
+                <div className="p-6 rounded-md bg-emerald-50/30 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-900/20 mb-6 flex items-center justify-between">
+                  <span className="text-sm font-bold text-emerald-800 dark:text-emerald-400">Market Potential Score</span>
+                  <span className="text-2xl font-black text-emerald-600">{data.commercialization_feedback.score}/10</span>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div>
+                    <h4 className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-3">Target Segments</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {data.commercialization_feedback.targets?.map((t: string, i: number) => (
+                        <span key={i} className="px-3 py-1 bg-white dark:bg-zinc-800 border border-gray-100 dark:border-zinc-800 rounded-full text-[11px] font-medium">{t}</span>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-3">Revenue Models</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {data.commercialization_feedback.revenue_models?.map((m: string, i: number) => (
+                        <span key={i} className="px-3 py-1 bg-white dark:bg-zinc-800 border border-gray-100 dark:border-zinc-800 rounded-full text-[11px] font-medium">{m}</span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {/* 12. Improved Drafting Suggestions */}
+            {data.improved_drafting_text && (
+              <section className="mb-20">
+                <div className="flex items-center gap-3 mb-8">
+                  <div className="h-8 w-8 rounded-md bg-gray-900 dark:bg-white flex items-center justify-center text-white dark:text-gray-900 font-bold text-sm">12</div>
+                  <h3 className="text-lg font-bold uppercase tracking-widest">Drafting Improvements</h3>
+                </div>
+                <div className="space-y-6">
+                  <div>
+                    <h4 className="text-[11px] font-bold text-gray-400 uppercase mb-2">Refined Problem Statement</h4>
+                    <p className="text-sm italic text-gray-600 dark:text-gray-400 bg-gray-50 p-4 rounded border-l-4 border-indigo-500">"{data.improved_drafting_text.problem_statement}"</p>
+                  </div>
+                  <div>
+                    <h4 className="text-[11px] font-bold text-gray-400 uppercase mb-2">Novelty Statement</h4>
+                    <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{data.improved_drafting_text.novelty_statement}</p>
+                  </div>
+                  <div>
+                    <h4 className="text-[11px] font-bold text-gray-400 uppercase mb-2">Technical Contributions</h4>
+                    <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {data.improved_drafting_text.technical_contributions?.map((c: string, i: number) => (
+                        <li key={i} className="text-xs text-gray-600 flex items-center gap-2">
+                          <Zap className="h-3 w-3 text-amber-500 flex-shrink-0" /> {c}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {/* 13. Revision Path & Expected Score */}
+            {(data.final_recommendation || data.expected_improved_score_after_revision) && (
+              <section>
+                <div className="flex items-center gap-3 mb-8">
+                  <div className="h-8 w-8 rounded-md bg-gray-900 dark:bg-white flex items-center justify-center text-white dark:text-gray-900 font-bold text-sm">13</div>
+                  <h3 className="text-lg font-bold uppercase tracking-widest">Revision Roadmap</h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                  <div className="p-6 rounded-md bg-indigo-600 text-white shadow-xl shadow-indigo-600/20">
+                    <h4 className="text-[11px] font-bold opacity-70 uppercase tracking-widest mb-4">Post-Revision Projection</h4>
+                    <div className="flex items-baseline gap-2 mb-2">
+                      <span className="text-4xl font-black">{data.expected_improved_score_after_revision?.expected_overall_score || "90+"}</span>
+                      <span className="text-sm font-bold opacity-80">Target Score</span>
+                    </div>
+                    <p className="text-[11px] opacity-90 leading-relaxed italic">"Potential verdict after implementing suggested improvements: {data.expected_improved_score_after_revision?.final_verdict}"</p>
+                  </div>
+                  <div className="space-y-5">
+                    <div>
+                      <h4 className="text-[11px] font-bold text-gray-400 uppercase mb-2">Best Filing Path</h4>
+                      <div className="space-y-3">
+                        {data.final_recommendation?.best_filing_path?.provisional_filing && (
+                          <div>
+                            <p className="text-[10px] font-black text-amber-600 uppercase mb-1">Provisional</p>
+                            <ul className="text-[11px] text-gray-600 list-disc list-inside">
+                              {data.final_recommendation.best_filing_path.provisional_filing.map((a: string, i: number) => <li key={i}>{a}</li>)}
+                            </ul>
+                          </div>
+                        )}
+                        {data.final_recommendation?.best_filing_path?.complete_filing && (
+                          <div>
+                            <p className="text-[10px] font-black text-emerald-600 uppercase mb-1">Complete</p>
+                            <ul className="text-[11px] text-gray-600 list-disc list-inside">
+                              {data.final_recommendation.best_filing_path.complete_filing.map((a: string, i: number) => <li key={i}>{a}</li>)}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {/* 14. Research Integrity Breakdown */}
+            {data.patent_id_score_breakdown && (
+              <section className="mt-20">
+                <div className="flex items-center gap-3 mb-8">
+                  <div className="h-8 w-8 rounded-md bg-gray-900 dark:bg-white flex items-center justify-center text-white dark:text-gray-900 font-bold text-sm">14</div>
+                  <h3 className="text-lg font-bold uppercase tracking-widest">Integrity Breakdown</h3>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                  <div className="p-5 rounded-md border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
+                    <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Verification Stats</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs">Valid: <span className="text-emerald-600 font-bold">{data.patent_id_score_breakdown.valid_count}</span></span>
+                      <span className="text-xs">Fake: <span className="text-red-500 font-bold">{data.patent_id_score_breakdown.invalid_count}</span></span>
+                    </div>
+                  </div>
+                  <div className="p-5 rounded-md border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
+                    <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Score Contribution</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-lg font-black text-indigo-600">{data.patent_id_score_breakdown.final_contribution}</span>
+                      <span className="text-[10px] font-bold text-gray-400 uppercase">Net Points</span>
+                    </div>
+                  </div>
+                  <div className="p-5 rounded-md border border-gray-100 dark:border-zinc-800 bg-indigo-50/50 dark:bg-indigo-900/20 shadow-sm">
+                    <p className="text-[10px] font-bold text-indigo-600 uppercase mb-1">Integrity Verdict</p>
+                    <p className="text-sm font-black text-indigo-900 dark:text-indigo-100">{data.patent_id_score_breakdown.integrity_verdict}</p>
+                  </div>
+                </div>
+              </section>
+            )}
+          </ReportPage>
+        )}
+
+        {/* Footer Disclaimer */}
+        <div className="mt-auto pt-12 text-[10px] text-gray-400 text-center leading-relaxed max-w-2xl mx-auto italic px-20">
+          <p>
+            <strong>DISCLAIMER:</strong> {data.document_metadata?.important_note || "This report is an automated assessment and does not constitute legal advice."}
+          </p>
+        </div>
     </div>
   );
 }
