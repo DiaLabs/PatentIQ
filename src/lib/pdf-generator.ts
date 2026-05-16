@@ -113,9 +113,7 @@ export const generatePatentReport = (data: any, logoBase64?: string) => {
         }
       },
 
-      { text: '\n\n' },
-      
-      { text: '1. EXECUTIVE VERDICT', style: 'sectionHeader' },
+      { text: '1. EXECUTIVE VERDICT', style: 'sectionHeader', margin: [0, 20, 0, 15] },
       {
         text: data.executive_verdict?.summary || data.summary || 'N/A',
         style: 'paragraph'
@@ -141,7 +139,7 @@ export const generatePatentReport = (data: any, logoBase64?: string) => {
       },
 
       // Page 2
-      { text: '2. DETAILED SCORING', style: 'sectionHeader', pageBreak: 'before' },
+      { text: '2. DETAILED SCORING', style: 'sectionHeader', margin: [0, 30, 0, 15] },
       data.detailed_scoring && data.detailed_scoring.length > 0 ? {
         table: {
           headerRows: 1,
@@ -186,7 +184,7 @@ export const generatePatentReport = (data: any, logoBase64?: string) => {
         }
       } : { text: 'Detailed scoring data unavailable.', style: 'paragraph', italics: true },
 
-      { text: '3. KEY STRENGTHS', style: 'sectionHeader', margin: [0, 40, 0, 15] },
+      { text: '3. KEY STRENGTHS', style: 'sectionHeader', margin: [0, 30, 0, 15] },
       data.key_strengths && data.key_strengths.length > 0 ? {
         columns: data.key_strengths.map((s: any, i: number) => ({
           width: '50%',
@@ -198,34 +196,60 @@ export const generatePatentReport = (data: any, logoBase64?: string) => {
         }))
       } : { text: 'Key strengths data unavailable.', style: 'paragraph', italics: true },
 
-      // Page 3
-      { text: '4. REFERENCE PATENTS', style: 'sectionHeader', pageBreak: 'before' },
+      // Section 4: Reference Validity
+      { text: '4. REFERENCE VALIDITY', style: 'sectionHeader', margin: [0, 30, 0, 15] },
       (data.stage_1?.patent_ids || data.patent_identifiers || []).length > 0 ? {
         table: {
-          widths: ['*'],
-          body: (data.stage_1?.patent_ids || data.patent_identifiers || []).map((id: string) => [
-            {
-              columns: [
-                { text: id, bold: true, fontSize: 11, color: '#111827', width: 100 },
-                { text: 'Potential prior art identified for functional overlap analysis.', fontSize: 9, color: '#6b7280' }
-              ],
-              margin: [0, 10, 0, 10]
-            }
-          ])
+          widths: [150, '*'],
+          body: [
+            [
+              { text: 'PATENT ID', style: 'tableHeader' },
+              { text: 'VALIDATION STATUS', style: 'tableHeader' }
+            ],
+            ...(data.stage_1?.patent_ids || data.patent_identifiers || []).map((id: string) => {
+              const isValid = data.stage_1?.valid_ids?.includes(id);
+              const isInvalid = data.stage_1?.invalid_ids?.includes(id);
+              let statusText = 'EXTRACTED';
+              let statusColor = '#9ca3af';
+              let statusBold = false;
+
+              if (isValid) {
+                statusText = 'VERIFIED VALID ✔';
+                statusColor = '#059669';
+                statusBold = true;
+              } else if (isInvalid) {
+                statusText = 'INVALID / FABRICATED ✘';
+                statusColor = '#dc2626';
+                statusBold = true;
+              }
+              
+              return [
+                { text: id, bold: true, fontSize: 10, color: '#4f46e5', margin: [0, 5, 0, 5] },
+                { text: statusText, color: statusColor, bold: statusBold, fontSize: 9, margin: [0, 5, 0, 5] }
+              ];
+            })
+          ]
         },
-        layout: 'lightHorizontalLines'
+        layout: {
+          hLineWidth: (i: number, node: any) => (i === 0 || i === node.table.body.length) ? 0 : 0.5,
+          vLineWidth: () => 0,
+          hLineColor: () => '#f3f4f6',
+          paddingTop: () => 8,
+          paddingBottom: () => 8,
+        },
+        margin: [0, 0, 0, 20]
       } : { text: 'No reference patents identified.', style: 'paragraph', italics: true },
 
-      { text: '5. MAJOR WEAKNESSES AND IMPROVEMENTS', style: 'sectionHeader', margin: [0, 40, 0, 15] },
+      { text: '5. MAJOR WEAKNESSES AND IMPROVEMENTS', style: 'sectionHeader', margin: [0, 30, 0, 15] },
       data.major_weaknesses_and_improvements && data.major_weaknesses_and_improvements.length > 0 ? {
         table: {
           headerRows: 1,
           widths: [120, '*', '*'],
           body: [
             [
-              { text: 'Weakness', style: 'tableHeader' },
-              { text: 'Problem Area', style: 'tableHeader' },
-              { text: 'Recommended Improvement', style: 'tableHeader' }
+              { text: 'WEAKNESS', style: 'tableHeader' },
+              { text: 'PROBLEM AREA', style: 'tableHeader' },
+              { text: 'RECOMMENDED IMPROVEMENT', style: 'tableHeader' }
             ],
             ...data.major_weaknesses_and_improvements.map((item: any) => [
               { text: item.weakness, bold: true, fontSize: 10, color: '#111827' },
@@ -238,15 +262,13 @@ export const generatePatentReport = (data: any, logoBase64?: string) => {
           hLineWidth: (i: number, node: any) => (i === 0 || i === node.table.body.length) ? 0 : 0.5,
           vLineWidth: () => 0,
           hLineColor: () => '#f3f4f6',
-          paddingLeft: () => 0,
-          paddingRight: () => 8,
           paddingTop: () => 12,
           paddingBottom: () => 12,
         }
       } : { text: 'No major weaknesses identified.', style: 'paragraph', italics: true },
 
       // Page 4
-      { text: '6. IMPROVED CORE INVENTIVE CONCEPT', style: 'sectionHeader', pageBreak: 'before' },
+      { text: '6. IMPROVED CORE INVENTIVE CONCEPT', style: 'sectionHeader', margin: [0, 30, 0, 15] },
       {
         table: {
           widths: ['*'],
@@ -266,7 +288,7 @@ export const generatePatentReport = (data: any, logoBase64?: string) => {
         layout: 'noBorders'
       },
 
-      { text: '7. RECOMMENDED CLAIM STRUCTURE', style: 'sectionHeader', margin: [0, 40, 0, 15] },
+      { text: '7. RECOMMENDED CLAIM STRUCTURE', style: 'sectionHeader', margin: [0, 30, 0, 15] },
       {
         columns: [
           {
@@ -277,12 +299,12 @@ export const generatePatentReport = (data: any, logoBase64?: string) => {
                 ul: data.recommended_claim_structure?.independent_system_claim?.components && data.recommended_claim_structure.independent_system_claim.components.length > 0 
                     ? data.recommended_claim_structure.independent_system_claim.components 
                     : ['Component analysis pending.'],
-                fontSize: 10.5,
+                fontSize: 10,
                 color: '#4b5563',
                 lineHeight: 1.4
               }
             ],
-            margin: [0, 0, 20, 0]
+            margin: [0, 0, 15, 0]
           },
           {
             width: '50%',
@@ -292,13 +314,224 @@ export const generatePatentReport = (data: any, logoBase64?: string) => {
                 ol: data.recommended_claim_structure?.independent_method_claim?.steps && data.recommended_claim_structure.independent_method_claim.steps.length > 0
                     ? data.recommended_claim_structure.independent_method_claim.steps 
                     : ['Method step analysis pending.'],
-                fontSize: 10.5,
+                fontSize: 10,
                 color: '#4b5563',
                 lineHeight: 1.4
               }
             ]
           }
-        ]
+        ],
+        margin: [0, 0, 0, 20]
+      },
+
+      // Section 8: Risk Assessment
+      { text: '8. RISK ASSESSMENT', style: 'sectionHeader', margin: [0, 30, 0, 15] },
+      data.risk_areas && data.risk_areas.length > 0 ? {
+        table: {
+          headerRows: 1,
+          widths: [200, '*'],
+          body: [
+            [{ text: 'RISK AREA', style: 'tableHeader' }, { text: 'RISK LEVEL', style: 'tableHeader' }],
+            ...data.risk_areas.map((r: any) => [
+              { text: r.risk_area, bold: true, fontSize: 10, color: '#111827', margin: [0, 5, 0, 5] },
+              { 
+                text: r.risk_level.toUpperCase(), 
+                bold: true, 
+                fontSize: 9, 
+                color: r.risk_level === 'High' ? '#dc2626' : (r.risk_level === 'Medium' ? '#d97706' : '#16a34a'),
+                margin: [0, 5, 0, 5]
+              }
+            ])
+          ]
+        },
+        layout: {
+          hLineWidth: (i: number, node: any) => (i === 0 || i === node.table.body.length) ? 0 : 0.5,
+          vLineWidth: () => 0,
+          hLineColor: () => '#f3f4f6',
+          paddingTop: () => 8,
+          paddingBottom: () => 8,
+        },
+        margin: [0, 0, 0, 20]
+      } : { text: 'No specific risk areas identified.', style: 'paragraph', italics: true },
+
+      // Section 9: Prior Art Matrix
+      { text: '9. PRIOR ART DIFFERENTIATION MATRIX', style: 'sectionHeader', margin: [0, 30, 0, 15] },
+      data.prior_art_differentiation_matrix && data.prior_art_differentiation_matrix.length > 0 ? {
+        table: {
+          headerRows: 1,
+          widths: [120, 160, '*'],
+          body: [
+            [{ text: 'TYPE', style: 'tableHeader' }, { text: 'LIMITATION', style: 'tableHeader' }, { text: 'DIFFERENTIATION', style: 'tableHeader' }],
+            ...data.prior_art_differentiation_matrix.map((m: any) => [
+              { text: m.prior_art_type, bold: true, fontSize: 9, color: '#111827' },
+              { text: m.limitation, fontSize: 9, color: '#6b7280', lineHeight: 1.3 },
+              { text: m.differentiation, fontSize: 9, color: '#6366f1', bold: true, lineHeight: 1.3 }
+            ])
+          ]
+        },
+        layout: {
+          hLineWidth: (i: number, node: any) => (i === 0 || i === node.table.body.length) ? 0 : 0.5,
+          vLineWidth: () => 0,
+          hLineColor: () => '#f3f4f6',
+          paddingTop: () => 10,
+          paddingBottom: () => 10,
+        },
+        margin: [0, 0, 0, 20]
+      } : { text: 'Matrix data unavailable.', style: 'paragraph', italics: true },
+
+      // Section 10: Technical Roadmap
+      { text: '10. TECHNICAL ROADMAP & IMPLEMENTATION', style: 'sectionHeader', margin: [0, 30, 0, 15] },
+      { text: 'MISSING TECHNICAL DETAILS', fontSize: 8, bold: true, color: '#9ca3af', margin: [0, 0, 0, 10], characterSpacing: 1 },
+      Object.entries(data.missing_technical_details || {}).length > 0 ? {
+        ul: Object.entries(data.missing_technical_details || {}).map(([cat, details]: any) => ({
+          text: [
+            { text: `${cat}: `, bold: true, color: '#4f46e5' },
+            { text: details.join(', '), color: '#4b5563' }
+          ],
+          margin: [0, 0, 0, 5],
+          fontSize: 9.5
+        }))
+      } : { text: 'No critical technical details missing.', style: 'paragraph', italics: true },
+
+      // Section 11: Commercial Potential
+      { text: '11. COMMERCIAL POTENTIAL', style: 'sectionHeader', margin: [0, 30, 0, 15] },
+      {
+        stack: [
+          {
+            columns: [
+              { text: 'MARKET POTENTIAL SCORE', fontSize: 8, bold: true, color: '#9ca3af', characterSpacing: 1 },
+              { text: `${data.commercialization_feedback?.score || 'N/A'} / 5`, bold: true, color: '#059669', alignment: 'right', fontSize: 14 }
+            ],
+            margin: [0, 0, 0, 15]
+          },
+          {
+            columns: [
+              {
+                width: '50%',
+                stack: [
+                  { text: 'TARGET SEGMENTS', fontSize: 7, bold: true, color: '#9ca3af', margin: [0, 0, 0, 5] },
+                  { text: data.commercialization_feedback?.targets?.join(', ') || 'N/A', fontSize: 9, color: '#111827', bold: true, lineHeight: 1.3 }
+                ]
+              },
+              {
+                width: '50%',
+                stack: [
+                  { text: 'REVENUE MODELS', fontSize: 7, bold: true, color: '#9ca3af', margin: [0, 0, 0, 5] },
+                  { text: data.commercialization_feedback?.revenue_models?.join(', ') || 'N/A', fontSize: 9, color: '#111827', bold: true, lineHeight: 1.3 }
+                ]
+              }
+            ]
+          }
+        ],
+        margin: [0, 0, 0, 20]
+      },
+
+      // Section 12: Drafting Improvements
+      { text: '12. DRAFTING IMPROVEMENTS', style: 'sectionHeader', margin: [0, 30, 0, 15] },
+      { text: 'REFINED PROBLEM STATEMENT', fontSize: 8, bold: true, color: '#9ca3af', margin: [0, 0, 0, 8], characterSpacing: 1 },
+      { 
+        text: data.improved_drafting_text?.problem_statement || 'N/A', 
+        italics: true, 
+        fontSize: 10, 
+        color: '#4b5563',
+        margin: [15, 0, 15, 20],
+        lineHeight: 1.5
+      },
+      { text: 'NOVELTY STATEMENT', fontSize: 8, bold: true, color: '#9ca3af', margin: [0, 0, 0, 8], characterSpacing: 1 },
+      { 
+        text: data.improved_drafting_text?.novelty_statement || 'N/A', 
+        fontSize: 10, 
+        color: '#111827',
+        bold: true,
+        margin: [0, 0, 0, 20],
+        lineHeight: 1.5
+      },
+
+      // Section 13: Revision Roadmap
+      { text: '13. REVISION ROADMAP & PROJECTION', style: 'sectionHeader', margin: [0, 30, 0, 15] },
+      {
+        table: {
+          widths: ['*', '*'],
+          body: [
+            [
+              { text: 'TARGET OVERALL SCORE', style: 'tableHeader', alignment: 'center' },
+              { text: 'POST-REVISION VERDICT', style: 'tableHeader', alignment: 'center' }
+            ],
+            [
+              { 
+                text: data.expected_improved_score_after_revision?.expected_overall_score || '90+', 
+                fontSize: 24, 
+                bold: true, 
+                color: '#4f46e5',
+                alignment: 'center',
+                margin: [0, 15, 0, 15]
+              },
+              { 
+                text: (data.expected_improved_score_after_revision?.final_verdict || 'Ready for Filing').toUpperCase(), 
+                fontSize: 11, 
+                bold: true, 
+                color: '#059669',
+                alignment: 'center',
+                margin: [0, 22, 0, 0]
+              }
+            ]
+          ]
+        },
+        layout: {
+          hLineWidth: (i: number, node: any) => (i === 0 || i === node.table.body.length) ? 0 : 0.5,
+          vLineWidth: () => 0,
+          hLineColor: () => '#f3f4f6',
+          paddingTop: () => 10,
+          paddingBottom: () => 10,
+        },
+        margin: [0, 0, 0, 30]
+      },
+
+      // Section 14: Research Integrity Breakdown
+      { text: '14. RESEARCH INTEGRITY BREAKDOWN', style: 'sectionHeader', margin: [0, 30, 0, 15] },
+      {
+        table: {
+          widths: ['*', '*', '*'],
+          body: [
+            [
+              { text: 'VALID / FAKE IDS', style: 'tableHeader', alignment: 'center' },
+              { text: 'SCORE CONTRIBUTION', style: 'tableHeader', alignment: 'center' },
+              { text: 'INTEGRITY VERDICT', style: 'tableHeader', alignment: 'center' }
+            ],
+            [
+              { 
+                text: `${data.patent_id_score_breakdown?.valid_count || 0} / ${data.patent_id_score_breakdown?.invalid_count || 0}`,
+                alignment: 'center',
+                fontSize: 12,
+                margin: [0, 10, 0, 10]
+              },
+              { 
+                text: `${data.patent_id_score_breakdown?.final_contribution || 0} PTS`, 
+                bold: true, 
+                color: '#4f46e5',
+                alignment: 'center',
+                fontSize: 14,
+                margin: [0, 10, 0, 10]
+              },
+              { 
+                text: (data.patent_id_score_breakdown?.integrity_verdict || 'N/A').toUpperCase(),
+                bold: true,
+                alignment: 'center',
+                fontSize: 10,
+                color: data.patent_id_score_breakdown?.integrity_verdict === 'Excellent' ? '#059669' : '#111827',
+                margin: [0, 12, 0, 0]
+              }
+            ]
+          ]
+        },
+        layout: {
+          hLineWidth: (i: number, node: any) => (i === 0 || i === node.table.body.length) ? 0 : 0.5,
+          vLineWidth: () => 0,
+          hLineColor: () => '#f3f4f6',
+          paddingTop: () => 10,
+          paddingBottom: () => 10,
+        },
+        margin: [0, 0, 0, 40]
       },
 
       {
