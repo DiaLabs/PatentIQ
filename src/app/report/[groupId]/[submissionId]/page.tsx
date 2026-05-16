@@ -55,6 +55,20 @@ export default function PublicReportPage() {
     try {
       const dataCopy = JSON.parse(JSON.stringify(reportData));
       
+      // Fetch logo for watermark
+      let logoBase64 = undefined;
+      try {
+        const response = await fetch('/icon1.png');
+        const blob = await response.blob();
+        logoBase64 = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.readAsDataURL(blob);
+        });
+      } catch (err) {
+        console.error("Failed to fetch logo for watermark:", err);
+      }
+
       const [pdfMakeModule, pdfFontsModule] = await Promise.all([
         import("pdfmake/build/pdfmake"),
         import("pdfmake/build/vfs_fonts")
@@ -69,12 +83,15 @@ export default function PublicReportPage() {
         (pdfMake as any).vfs = (pdfFonts as any).vfs;
       }
 
-      const pdf = generatePatentReport(dataCopy);
+      const pdf = generatePatentReport(dataCopy, logoBase64);
       if (!(pdf as any).vfs) {
         (pdf as any).vfs = (pdfMake as any).vfs;
       }
       
-      (pdf as any).download(`Patent_Report_${submissionId.slice(0, 8)}.pdf`);
+      const sName = reportData.submitter_name || 'Student';
+      const uId = reportData.unique_id || submissionId.slice(0, 8);
+      const fileName = `Evaluation_Report_${sName}_${uId}_PatentIQ.pdf`.replace(/\s+/g, '_');
+      (pdf as any).download(fileName);
       toast("Report downloaded", "success");
     } catch (err: any) {
       console.error("PDF generation error:", err);
