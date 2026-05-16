@@ -203,14 +203,18 @@ export function ReportContent({ data }: ReportContentProps) {
                     </div>
                   ))
                 ) : (
-                  (data.strengths || []).map((s: string, i: number) => (
-                    <div key={i} className="p-5 rounded-md border border-emerald-100 dark:border-emerald-900/20 bg-emerald-50/30 dark:bg-emerald-900/5">
-                      <h4 className="text-sm font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-2 mb-2">
-                        <CheckCircle2 className="h-4 w-4" /> Strength {i+1}
-                      </h4>
-                      <p className="text-[12px] text-gray-600 dark:text-gray-400 leading-relaxed">{s}</p>
-                    </div>
-                  ))
+                  (data.strengths || []).map((s: any, i: number) => {
+                    const title = typeof s === 'object' ? s.title : `Strength ${i+1}`;
+                    const description = typeof s === 'object' ? s.description : s;
+                    return (
+                      <div key={i} className="p-5 rounded-md border border-emerald-100 dark:border-emerald-900/20 bg-emerald-50/30 dark:bg-emerald-900/5">
+                        <h4 className="text-sm font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-2 mb-2">
+                          <CheckCircle2 className="h-4 w-4" /> {title}
+                        </h4>
+                        <p className="text-[12px] text-gray-600 dark:text-gray-400 leading-relaxed">{description}</p>
+                      </div>
+                    );
+                  })
                 )}
               </div>
             </section>
@@ -219,19 +223,19 @@ export function ReportContent({ data }: ReportContentProps) {
       )}
 
       {/* Page 3: Reference Patents & Weaknesses */}
-      {(data.stage_1?.patent_ids || data.patent_identifiers || data.major_weaknesses_and_improvements) && (
+      {(data.stage_1?.patent_ids || data.patent_identifiers || data.valid_patent_ids || data.major_weaknesses_and_improvements) && (
         <ReportPage>
           {/* 4. Patent Identifiers & Validation */}
-          {(data.stage_1?.patent_ids || data.patent_identifiers) && (
+          {(data.stage_1?.patent_ids || data.patent_identifiers || data.valid_patent_ids) && (
             <section className="mb-20">
               <div className="flex items-center gap-3 mb-8">
                 <div className="h-8 w-8 rounded-md bg-gray-900 dark:bg-white flex items-center justify-center text-white dark:text-gray-900 font-bold text-sm">4</div>
                 <h3 className="text-lg font-bold uppercase tracking-widest">Reference Validity</h3>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
-                {(data.stage_1?.patent_ids || data.patent_identifiers || []).map((id: string, i: number) => {
-                  const isValid = data.stage_1?.valid_ids?.includes(id);
-                  const isInvalid = data.stage_1?.invalid_ids?.includes(id);
+                {(data.stage_1?.patent_ids || data.patent_identifiers || data.valid_patent_ids || []).map((id: string, i: number) => {
+                  const isValid = data.stage_1?.valid_ids?.includes(id) || data.valid_patent_ids?.includes(id);
+                  const isInvalid = data.stage_1?.invalid_ids?.includes(id) || data.invalid_patent_ids?.includes(id);
                   
                   return (
                     <div key={i} className="flex items-center justify-between p-4 rounded-md border border-gray-100 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-800/20">
