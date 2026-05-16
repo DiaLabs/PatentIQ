@@ -349,8 +349,9 @@ export async function fetchGroupPublic(token: string): Promise<{
 export async function prepareUpload(body: {
   access_token: string;
   submitter_name: string;
-  roll_number: string;
-  email: string;
+  unique_id: string;
+  submitter_email: string;
+  invention_title: string;
   phone: string;
   team_member_names: string[];
   group_name: string;

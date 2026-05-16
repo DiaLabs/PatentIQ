@@ -42,6 +42,7 @@ export default function SubmitForm() {
   const [submitterName, setSubmitterName] = useState("");
   const [rollNumber, setRollNumber] = useState("");
   const [email, setEmail] = useState("");
+  const [inventionTitle, setInventionTitle] = useState("");
   const [phone, setPhone] = useState("");
   const [teammates, setTeammates] = useState<string[]>([""]);
   const [file, setFile] = useState<File | null>(null);
@@ -95,7 +96,7 @@ export default function SubmitForm() {
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!file || !submitterName.trim() || !email.trim() || !rollNumber.trim() || !token) return;
+    if (!file || !submitterName.trim() || !email.trim() || !rollNumber.trim() || !inventionTitle.trim() || !token) return;
 
     setStep("uploading");
     setError(null);
@@ -112,8 +113,9 @@ export default function SubmitForm() {
       const prep = await prepareUpload({
         access_token: token,
         submitter_name: submitterName.trim(),
-        roll_number: rollNumber.trim(),
-        email: email.trim(),
+        unique_id: rollNumber.trim(),
+        submitter_email: email.trim(),
+        invention_title: inventionTitle.trim(),
         phone: phone.trim(),
         team_member_names: teamMembers,
         group_name: groupInfo?.name || "Submitted Group",
@@ -137,7 +139,7 @@ export default function SubmitForm() {
       setError(err?.message ?? "Submission failed. Please try again.");
       setStep("error");
     }
-  }, [file, submitterName, rollNumber, email, phone, token, teammates, groupInfo]);
+  }, [file, submitterName, rollNumber, email, inventionTitle, phone, token, teammates, groupInfo]);
 
   // Poll for status
   useEffect(() => {
@@ -242,8 +244,23 @@ export default function SubmitForm() {
 
                 {/* Form Fields */}
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Student Details</h2>
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Submission Details</h2>
                   <form id="submission-form" onSubmit={handleSubmit} className="space-y-6">
+                    {/* Invention Title */}
+                    <div>
+                      <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest px-1 mb-1.5">
+                        Invention / Patent Title *
+                      </label>
+                      <input
+                        type="text"
+                        value={inventionTitle}
+                        onChange={(e) => setInventionTitle(e.target.value)}
+                        placeholder="Enter the full title of your invention"
+                        required
+                        className="w-full rounded-md border border-gray-200 dark:border-zinc-800 px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 bg-white dark:bg-zinc-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/40 outline-none transition-all"
+                      />
+                    </div>
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                       {/* Submitter Name */}
                       <div>
@@ -438,7 +455,7 @@ export default function SubmitForm() {
                 <Button
                   form="submission-form"
                   type="submit"
-                  disabled={!file || !submitterName.trim() || !email.trim() || !rollNumber.trim()}
+                  disabled={!file || !submitterName.trim() || !email.trim() || !rollNumber.trim() || !inventionTitle.trim()}
                   className="w-full py-7 text-base rounded-md font-bold transition-all bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/20 dark:shadow-none disabled:bg-gray-200 dark:disabled:bg-zinc-800 disabled:text-gray-400"
                 >
                   Submit Patent Evaluation
@@ -473,6 +490,10 @@ export default function SubmitForm() {
                 </p>
 
                 <div className="rounded-md bg-gray-50/50 dark:bg-zinc-900/50 border border-gray-100 dark:border-zinc-800/50 p-6 mb-10 text-left space-y-4">
+                  <div className="flex justify-between items-center border-b border-gray-100 dark:border-zinc-800 pb-4">
+                    <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Invention</span>
+                    <span className="text-sm font-semibold text-gray-900 dark:text-white truncate max-w-[200px] text-right">{inventionTitle}</span>
+                  </div>
                   <div className="flex justify-between items-center border-b border-gray-100 dark:border-zinc-800 pb-4">
                     <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Name</span>
                     <span className="text-sm font-semibold text-gray-900 dark:text-white">{submitterName}</span>
