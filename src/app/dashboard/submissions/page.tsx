@@ -59,7 +59,7 @@ export default function SubmissionsPage() {
   const [status, setStatus] = useState("");
   const [group, setGroup] = useState("");
   const [page, setPage] = useState(1);
-  const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
+  const [selectedReport, setSelectedReport] = useState<{ id: string; groupId: string } | null>(null);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [menuAnchor, setMenuAnchor] = useState<DOMRect | null>(null);
   // Custom delete confirmation
@@ -419,7 +419,10 @@ export default function SubmissionsPage() {
                     <td className="px-4 py-5">
                       {s.status === "COMPLETED" ? (
                         <button
-                          onClick={(e) => { e.stopPropagation(); setSelectedReportId(s.submission_id); }}
+                          onClick={(e) => { 
+                            e.stopPropagation(); 
+                            setSelectedReport({ id: s.submission_id, groupId: s.group_id }); 
+                          }}
                           className="text-xs font-semibold text-indigo-500 dark:text-indigo-400 underline underline-offset-2 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
                         >
                           View Report
@@ -549,7 +552,11 @@ export default function SubmissionsPage() {
 
               {activeRow.status === "COMPLETED" && (
                 <button
-                  onClick={() => { setOpenMenuId(null); setMenuAnchor(null); setSelectedReportId(activeRow.submission_id); }}
+                  onClick={() => { 
+                    setOpenMenuId(null); 
+                    setMenuAnchor(null); 
+                    setSelectedReport({ id: activeRow.submission_id, groupId: activeRow.group_id }); 
+                  }}
                   className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors"
                 >
                   <FileText className="h-4 w-4 text-emerald-500" />
@@ -620,8 +627,12 @@ export default function SubmissionsPage() {
       />
 
       {/* Report Modal */}
-      {selectedReportId && (
-        <ReportModal submissionId={selectedReportId} onClose={() => setSelectedReportId(null)} />
+      {selectedReport && (
+        <ReportModal 
+          submissionId={selectedReport.id} 
+          groupId={selectedReport.groupId}
+          onClose={() => setSelectedReport(null)} 
+        />
       )}
 
       {/* Export Excel Modal */}

@@ -24,6 +24,7 @@ import {
   Trash2,
   TrendingUp,
   Layers,
+  Share2,
 } from "lucide-react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -301,6 +302,7 @@ export default function OverviewPage() {
                       <td className="px-6 py-4 text-right">
                         <SubmissionActionMenu 
                           submissionId={s.submission_id} 
+                          groupId={s.group_id}
                           fileName={s.file_name}
                           onRefresh={load} 
                         />
@@ -370,10 +372,12 @@ export default function OverviewPage() {
 
 function SubmissionActionMenu({
   submissionId,
+  groupId,
   fileName,
   onRefresh,
 }: {
   submissionId: string;
+  groupId: string;
   fileName: string;
   onRefresh: () => void;
 }) {
@@ -437,6 +441,18 @@ function SubmissionActionMenu({
     }
   };
 
+  const handleShare = async () => {
+    try {
+      const publicUrl = `${window.location.origin}/report/${groupId}/${submissionId}`;
+      await navigator.clipboard.writeText(publicUrl);
+      toast("Report link copied to clipboard", "success");
+    } catch (err) {
+      toast("Failed to copy link", "error");
+    } finally {
+      setIsOpen(false);
+    }
+  };
+
   return (
     <div className="relative" ref={menuRef}>
       <button
@@ -466,6 +482,12 @@ function SubmissionActionMenu({
               className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors text-left"
             >
               <Download className="h-4 w-4 text-blue-500" /> Download PDF
+            </button>
+            <button
+              onClick={handleShare}
+              className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors text-left"
+            >
+              <Share2 className="h-4 w-4 text-emerald-500" /> Share Report
             </button>
             <div className="h-px bg-gray-50 dark:bg-zinc-800 my-1" />
             <button

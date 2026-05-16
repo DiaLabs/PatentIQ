@@ -405,6 +405,11 @@ export async function checkSubmissionStatus(
   return publicFetch<SubmissionStatusResponse>(`/api/v1/submit/${submissionId}/status`);
 }
 
+/** GET /api/v1/public/report/:groupId/:submissionId/data */
+export async function fetchPublicReportData(groupId: string, submissionId: string): Promise<any> {
+  return publicFetch<any>(`/api/v1/public/report/${groupId}/${submissionId}/data`);
+}
+
 /** GET /mentor/groups/:id/export/excel */
 export async function exportGroupExcel(groupId: string): Promise<Blob> {
   const user = auth.currentUser;

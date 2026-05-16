@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { fetchSubmissionReport } from "@/lib/api";
 import { generatePatentReport } from "@/lib/pdf-generator";
-import { X, Loader2, Download, FileText, AlertTriangle } from "lucide-react";
+import { X, Loader2, Download, FileText, AlertTriangle, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ReportContent } from "./report-content";
 import { Portal } from "@/components/ui/portal";
@@ -12,15 +12,26 @@ import { useToast } from "@/context/ToastContext";
 
 interface ReportModalProps {
   submissionId: string;
+  groupId: string;
   onClose: () => void;
 }
 
-export function ReportModal({ submissionId, onClose }: ReportModalProps) {
+export function ReportModal({ submissionId, groupId, onClose }: ReportModalProps) {
   const [loading, setLoading] = useState(true);
   const [generatingPdf, setGeneratingPdf] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [reportData, setReportData] = useState<any>(null);
   const { toast } = useToast();
+
+  const handleShare = async () => {
+    try {
+      const publicUrl = `${window.location.origin}/report/${groupId}/${submissionId}`;
+      await navigator.clipboard.writeText(publicUrl);
+      toast("Report link copied to clipboard", "success");
+    } catch (err) {
+      toast("Failed to copy link", "error");
+    }
+  };
 
   // Close on Escape
   useEffect(() => {
@@ -122,17 +133,28 @@ export function ReportModal({ submissionId, onClose }: ReportModalProps) {
 
             <div className="flex items-center gap-3">
               {reportData && (
-                <Button
-                  onClick={handleDownload}
-                  disabled={generatingPdf}
-                  className="rounded-md bg-indigo-600 hover:bg-indigo-700 text-white px-5 gap-2 h-9 text-sm font-semibold shadow-sm"
-                >
+                <>
+                  <Button
+                    onClick={handleShare}
+                    variant="outline"
+                    className="rounded-md border-gray-200 dark:border-zinc-700 text-gray-600 dark:text-gray-300 px-4 gap-2 h-9 text-sm font-semibold shadow-sm hover:bg-gray-50 dark:hover:bg-zinc-800"
+                  >
+                    <Share2 className="h-3.5 w-3.5" />
+                    Share
+                  </Button>
+                  
+                  <Button
+                    onClick={handleDownload}
+                    disabled={generatingPdf}
+                    className="rounded-md bg-indigo-600 hover:bg-indigo-700 text-white px-5 gap-2 h-9 text-sm font-semibold shadow-sm"
+                  >
                   {generatingPdf ? (
                     <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Preparing PDF…</>
                   ) : (
                     <><Download className="h-3.5 w-3.5" /> Download PDF</>
                   )}
                 </Button>
+                </>
               )}
 
               {/* Close button */}

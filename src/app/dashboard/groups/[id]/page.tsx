@@ -828,6 +828,7 @@ export default function GroupDetailPage() {
       {selectedSubmissionReport && (
         <ReportModal
           submissionId={selectedSubmissionReport}
+          groupId={groupId}
           onClose={() => setSelectedSubmissionReport(null)}
         />
       )}
