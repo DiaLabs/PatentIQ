@@ -103,12 +103,14 @@ export default function PublicReportPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-gray-50 dark:bg-[#0a0a0a]">
+      <div className="min-h-screen flex flex-col items-center justify-center gap-6 bg-gray-50 dark:bg-[#0a0a0a]">
         <div className="relative">
-          <div className="h-14 w-14 rounded-full border-4 border-indigo-100 dark:border-indigo-900/30 border-t-indigo-600 animate-spin" />
-          <FileText className="h-5 w-5 text-indigo-600 absolute inset-0 m-auto" />
+          <div className="h-24 w-24 rounded-full border-4 border-indigo-100 dark:border-indigo-900/20 border-t-indigo-600 animate-spin" />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <img src="/icon0.svg" alt="PatentIQ" className="h-10 w-10 animate-pulse" />
+          </div>
         </div>
-        <p className="text-sm font-semibold text-gray-400 uppercase tracking-widest animate-pulse">
+        <p className="text-xs font-bold text-gray-400 uppercase tracking-[0.3em] animate-pulse">
           Loading Report…
         </p>
       </div>
