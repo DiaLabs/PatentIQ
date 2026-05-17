@@ -48,6 +48,7 @@ export default function SubmitForm() {
   const [file, setFile] = useState<File | null>(null);
   const [groupInfo, setGroupInfo] = useState<{ name: string; plag_threshold: number; expires_at?: number; mentor_name?: string } | null>(null);
   const [loadingGroup, setLoadingGroup] = useState(true);
+  const [isDragging, setIsDragging] = useState(false);
 
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -83,15 +84,39 @@ export default function SubmitForm() {
   const updateTeammate = (i: number, val: string) =>
     setTeammates((t) => t.map((x, idx) => (idx === i ? val : x)));
 
+  const processFile = (f: File) => {
+    if (f.size > 2 * 1024 * 1024) {
+      alert("File size exceeds 2MB limit");
+      return;
+    }
+    const ext = f.name.split(".").pop()?.toLowerCase();
+    if (!["pdf", "doc", "docx"].includes(ext || "")) {
+      alert("Only PDF, DOC, and DOCX files are allowed");
+      return;
+    }
+    setFile(f);
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
-    if (f) {
-      if (f.size > 2 * 1024 * 1024) {
-        alert("File size exceeds 2MB limit");
-        return;
-      }
-      setFile(f);
-    }
+    if (f) processFile(f);
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const f = e.dataTransfer.files?.[0];
+    if (f) processFile(f);
   };
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
@@ -354,9 +379,14 @@ export default function SubmitForm() {
                 <div className="mb-8">
                   <div
                     onClick={() => fileRef.current?.click()}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
                     className={`rounded-md border-2 border-dashed cursor-pointer transition-all p-10 text-center ${
                       file
                         ? "border-indigo-300 bg-indigo-50 dark:bg-indigo-900/20"
+                        : isDragging
+                        ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30"
                         : "border-gray-200 dark:border-zinc-800 hover:border-indigo-300 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/10"
                     }`}
                   >
