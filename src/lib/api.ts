@@ -253,6 +253,25 @@ export async function fetchDashboard(days = 30): Promise<DashboardData> {
   return apiFetch<DashboardData>(`/api/v1/mentor/dashboard?days=${days}`);
 }
 
+export interface Mentor {
+  id: string;
+  email: string;
+  name: string;
+  picture_url: string | null;
+  created_at: number;
+  credits: number;
+}
+
+export interface MentorProfileResponse {
+  mentor: Mentor;
+}
+
+/** GET /mentor/profile */
+export async function fetchMentorProfile(): Promise<MentorProfileResponse> {
+  return apiFetch<MentorProfileResponse>('/api/v1/mentor/profile');
+}
+
+
 /** GET /mentor/groups */
 export async function fetchGroups(): Promise<{ groups: Group[] }> {
   return apiFetch<{ groups: Group[] }>('/api/v1/mentor/groups');

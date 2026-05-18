@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bell, RefreshCw, Clock, CheckCircle2, AlertCircle, Info, Trash2 } from "lucide-react";
+import { Bell, RefreshCw, Clock, CheckCircle2, AlertCircle, Info, Trash2, Coins } from "lucide-react";
 import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 import { useToast } from "@/context/ToastContext";
+import { useAuth } from "@/context/AuthContext";
 
 interface PageTopBarProps {
   onRefresh?: () => void;
@@ -13,6 +14,7 @@ interface PageTopBarProps {
  *  Rendered in the dashboard layout so it persists across ALL pages. */
 export function PageTopBar({ onRefresh, isLoading = false }: PageTopBarProps) {
   const { actions, clearActions } = useToast();
+  const { mentorProfile } = useAuth();
   const [showNotifications, setShowNotifications] = useState(false);
 
   const formatTime = (ts: number) => {
@@ -26,6 +28,23 @@ export function PageTopBar({ onRefresh, isLoading = false }: PageTopBarProps) {
 
   return (
     <div className="flex items-center gap-2 relative">
+      {/* Credits Display */}
+      {mentorProfile !== null && (
+        <div className={`flex items-center gap-2 px-2 h-10 select-none transition-colors ${
+          mentorProfile.credits <= 5 
+            ? "text-red-500 dark:text-red-400 font-semibold" 
+            : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
+        }`}>
+          <Coins className="h-5 w-5" />
+          <div className="flex items-baseline gap-1 text-sm font-medium">
+            <span>Credits:</span>
+            <span className="font-bold tabular-nums">
+              {mentorProfile.credits}
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* Theme Toggle */}
       <AnimatedThemeToggler
         duration={400}

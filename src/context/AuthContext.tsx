@@ -3,25 +3,49 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { User } from "firebase/auth";
 import { onAuthStateChangedListener, signInWithGoogle, signOutUser, SignInResult } from "@/lib/auth";
+import { fetchMentorProfile, type Mentor } from "@/lib/api";
 
 interface AuthContextType {
   user: User | null;
+  mentorProfile: Mentor | null;
   loading: boolean;
   isSigningIn: boolean;
   signInWithGoogle: () => Promise<SignInResult>;
   signOut: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [mentorProfile, setMentorProfile] = useState<Mentor | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSigningIn, setIsSigningIn] = useState(false);
 
+  const refreshProfile = async () => {
+    if (!user) return;
+    try {
+      const res = await fetchMentorProfile();
+      setMentorProfile(res.mentor);
+    } catch (err) {
+      console.error("Failed to refresh mentor profile:", err);
+    }
+  };
+
   useEffect(() => {
-    const unsubscribe = onAuthStateChangedListener((user) => {
-      setUser(user);
+    const unsubscribe = onAuthStateChangedListener(async (firebaseUser) => {
+      setUser(firebaseUser);
+      if (firebaseUser) {
+        try {
+          const res = await fetchMentorProfile();
+          setMentorProfile(res.mentor);
+        } catch (err) {
+          console.error("Failed to load mentor profile on login:", err);
+        }
+      } else {
+        setMentorProfile(null);
+      }
       setLoading(false);
     });
 
@@ -61,7 +85,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, loading, isSigningIn, signInWithGoogle: handleSignInWithGoogle, signOut: handleSignOut }}
+      value={{
+        user,
+        mentorProfile,
+        loading,
+        isSigningIn,
+        signInWithGoogle: handleSignInWithGoogle,
+        signOut: handleSignOut,
+        refreshProfile
+      }}
     >
       {children}
     </AuthContext.Provider>
