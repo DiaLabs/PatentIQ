@@ -100,6 +100,7 @@ export interface RecentSubmission {
   status: SubmissionStatus;
   score: number | null;
   submitted_at: number;
+  error_message?: string | null;
 }
 
 export interface DashboardData {
@@ -139,6 +140,7 @@ export interface Submission {
   verdict: string | null;
   submitted_at: string;
   file_name: string;
+  error_message?: string | null;
 }
 
 export type SubmissionStatus =

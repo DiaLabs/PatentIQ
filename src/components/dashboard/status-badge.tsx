@@ -17,8 +17,13 @@ const STATUS_CONFIG: Record<
   PAUSED:              { label: "Paused",       className: "bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400" },
 };
 
-export function StatusBadge({ status }: { status: SubmissionStatus }) {
-  const config = STATUS_CONFIG[status] ?? { label: status, className: "bg-gray-100 text-gray-600" };
+export function StatusBadge({ status, errorMessage }: { status: SubmissionStatus; errorMessage?: string | null }) {
+  let resolvedStatus = status;
+  if (status === "FAILED" && errorMessage?.includes("Evaluation paused")) {
+    resolvedStatus = "PAUSED";
+  }
+
+  const config = STATUS_CONFIG[resolvedStatus] ?? { label: status, className: "bg-gray-100 text-gray-600" };
   return (
     <span
       className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${config.className}`}
