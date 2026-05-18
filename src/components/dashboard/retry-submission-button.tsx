@@ -31,7 +31,7 @@ export function RetrySubmissionButton({
   const [showConfirm, setShowConfirm] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const canRetry = ["FAILED", "COMPLETED", "REJECTED"].includes(status) && retryCount < 3;
+  const canRetry = ["FAILED", "COMPLETED", "REJECTED", "PAUSED"].includes(status) && retryCount < 3;
 
   const handleRetry = async () => {
     setIsLoading(true);

@@ -151,7 +151,8 @@ export type SubmissionStatus =
   | 'EVALUATING'
   | 'COMPLETED'
   | 'REJECTED'
-  | 'FAILED';
+  | 'FAILED'
+  | 'PAUSED';
 
 export interface GroupDetails {
   group: {

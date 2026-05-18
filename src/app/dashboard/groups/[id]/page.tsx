@@ -57,6 +57,7 @@ const STATUS_OPTIONS = [
   { value: "PENDING", label: "Pending" },
   { value: "FAILED", label: "Failed" },
   { value: "REJECTED", label: "Rejected" },
+  { value: "PAUSED", label: "Paused" },
 ];
 
 const GROUP_COLORS = [

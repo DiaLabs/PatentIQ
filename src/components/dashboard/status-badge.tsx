@@ -14,6 +14,7 @@ const STATUS_CONFIG: Record<
   COMPLETED:           { label: "Completed",    className: "bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400" },
   REJECTED:            { label: "Needs Review", className: "bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400" },
   FAILED:              { label: "Failed",       className: "bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400" },
+  PAUSED:              { label: "Paused",       className: "bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400" },
 };
 
 export function StatusBadge({ status }: { status: SubmissionStatus }) {

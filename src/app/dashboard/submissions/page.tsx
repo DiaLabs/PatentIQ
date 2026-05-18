@@ -44,6 +44,7 @@ const STATUS_OPTIONS = [
   { value: "PENDING", label: "Pending" },
   { value: "FAILED", label: "Failed" },
   { value: "REJECTED", label: "Rejected" },
+  { value: "PAUSED", label: "Paused" },
 ];
 
 export default function SubmissionsPage() {
