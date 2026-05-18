@@ -74,6 +74,8 @@ export interface DashboardOverview {
   total_submissions: number;
   total_evaluated: number;
   total_rejected: number;
+  total_completed: number;
+  total_failed: number;
   avg_overall_score: number | null;
   avg_plag_similarity: number | null;
 }
@@ -103,6 +105,7 @@ export interface RecentSubmission {
 export interface DashboardData {
   overview: DashboardOverview;
   status_distribution: Record<string, number>;
+  monthly_submissions: { month: string; year: number; submissions: number }[];
   active_groups: ActiveGroup[];
   recent_submissions: RecentSubmission[];
 }
@@ -249,8 +252,12 @@ export async function downloadSubmissionFile(submissionId: string): Promise<Blob
 }
 
 /** GET /mentor/dashboard */
-export async function fetchDashboard(days = 30): Promise<DashboardData> {
-  return apiFetch<DashboardData>(`/api/v1/mentor/dashboard?days=${days}`);
+export async function fetchDashboard(params?: { from?: string; to?: string }): Promise<DashboardData> {
+  const qs = new URLSearchParams();
+  if (params?.from) qs.set('from', params.from);
+  if (params?.to) qs.set('to', params.to);
+  const query = qs.toString() ? `?${qs.toString()}` : '';
+  return apiFetch<DashboardData>(`/api/v1/mentor/dashboard${query}`);
 }
 
 export interface Mentor {
@@ -346,7 +353,7 @@ export async function retrySubmissionEvaluation(
 ): Promise<{ success: boolean; message: string; retry_count: number }> {
   return apiFetch<{ success: boolean; message: string; retry_count: number }>(
     `/api/v1/mentor/groups/${groupId}/submissions/${submissionId}/retry`,
-    { 
+    {
       method: 'POST',
       body: JSON.stringify({ force })
     }
