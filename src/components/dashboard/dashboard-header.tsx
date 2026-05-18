@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Bell, RefreshCw, Clock, CheckCircle2, AlertCircle, Info, Trash2, Coins } from "lucide-react";
 import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 import { useToast } from "@/context/ToastContext";
 import { useAuth } from "@/context/AuthContext";
+import { OutOfCreditsModal } from "@/components/dashboard/out-of-credits-modal";
 
 interface PageTopBarProps {
   onRefresh?: () => void;
@@ -16,6 +17,33 @@ export function PageTopBar({ onRefresh, isLoading = false }: PageTopBarProps) {
   const { actions, clearActions } = useToast();
   const { mentorProfile } = useAuth();
   const [showNotifications, setShowNotifications] = useState(false);
+  const [isCreditsModalOpen, setIsCreditsModalOpen] = useState(false);
+  const [pausedIdsToDismiss, setPausedIdsToDismiss] = useState<string[]>([]);
+  const prevCreditsRef = useRef<number | null>(null);
+
+  // Monitor credits change to auto-popup the modal when credits transition to 0
+  useEffect(() => {
+    if (mentorProfile !== null) {
+      if (prevCreditsRef.current !== null && prevCreditsRef.current > 0 && mentorProfile.credits === 0) {
+        setIsCreditsModalOpen(true);
+      }
+      prevCreditsRef.current = mentorProfile.credits;
+    }
+  }, [mentorProfile]);
+
+  // Listen for custom broadcast trigger to open the modal in real-time
+  useEffect(() => {
+    const handleOpenModal = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      const ids = customEvent.detail?.pausedSubIds || [];
+      setPausedIdsToDismiss(ids);
+      setIsCreditsModalOpen(true);
+    };
+    window.addEventListener("insufficient-credits-modal", handleOpenModal);
+    return () => {
+      window.removeEventListener("insufficient-credits-modal", handleOpenModal);
+    };
+  }, []);
 
   const formatTime = (ts: number) => {
     const diff = Date.now() - ts;
@@ -30,11 +58,21 @@ export function PageTopBar({ onRefresh, isLoading = false }: PageTopBarProps) {
     <div className="flex items-center gap-2 relative">
       {/* Credits Display */}
       {mentorProfile !== null && (
-        <div className={`flex items-center gap-2 px-2 h-10 select-none transition-colors ${
-          mentorProfile.credits <= 5 
-            ? "text-red-500 dark:text-red-400 font-semibold" 
-            : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
-        }`}>
+        <div 
+          onClick={() => {
+            if (mentorProfile.credits === 0) {
+              setIsCreditsModalOpen(true);
+            }
+          }}
+          className={`flex items-center gap-2 px-2 h-10 select-none transition-all duration-200 ${
+            mentorProfile.credits === 0 
+              ? "text-red-500 dark:text-red-400 font-semibold cursor-pointer hover:opacity-85 hover:scale-105 active:scale-95" 
+              : mentorProfile.credits <= 5 
+              ? "text-red-500 dark:text-red-400 font-semibold cursor-default" 
+              : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 cursor-default"
+          }`}
+          title={mentorProfile.credits === 0 ? "Click to contact developer and refill credits" : undefined}
+        >
           <Coins className="h-5 w-5" />
           <div className="flex items-baseline gap-1 text-sm font-medium">
             <span>Credits:</span>
@@ -44,6 +82,23 @@ export function PageTopBar({ onRefresh, isLoading = false }: PageTopBarProps) {
           </div>
         </div>
       )}
+
+      {/* Out of Credits Modal */}
+      <OutOfCreditsModal
+        isOpen={isCreditsModalOpen}
+        onClose={() => {
+          if (pausedIdsToDismiss.length > 0) {
+            try {
+              const current = JSON.parse(localStorage.getItem("dismissed-paused-submissions") || "[]");
+              const updated = Array.from(new Set([...current, ...pausedIdsToDismiss]));
+              localStorage.setItem("dismissed-paused-submissions", JSON.stringify(updated));
+            } catch (err) {
+              console.error("Failed to save dismissed paused submissions:", err);
+            }
+          }
+          setIsCreditsModalOpen(false);
+        }}
+      />
 
       {/* Theme Toggle */}
       <AnimatedThemeToggler
@@ -161,7 +216,7 @@ export function DashboardHeader({ userName, onRefresh, isLoading = false }: Dash
       className="flex flex-col gap-1"
     >
       <h1 className="text-4xl font-bold text-gray-900 dark:text-white tracking-tight">
-        Welcome back, {userName} 👋
+        Welcome back, {userName}
       </h1>
       <p className="mt-1 text-lg font-normal text-gray-500 dark:text-gray-400">
         Here's what's happening with your groups today.

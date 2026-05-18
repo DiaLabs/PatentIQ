@@ -17,6 +17,7 @@ import {
 import { useRefresh } from "@/context/RefreshContext";
 import { StatusBadge } from "@/components/dashboard/status-badge";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
 import {
   AlertCircle,
   Copy,
@@ -75,8 +76,14 @@ export default function GroupDetailPage() {
   const groupId = params.id as string;
   const { toast } = useToast();
   const { refreshTrigger, setRefreshing } = useRefresh();
+  const { refreshProfile } = useAuth();
 
   const [data, setData] = useState<GroupDetails | null>(null);
+  const dataRef = useRef<GroupDetails | null>(null);
+  useEffect(() => {
+    dataRef.current = data;
+  }, [data]);
+
   const [loading, setLoading] = useState(true);
   const [tableLoading, setTableLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -113,15 +120,15 @@ export default function GroupDetailPage() {
     }).catch(console.error);
   }, [groupId]);
 
-  const load = useCallback(async (isManual = false) => {
-    if (isManual) setRefreshing(true);
-    else {
+  const load = useCallback(async (isPolling = false, isManual = false) => {
+    if (!isPolling && isManual) setRefreshing(true);
+    if (!isPolling && !isManual) {
       // If first load, show full page skeleton
       if (!data) setLoading(true);
       // Otherwise only show table skeleton
       else setTableLoading(true);
     }
-    setError(null);
+    if (!isPolling) setError(null);
     try {
       const result = await fetchGroupDetails(groupId, {
         page,
@@ -129,15 +136,67 @@ export default function GroupDetailPage() {
         status: statusFilter || undefined,
         search: search || undefined,
       });
+
+      // Detect paused submissions to fire modal event in real-time
+      const pausedSubIds = result.submissions
+        .filter(s => s.status === 'FAILED' && s.error_message?.includes('Evaluation paused'))
+        .map(s => s.submission_id);
+      
+      if (pausedSubIds.length > 0) {
+        let dismissedIds: string[] = [];
+        try {
+          dismissedIds = JSON.parse(localStorage.getItem("dismissed-paused-submissions") || "[]");
+        } catch (err) {}
+        
+        const hasNewPausedSub = pausedSubIds.some(id => !dismissedIds.includes(id));
+        if (hasNewPausedSub) {
+          window.dispatchEvent(new CustomEvent('insufficient-credits-modal', { 
+            detail: { pausedSubIds } 
+          }));
+        }
+      }
+
+      // Automatically refresh mentor profile credits if any submission status has changed
+      const currentData = dataRef.current;
+      if (currentData) {
+        let statusChanged = false;
+        for (const newSub of result.submissions) {
+          const oldSub = currentData.submissions.find(s => s.submission_id === newSub.submission_id);
+          if (oldSub && oldSub.status !== newSub.status) {
+            statusChanged = true;
+            break;
+          }
+        }
+        if (statusChanged) {
+          refreshProfile();
+        }
+      }
+
       setData(result);
     } catch (e: any) {
-      setError(e?.message ?? "Failed to load group.");
+      if (!isPolling) setError(e?.message ?? "Failed to load group.");
     } finally {
-      setLoading(false);
-      setTableLoading(false);
-      setRefreshing(false);
+      if (!isPolling) {
+        setLoading(false);
+        setTableLoading(false);
+        setRefreshing(false);
+      }
     }
-  }, [groupId, page, statusFilter, search, setRefreshing, !!data]);
+  }, [groupId, page, statusFilter, search, setRefreshing, !!data, refreshProfile]);
+
+  // Polling for processing submissions in real-time
+  useEffect(() => {
+    if (!data) return;
+    const hasPending = data.submissions.some(
+      (s) => s.status === "QUEUED" || s.status === "PROCESSING" || s.status === "PENDING"
+    );
+    if (hasPending) {
+      const interval = setInterval(() => {
+        load(true);
+      }, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [data, load]);
 
   const lastRefreshProcessed = useRef(refreshTrigger);
 
@@ -169,7 +228,7 @@ export default function GroupDetailPage() {
   useEffect(() => {
     if (refreshTrigger > lastRefreshProcessed.current) {
       lastRefreshProcessed.current = refreshTrigger;
-      load(true);
+      load(false, true);
     }
   }, [refreshTrigger, load]);
 
@@ -241,6 +300,13 @@ export default function GroupDetailPage() {
     setIsBulkOperating(true);
     let successCount = 0;
     const ids = Array.from(selectedIds);
+
+    // Remove from dismissed-paused-submissions if present so modal can fire again
+    try {
+      const dismissed = JSON.parse(localStorage.getItem("dismissed-paused-submissions") || "[]");
+      const updated = dismissed.filter((dId: string) => !ids.includes(dId));
+      localStorage.setItem("dismissed-paused-submissions", JSON.stringify(updated));
+    } catch (e) {}
 
     try {
       for (const id of ids) {
@@ -533,7 +599,7 @@ export default function GroupDetailPage() {
                       </div>
                     </td>
                     <td className="px-6 py-5">
-                      <StatusBadge status={s.status as SubmissionStatus} />
+                      <StatusBadge status={s.status as SubmissionStatus} errorMessage={s.error_message} />
                     </td>
                     <td className="px-4 py-5">
                       {s.overall_score != null ? (
@@ -806,6 +872,13 @@ export default function GroupDetailPage() {
                   setOpenMenuId(null); setMenuAnchor(null);
                   setRetryingId(activeRow.submission_id);
                   try {
+                    // Remove from dismissed-paused-submissions if present so modal can fire again
+                    try {
+                      const dismissed = JSON.parse(localStorage.getItem("dismissed-paused-submissions") || "[]");
+                      const updated = dismissed.filter((id: string) => id !== activeRow.submission_id);
+                      localStorage.setItem("dismissed-paused-submissions", JSON.stringify(updated));
+                    } catch (e) {}
+
                     await retrySubmissionEvaluation(groupId, activeRow.submission_id, true);
                     toast("Re-evaluation queued (overwriting existing results)", "success");
                     load();

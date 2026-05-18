@@ -10,6 +10,7 @@ import { CustomSelect } from "@/components/ui/custom-select";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/context/ToastContext";
 import { useRefresh } from "@/context/RefreshContext";
+import { useAuth } from "@/context/AuthContext";
 import {
   FileText,
   Search,
@@ -49,6 +50,11 @@ const STATUS_OPTIONS = [
 
 export default function SubmissionsPage() {
   const [data, setData] = useState<SubmissionsResponse | null>(null);
+  const dataRef = useRef<SubmissionsResponse | null>(null);
+  useEffect(() => {
+    dataRef.current = data;
+  }, [data]);
+
   const [loading, setLoading] = useState(true);
   const [tableLoading, setTableLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -72,6 +78,7 @@ export default function SubmissionsPage() {
   const [showExportModal, setShowExportModal] = useState(false);
   const { toast } = useToast();
   const { refreshTrigger, setRefreshing } = useRefresh();
+  const { refreshProfile } = useAuth();
 
   // Selection State
   const [isSelectionMode, setIsSelectionMode] = useState(false);
@@ -128,6 +135,42 @@ export default function SubmissionsPage() {
         page,
         limit: 15,
       });
+
+      // Detect paused submissions to fire modal event in real-time
+      const pausedSubIds = res.submissions
+        .filter(s => s.status === 'FAILED' && s.error_message?.includes('Evaluation paused'))
+        .map(s => s.submission_id);
+      
+      if (pausedSubIds.length > 0) {
+        let dismissedIds: string[] = [];
+        try {
+          dismissedIds = JSON.parse(localStorage.getItem("dismissed-paused-submissions") || "[]");
+        } catch (err) {}
+        
+        const hasNewPausedSub = pausedSubIds.some(id => !dismissedIds.includes(id));
+        if (hasNewPausedSub) {
+          window.dispatchEvent(new CustomEvent('insufficient-credits-modal', { 
+            detail: { pausedSubIds } 
+          }));
+        }
+      }
+
+      // Automatically refresh mentor profile credits if any submission status has changed
+      const currentData = dataRef.current;
+      if (currentData) {
+        let statusChanged = false;
+        for (const newSub of res.submissions) {
+          const oldSub = currentData.submissions.find(s => s.submission_id === newSub.submission_id);
+          if (oldSub && oldSub.status !== newSub.status) {
+            statusChanged = true;
+            break;
+          }
+        }
+        if (statusChanged) {
+          refreshProfile();
+        }
+      }
+
       setData(res);
     } catch (e: any) {
       if (!isPolling) setError(e?.message ?? "Failed to load submissions.");
@@ -138,7 +181,7 @@ export default function SubmissionsPage() {
         setRefreshing(false);
       }
     }
-  }, [search, status, group, page, setRefreshing, !!data]);
+  }, [search, status, group, page, setRefreshing, !!data, refreshProfile]);
 
   // Polling for processing submissions
   useEffect(() => {
@@ -215,6 +258,13 @@ export default function SubmissionsPage() {
     setIsBulkOperating(true);
     let successCount = 0;
     const ids = Array.from(selectedIds);
+
+    // Remove from dismissed-paused-submissions if present so modal can fire again
+    try {
+      const dismissed = JSON.parse(localStorage.getItem("dismissed-paused-submissions") || "[]");
+      const updated = dismissed.filter((dId: string) => !ids.includes(dId));
+      localStorage.setItem("dismissed-paused-submissions", JSON.stringify(updated));
+    } catch (e) {}
 
     try {
       for (const id of ids) {
@@ -435,7 +485,7 @@ export default function SubmissionsPage() {
                     <td className="px-4 py-5">
                       <span className="text-sm text-gray-600 dark:text-gray-400">{s.group_name}</span>
                     </td>
-                    <td className="px-4 py-5"><StatusBadge status={s.status} /></td>
+                    <td className="px-4 py-5"><StatusBadge status={s.status} errorMessage={s.error_message} /></td>
                     <td className="px-4 py-5">
                       {s.score != null ? (
                         <div className={cn(
@@ -659,6 +709,13 @@ export default function SubmissionsPage() {
                   setOpenMenuId(null); setMenuAnchor(null);
                   setRetryingId(activeRow.submission_id);
                   try {
+                    // Remove from dismissed-paused-submissions if present so modal can fire again
+                    try {
+                      const dismissed = JSON.parse(localStorage.getItem("dismissed-paused-submissions") || "[]");
+                      const updated = dismissed.filter((id: string) => id !== activeRow.submission_id);
+                      localStorage.setItem("dismissed-paused-submissions", JSON.stringify(updated));
+                    } catch (e) {}
+
                     await retrySubmissionEvaluation(activeRow.group_id, activeRow.submission_id, true);
                     toast("Re-evaluation queued", "success");
                     load();

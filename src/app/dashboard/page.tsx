@@ -47,7 +47,28 @@ export default function OverviewPage() {
     else setLoading(true);
     setError(null);
     try {
-      setDashboard(await fetchDashboard());
+      const res = await fetchDashboard();
+      
+      // Detect paused submissions to fire modal event in real-time
+      const pausedSubIds = res.recent_submissions
+        ?.filter(s => s.status === 'FAILED' && s.error_message?.includes('Evaluation paused'))
+        .map(s => s.submission_id) || [];
+      
+      if (pausedSubIds.length > 0) {
+        let dismissedIds: string[] = [];
+        try {
+          dismissedIds = JSON.parse(localStorage.getItem("dismissed-paused-submissions") || "[]");
+        } catch (err) {}
+        
+        const hasNewPausedSub = pausedSubIds.some(id => !dismissedIds.includes(id));
+        if (hasNewPausedSub) {
+          window.dispatchEvent(new CustomEvent('insufficient-credits-modal', { 
+            detail: { pausedSubIds } 
+          }));
+        }
+      }
+
+      setDashboard(res);
     } catch (e: any) {
       setError(e?.message ?? "Failed to load dashboard.");
     } finally {
@@ -315,7 +336,7 @@ export default function OverviewPage() {
                         <span className="text-xs text-gray-500 dark:text-gray-400">{s.group_name}</span>
                       </td>
                       <td className="px-4 py-4">
-                        <StatusBadge status={s.status} />
+                        <StatusBadge status={s.status} errorMessage={s.error_message} />
                       </td>
                       <td className="px-4 py-4">
                         {s.score != null ? (
