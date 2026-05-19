@@ -21,7 +21,7 @@ export function CreateGroupDialog({ onClose, onCreated }: Props) {
   const [copied, setCopied] = useState(false);
 
   const [name, setName] = useState("");
-  const [plagThreshold, setPlagThreshold] = useState(40);
+  const plagThreshold = 40;
   const [expiryDate, setExpiryDate] = useState<string>(() => {
     const d = new Date();
     d.setDate(d.getDate() + 7);
@@ -121,26 +121,6 @@ export function CreateGroupDialog({ onClose, onCreated }: Props) {
                     required
                     className="w-full h-12 bg-white dark:bg-zinc-900 rounded-md border border-gray-200 dark:border-zinc-800 px-4 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/40 outline-none transition-all"
                   />
-                </div>
-
-                <div>
-                  <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">
-                    Plagiarism Threshold — <span className="text-indigo-600 dark:text-indigo-400">{plagThreshold}%</span>
-                  </label>
-                  <input
-                    type="range"
-                    min={10}
-                    max={90}
-                    step={5}
-                    value={plagThreshold}
-                    onChange={(e) => setPlagThreshold(Number(e.target.value))}
-                    className="w-full h-1.5 rounded-lg appearance-none cursor-pointer transition-all slider-custom-track"
-                    style={{ "--slider-percent": `${((plagThreshold - 10) / (90 - 10)) * 100}%` } as React.CSSProperties}
-                  />
-                  <div className="flex justify-between mt-2 text-[10px] font-bold text-gray-400 uppercase tracking-tight">
-                    <span>Strict (10%)</span>
-                    <span>Lenient (90%)</span>
-                  </div>
                 </div>
 
                 <div>
