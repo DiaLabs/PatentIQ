@@ -7,11 +7,10 @@ import { useRefresh } from "@/context/RefreshContext";
 import { useState, useCallback, useEffect, useRef } from "react";
 
 const rules = [
-  { id: 1, name: "Novelty Check", description: "Checks if the patent claim is novel against prior art.", weight: 30, enabled: true },
-  { id: 2, name: "Inventive Step", description: "Evaluates non-obviousness of the invention.", weight: 25, enabled: true },
-  { id: 3, name: "Industrial Applicability", description: "Ensures the invention can be industrially applied.", weight: 20, enabled: true },
-  { id: 4, name: "Plagiarism Similarity", description: "Detects textual similarity with existing documents.", weight: 15, enabled: true },
-  { id: 5, name: "Claims Clarity", description: "Checks clarity and precision of patent claims.", weight: 10, enabled: false },
+  { id: 1, name: "Novelty Check", description: "Checks if the patent claim is novel against prior art.", weight: 40, enabled: true },
+  { id: 2, name: "Inventive Step", description: "Evaluates non-obviousness of the invention.", weight: 35, enabled: true },
+  { id: 3, name: "Industrial Applicability", description: "Ensures the invention can be industrially applied.", weight: 25, enabled: true },
+  { id: 5, name: "Claims Clarity", description: "Checks clarity and precision of patent claims.", weight: 0, enabled: false },
 ];
 
 export default function EvaluationRulesPage() {
@@ -109,7 +108,7 @@ export default function EvaluationRulesPage() {
       <div className="mt-6 flex items-center gap-3 rounded-md bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-900/50 px-5 py-3">
         <div className="h-2 w-2 rounded-full bg-indigo-500 dark:bg-indigo-400" />
         <p className="text-sm text-indigo-700 dark:text-indigo-300 font-medium">
-          Total active weight: <span className="font-bold">90%</span> — weights must sum to 100% for scoring to be accurate.
+          Total active weight: <span className="font-bold">100%</span> — weights must sum to 100% for scoring to be accurate.
         </p>
       </div>
     </motion.div>

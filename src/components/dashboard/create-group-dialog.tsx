@@ -21,7 +21,6 @@ export function CreateGroupDialog({ onClose, onCreated }: Props) {
   const [copied, setCopied] = useState(false);
 
   const [name, setName] = useState("");
-  const plagThreshold = 40;
   const [expiryDate, setExpiryDate] = useState<string>(() => {
     const d = new Date();
     d.setDate(d.getDate() + 7);
@@ -41,7 +40,6 @@ export function CreateGroupDialog({ onClose, onCreated }: Props) {
 
       const result = await createGroup({
         name: name.trim(),
-        plag_threshold: plagThreshold / 100,
         link_expiry_days: diffDays,
       });
       setCreated(result);
@@ -52,7 +50,7 @@ export function CreateGroupDialog({ onClose, onCreated }: Props) {
     } finally {
       setLoading(false);
     }
-  }, [name, plagThreshold, expiryDate, onCreated]);
+  }, [name, expiryDate, onCreated]);
 
   const handleCopy = useCallback(() => {
     if (!created?.group_id) return;
@@ -88,7 +86,7 @@ export function CreateGroupDialog({ onClose, onCreated }: Props) {
                 </h3>
                 <p className="mt-1.5 text-sm text-gray-500 dark:text-gray-400">
                   {step === "form" 
-                    ? "Initialize a new evaluation cohort with custom plagiarism and expiry rules."
+                    ? "Initialize a new evaluation cohort with custom link expiry rules."
                     : "Your group is ready. Share the secure submission link with your students."}
                 </p>
               </div>

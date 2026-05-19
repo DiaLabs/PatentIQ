@@ -19,7 +19,6 @@ type Step = "form" | "uploading" | "tracking" | "done" | "error";
 const PIPELINE_STEPS = [
   { status: "EXTRACTING_IDS", label: "Extracting patent references" },
   { status: "VALIDATING_IDS", label: "Verifying patent IDs" },
-  { status: "CHECKING_PLAGIARISM", label: "Plagiarism check" },
   { status: "EVALUATING", label: "AI evaluation" },
   { status: "COMPLETED", label: "Report generation" },
 ];
@@ -46,7 +45,7 @@ export default function SubmitForm() {
   const [phone, setPhone] = useState("");
   const [teammates, setTeammates] = useState<string[]>([""]);
   const [file, setFile] = useState<File | null>(null);
-  const [groupInfo, setGroupInfo] = useState<{ name: string; plag_threshold: number; expires_at?: number; mentor_name?: string } | null>(null);
+  const [groupInfo, setGroupInfo] = useState<{ name: string; expires_at?: number; mentor_name?: string } | null>(null);
   const [loadingGroup, setLoadingGroup] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -64,7 +63,6 @@ export default function SubmitForm() {
         // Fallback to default values instead of showing error
         setGroupInfo({
           name: 'Group Submission',
-          plag_threshold: 0.4,
           mentor_name: 'Mentor',
         });
       } finally {

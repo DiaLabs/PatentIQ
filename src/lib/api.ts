@@ -114,7 +114,6 @@ export interface DashboardData {
 export interface Group {
   group_id: string;
   name: string;
-  plag_threshold: number;
   expires_at: string;
   is_expired: boolean;
   created_at: string;
@@ -162,7 +161,6 @@ export interface GroupDetails {
     name: string;
     access_token: string;
     student_link: string;
-    plag_threshold: number;
     expires_at: string;
     is_expired: boolean;
   };
@@ -180,7 +178,6 @@ export interface CreatedGroup {
   name: string;
   student_link: string;
   expires_at: string;
-  plag_threshold: number;
 }
 
 export interface SubmissionStatusResponse {
@@ -290,7 +287,6 @@ export async function fetchGroups(): Promise<{ groups: Group[] }> {
 /** POST /mentor/groups */
 export async function createGroup(body: {
   name: string;
-  plag_threshold: number;
   link_expiry_days: number;
 }): Promise<CreatedGroup> {
   return apiFetch<CreatedGroup>('/api/v1/mentor/groups', {
@@ -373,11 +369,10 @@ export async function fetchSubmissionReport(submissionId: string): Promise<any> 
 export async function fetchGroupPublic(token: string): Promise<{
   id: string;
   name: string;
-  plag_threshold: number;
   expires_at: number;
   mentor_name?: string;
 }> {
-  return publicFetch<{ id: string; name: string; plag_threshold: number; expires_at: number; mentor_name: string }>(`/api/v1/group/${token}`);
+  return publicFetch<{ id: string; name: string; expires_at: number; mentor_name: string }>(`/api/v1/group/${token}`);
 }
 
 /** POST /api/v1/submit/prepare */

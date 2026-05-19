@@ -380,15 +380,7 @@ export default function GroupDetailPage() {
                   </span>
                 </div>
               </div>
-              <div className="flex items-center gap-2.5">
-                <ShieldCheck className="h-4 w-4 text-indigo-400" />
-                <div className="flex flex-col">
-                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-1">Plagiarism Limit</span>
-                  <span className="text-sm font-bold text-indigo-600 dark:text-indigo-400">
-                    {data ? `${Math.round(data.group.plag_threshold * 100)}%` : "—"}
-                  </span>
-                </div>
-              </div>
+
             </div>
           </div>
         </div>
