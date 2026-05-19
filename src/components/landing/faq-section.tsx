@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 const faqs = [
   {
     question: "What file formats are supported?",
-    answer: "Currently, PatentIQ supports .docx and .pdf files. We are working on adding support for .txt and LaTeX formats soon."
+    answer: "Currently, PatentIQ supports only PDF files. We are working on adding support for other formats soon."
   },
   {
     question: "Is my patent data secure?",

@@ -90,8 +90,8 @@ export default function SubmitForm() {
       return;
     }
     const ext = f.name.split(".").pop()?.toLowerCase();
-    if (!["pdf", "doc", "docx"].includes(ext || "")) {
-      alert("Only PDF, DOC, and DOCX files are allowed");
+    if (ext !== "pdf") {
+      alert("Only PDF files are allowed");
       return;
     }
     setFile(f);
@@ -393,7 +393,7 @@ export default function SubmitForm() {
                     <input
                       ref={fileRef}
                       type="file"
-                      accept=".pdf,.doc,.docx"
+                      accept=".pdf"
                       onChange={handleFileChange}
                       className="hidden"
                     />
@@ -434,7 +434,7 @@ export default function SubmitForm() {
                           <p className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
                             Click to upload or drag & drop
                           </p>
-                          <p className="text-xs text-gray-400">PDF, DOC, DOCX up to 2MB</p>
+                          <p className="text-xs text-gray-400">PDF up to 2MB</p>
                         </div>
                       </div>
                     )}
@@ -450,7 +450,7 @@ export default function SubmitForm() {
                      </li>
                      <li className="flex gap-2 items-start">
                         <Check className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
-                        <span>Document is in a supported format</span>
+                        <span>Document must be in PDF format</span>
                      </li>
                      <li className="flex gap-2 items-start">
                         <Check className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
