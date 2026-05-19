@@ -36,6 +36,7 @@ export default function SubmitForm() {
 
   const [step, setStep] = useState<Step>("form");
   const [error, setError] = useState<string | null>(null);
+  const [showLimitModal, setShowLimitModal] = useState(false);
 
   // Form state
   const [submitterName, setSubmitterName] = useState("");
@@ -158,8 +159,13 @@ export default function SubmitForm() {
       setSubmissionId(confirmed.submission_id);
       setStep("tracking");
     } catch (err: any) {
-      setError(err?.message ?? "Submission failed. Please try again.");
-      setStep("error");
+      if (err?.message?.includes("resubmission limit") || err?.message?.includes("LIMIT_REACHED")) {
+        setShowLimitModal(true);
+        setStep("form");
+      } else {
+        setError(err?.message ?? "Submission failed. Please try again.");
+        setStep("error");
+      }
     }
   }, [file, submitterName, uniqueId, email, inventionTitle, phone, token, teammates, groupInfo]);
 
@@ -550,6 +556,41 @@ export default function SubmitForm() {
           )}
         </div>
       </main>
+
+      {/* Limit Exceeded Modal */}
+      {showLimitModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Glassmorphic Backdrop */}
+          <div 
+            className="absolute inset-0 bg-zinc-950/40 backdrop-blur-md transition-opacity duration-300"
+            onClick={() => setShowLimitModal(false)}
+          />
+          
+          {/* Modal Container */}
+          <div className="relative bg-white dark:bg-zinc-900 border border-red-100 dark:border-red-950/30 rounded-2xl max-w-md w-full shadow-2xl p-8 text-center overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            {/* Visual Red Alert Icon with micro-animation */}
+            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-50 dark:bg-red-950/20 border-2 border-red-100 dark:border-red-900/20 mb-6 animate-pulse">
+              <AlertCircle className="h-8 w-8 text-red-500 dark:text-red-400" />
+            </div>
+
+            <h3 className="text-xl font-bold text-gray-950 dark:text-white tracking-tight mb-2">
+              Resubmission Limit Reached
+            </h3>
+            
+            <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed mb-8">
+              You have already reached the maximum resubmission limit of 3 for this group. Please contact your mentor if you need to submit another update.
+            </p>
+
+            <Button
+              type="button"
+              onClick={() => setShowLimitModal(false)}
+              className="w-full py-6 text-base font-semibold rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/10 dark:shadow-none transition-all duration-200"
+            >
+              Close Alert
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
