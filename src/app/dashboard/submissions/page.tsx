@@ -293,7 +293,7 @@ export default function SubmissionsPage() {
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="px-6 py-8 min-h-screen relative"
+      className="px-4 sm:px-6 md:px-8 lg:px-12 py-6 sm:py-8 min-h-screen relative"
     >
       {/* Page Title */}
       <div className="mb-8">
@@ -304,9 +304,9 @@ export default function SubmissionsPage() {
       </div>
 
       {/* Filter Bar */}
-      <div className="flex flex-wrap items-center gap-3 mb-8">
-        {/* Search */}
-        <div className="relative flex-1 min-w-[220px] max-w-sm">
+      <div className="mb-8 space-y-3 sm:space-y-0 sm:flex sm:flex-wrap sm:items-center sm:gap-3">
+        {/* Search — full width on mobile */}
+        <div className="relative w-full sm:flex-1 sm:min-w-[220px] sm:max-w-sm">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
           <input
             type="text"
@@ -317,28 +317,28 @@ export default function SubmissionsPage() {
           />
         </div>
 
-        {/* Group Dropdown */}
-        <CustomSelect
-          value={group}
-          onChange={(v) => { setGroup(v); setPage(1); }}
-          options={groupOptions}
-          placeholder="All Groups"
-          className="w-40"
-        />
+        {/* Controls row */}
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Group Dropdown */}
+          <CustomSelect
+            value={group}
+            onChange={(v) => { setGroup(v); setPage(1); }}
+            options={groupOptions}
+            placeholder="All Groups"
+            className="w-36"
+          />
 
-        {/* Status Dropdown */}
-        <CustomSelect
-          value={status}
-          onChange={(v) => { setStatus(v); setPage(1); }}
-          options={STATUS_OPTIONS}
-          placeholder="All Statuses"
-          className="w-40"
-        />
+          {/* Status Dropdown */}
+          <CustomSelect
+            value={status}
+            onChange={(v) => { setStatus(v); setPage(1); }}
+            options={STATUS_OPTIONS}
+            placeholder="All Statuses"
+            className="w-36"
+          />
 
-        {/* Spacer */}
-        <div className="flex-1" />
+          <div className="hidden sm:block flex-1" />
 
-        <div className="flex items-center gap-2">
           <Button
             variant="outline"
             onClick={() => {
@@ -353,9 +353,9 @@ export default function SubmissionsPage() {
             )}
           >
             {isSelectionMode ? (
-              <><X className="h-4 w-4" /> Cancel Selection</>
+              <><X className="h-4 w-4" /> <span className="hidden sm:inline">Cancel</span></>
             ) : (
-              <><MousePointer2 className="h-4 w-4" /> Select</>
+              <><MousePointer2 className="h-4 w-4" /> <span className="hidden sm:inline">Select</span></>
             )}
           </Button>
 
@@ -364,7 +364,9 @@ export default function SubmissionsPage() {
             onClick={() => setShowExportModal(true)}
             className="rounded-md gap-2 h-[42px]"
           >
-            <FileSpreadsheet className="h-4 w-4 text-emerald-600" /> Export as Excel
+            <FileSpreadsheet className="h-4 w-4 text-emerald-600" />
+            <span className="hidden sm:inline">Export as Excel</span>
+            <span className="sm:hidden">Export</span>
           </Button>
         </div>
       </div>
@@ -601,12 +603,15 @@ export default function SubmissionsPage() {
 
         {/* Pagination */}
         {data && data.pagination.total_pages > 1 && (
-          <div className="px-8 py-6 border-t border-gray-50 dark:border-zinc-800 flex items-center bg-gray-50/30 dark:bg-zinc-800/20">
-            {/* Left Spacer */}
-            <div className="flex-1" />
+          <div className="px-4 sm:px-8 py-4 sm:py-6 border-t border-gray-50 dark:border-zinc-800 flex flex-col sm:flex-row items-center gap-3 sm:gap-0 bg-gray-50/30 dark:bg-zinc-800/20">
+            {/* Page info */}
+            <p className="text-xs sm:text-sm text-gray-500 font-medium sm:flex-1">
+              Showing <span className="text-gray-900 dark:text-white font-bold">{Math.min(page * 15, data.pagination.total)}</span>{" "}
+              of <span className="text-gray-900 dark:text-white font-bold">{data.pagination.total}</span>
+            </p>
 
-            {/* Center Navigation */}
-            <div className="flex items-center gap-6">
+            {/* Navigation */}
+            <div className="flex items-center gap-3 sm:gap-6">
               <Button
                 variant="ghost"
                 size="sm"
@@ -615,13 +620,13 @@ export default function SubmissionsPage() {
                 onClick={() => setPage(page - 1)}
               >
                 <ChevronLeft className="h-4 w-4" />
-                <span>Previous</span>
+                <span>Prev</span>
               </Button>
               
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-500">Page {page}</span>
-                <span className="text-sm text-gray-400">of</span>
-                <span className="text-sm text-gray-400 font-medium">{data.pagination.total_pages}</span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-sm text-gray-500">Page</span>
+                <span className="text-sm font-bold text-gray-900 dark:text-white">{page}</span>
+                <span className="text-sm text-gray-400">/ {data.pagination.total_pages}</span>
               </div>
 
               <Button
@@ -634,14 +639,6 @@ export default function SubmissionsPage() {
                 <span>Next</span>
                 <ChevronRight className="h-4 w-4" />
               </Button>
-            </div>
-
-            {/* Right-aligned Stats */}
-            <div className="flex-1 flex justify-end">
-              <p className="text-sm text-gray-500 font-medium">
-                Showing <span className="text-gray-900 dark:text-white font-bold">{Math.min(page * 15, data.pagination.total)}</span>{" "}
-                of <span className="text-gray-900 dark:text-white font-bold">{data.pagination.total}</span>
-              </p>
             </div>
           </div>
         )}
