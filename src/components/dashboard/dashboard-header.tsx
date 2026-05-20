@@ -55,31 +55,27 @@ export function PageTopBar({ onRefresh, isLoading = false }: PageTopBarProps) {
   };
 
   return (
-    <div className="flex items-center gap-2 relative">
-      {/* Credits Display */}
+    <div className="flex items-center gap-1.5 sm:gap-2 relative">
+
+      {/* Credits Display — desktop only (mobile sees it in sidebar) */}
       {mentorProfile !== null && (
-        <div 
+        <div
           onClick={() => {
             if (mentorProfile.credits === 0) {
               setIsCreditsModalOpen(true);
             }
           }}
-          className={`flex items-center gap-2 px-2 h-10 select-none transition-all duration-200 ${
-            mentorProfile.credits === 0 
-              ? "text-red-500 dark:text-red-400 font-semibold cursor-pointer hover:opacity-85 hover:scale-105 active:scale-95" 
-              : mentorProfile.credits <= 5 
-              ? "text-red-500 dark:text-red-400 font-semibold cursor-default" 
+          className={`hidden lg:flex items-center gap-1.5 px-1 sm:px-2 h-10 select-none transition-all duration-200 ${
+            mentorProfile.credits === 0
+              ? "text-red-500 dark:text-red-400 font-semibold cursor-pointer hover:opacity-85 hover:scale-105 active:scale-95"
+              : mentorProfile.credits <= 5
+              ? "text-red-500 dark:text-red-400 font-semibold cursor-default"
               : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 cursor-default"
           }`}
           title={mentorProfile.credits === 0 ? "Click to contact developer and refill credits" : undefined}
         >
-          <Coins className="h-5 w-5" />
-          <div className="flex items-baseline gap-1 text-sm font-medium">
-            <span>Credits:</span>
-            <span className="font-bold tabular-nums">
-              {mentorProfile.credits}
-            </span>
-          </div>
+          <Coins className="h-4 w-4" />
+          <span className="text-sm font-medium">Credits: <span className="font-bold tabular-nums">{mentorProfile.credits}</span></span>
         </div>
       )}
 
@@ -99,6 +95,19 @@ export function PageTopBar({ onRefresh, isLoading = false }: PageTopBarProps) {
           setIsCreditsModalOpen(false);
         }}
       />
+
+      {/* Refresh Button */}
+      {onRefresh && (
+        <motion.button
+          onClick={onRefresh}
+          disabled={isLoading}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className="hidden sm:flex items-center justify-center h-10 w-10 rounded-full text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-zinc-800 dark:hover:text-gray-300 disabled:opacity-60"
+        >
+          <RefreshCw className={`h-5 w-5 ${isLoading ? "animate-spin" : ""}`} />
+        </motion.button>
+      )}
 
       {/* Theme Toggle */}
       <AnimatedThemeToggler
@@ -183,19 +192,6 @@ export function PageTopBar({ onRefresh, isLoading = false }: PageTopBarProps) {
           )}
         </AnimatePresence>
       </div>
-
-      {/* Refresh Button */}
-      {onRefresh && (
-        <motion.button
-          onClick={onRefresh}
-          disabled={isLoading}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="flex items-center justify-center h-10 w-10 rounded-full text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-zinc-800 dark:hover:text-gray-300 disabled:opacity-60"
-        >
-          <RefreshCw className={`h-5 w-5 ${isLoading ? "animate-spin" : ""}`} />
-        </motion.button>
-      )}
     </div>
   );
 }
@@ -215,10 +211,10 @@ export function DashboardHeader({ userName, onRefresh, isLoading = false }: Dash
       transition={{ duration: 0.3, ease: "easeOut" }}
       className="flex flex-col gap-1"
     >
-      <h1 className="text-4xl font-bold text-gray-900 dark:text-white tracking-tight">
+      <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white tracking-tight">
         Welcome back, {userName}
       </h1>
-      <p className="mt-1 text-lg font-normal text-gray-500 dark:text-gray-400">
+      <p className="mt-1 text-sm sm:text-base lg:text-lg font-normal text-gray-500 dark:text-gray-400">
         Here's what's happening with your groups today.
       </p>
     </motion.div>

@@ -10,7 +10,9 @@ import {
   BarChart3, 
   Settings,
   LogOut,
-  ChevronRight
+  ChevronRight,
+  X,
+  Coins
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
@@ -25,18 +27,32 @@ const navItems = [
   { name: "Settings", href: "/dashboard/settings", icon: Settings },
 ];
 
-export function Sidebar() {
+interface SidebarProps {
+  isOpen?: boolean;
+  onClose?: () => void;
+}
+
+export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
-  const { user, signOut } = useAuth();
+  const { user, mentorProfile, signOut } = useAuth();
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-64 border-r border-gray-100 dark:border-zinc-800 bg-white/50 dark:bg-[#0a0a0a]/50 backdrop-blur-xl z-50 flex flex-col">
+    <aside className={cn(
+      "fixed left-0 top-0 h-screen w-64 border-r border-gray-100 dark:border-zinc-800 bg-white/50 dark:bg-[#0a0a0a]/50 backdrop-blur-xl z-50 flex flex-col transition-transform duration-300",
+      isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+    )}>
       {/* Brand */}
-      <div className="px-8 py-10">
-        <Link href="/dashboard" className="flex items-center gap-1">
+      <div className="px-8 py-10 flex items-center justify-between">
+        <Link href="/dashboard" className="flex items-center gap-1" onClick={onClose}>
           <img src="/icon0.svg" alt="PatentIQ Logo" className="w-10 h-10" />
           <span className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">PatentIQ</span>
         </Link>
+        <button
+          onClick={onClose}
+          className="lg:hidden p-2 rounded-md hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors"
+        >
+          <X className="h-5 w-5" />
+        </button>
       </div>
 
       {/* Nav Links */}
@@ -51,6 +67,7 @@ export function Sidebar() {
             <Link
               key={item.name}
               href={item.href}
+              onClick={onClose}
               className={cn(
                 "group flex items-center gap-3 px-4 py-3 rounded-md text-sm font-semibold transition-all relative overflow-hidden",
                 isActive 
@@ -73,6 +90,38 @@ export function Sidebar() {
           );
         })}
       </nav>
+
+      {/* Credits Display — mobile only, integrated with bottom section */}
+      {mentorProfile && (
+        <div
+          onClick={() => {
+            if (mentorProfile.credits === 0) {
+              const event = new CustomEvent('insufficient-credits-modal', { detail: { pausedSubIds: [] } });
+              window.dispatchEvent(event);
+            }
+          }}
+          className={`lg:hidden mx-4 mb-2 flex items-center gap-3 px-4 py-2.5 rounded-md border transition-all ${
+            mentorProfile.credits === 0
+              ? "border-red-200 dark:border-red-900/40 bg-red-50 dark:bg-red-900/10 cursor-pointer hover:bg-red-100 dark:hover:bg-red-900/20"
+              : mentorProfile.credits <= 5
+              ? "border-red-200 dark:border-red-900/40 bg-red-50/50 dark:bg-red-900/10"
+              : "border-gray-100 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-800/30"
+          }`}
+        >
+          <Coins className={`h-4 w-4 shrink-0 ${
+            mentorProfile.credits <= 5 ? "text-red-500 dark:text-red-400" : "text-gray-400 dark:text-gray-500"
+          }`} />
+          <div className="flex-1 min-w-0">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 leading-none mb-0.5">Credits</p>
+            <p className={`text-sm font-bold tabular-nums ${
+              mentorProfile.credits <= 5 ? "text-red-600 dark:text-red-400" : "text-gray-900 dark:text-white"
+            }`}>{mentorProfile.credits} available</p>
+          </div>
+          {mentorProfile.credits === 0 && (
+            <span className="text-[9px] font-bold text-red-500 uppercase tracking-wider">Tap to refill</span>
+          )}
+        </div>
+      )}
 
       {/* User / Bottom */}
       <div className="p-4 border-t border-gray-100 dark:border-zinc-800">
