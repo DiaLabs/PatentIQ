@@ -223,7 +223,7 @@ export default function GroupsPage() {
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="px-12 py-8"
+      className="px-4 sm:px-6 md:px-8 lg:px-12 py-6 sm:py-8"
     >
       {/* Page Title */}
       <div className="mb-8">
@@ -234,9 +234,9 @@ export default function GroupsPage() {
       </div>
 
       {/* Filter Bar */}
-      <div className="flex flex-wrap items-center gap-3 mb-8">
-        {/* Search */}
-        <div className="relative flex-1 min-w-[220px] max-w-sm">
+      <div className="mb-8 space-y-3 sm:space-y-0 sm:flex sm:flex-wrap sm:items-center sm:gap-3">
+        {/* Search — full width on mobile */}
+        <div className="relative w-full sm:flex-1 sm:min-w-[220px] sm:max-w-sm">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
           <input
             type="text"
@@ -247,67 +247,62 @@ export default function GroupsPage() {
           />
         </div>
 
-        {/* Sort dropdown */}
-        <CustomSelect
-          value={sortBy}
-          onChange={(v) => setSortBy(v as any)}
-          options={SORT_OPTIONS}
-          placeholder="Sort By"
-          className="w-40"
-        />
-
-        {/* Spacer */}
-        <div className="flex-1" />
-
-        {/* Create */}
-        <Button
-          onClick={() => setShowDialog(true)}
-          className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md px-5 h-[42px] shadow-sm font-semibold"
-        >
-          <Plus className="h-4 w-4" />
-          Create Group
-        </Button>
+        {/* Sort + Create — row on mobile, inline on desktop */}
+        <div className="flex items-center gap-3">
+          <CustomSelect
+            value={sortBy}
+            onChange={(v) => setSortBy(v as any)}
+            options={SORT_OPTIONS}
+            placeholder="Sort By"
+            className="w-36"
+          />
+          <div className="flex-1" />
+          <Button
+            onClick={() => setShowDialog(true)}
+            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md px-4 sm:px-5 h-[42px] shadow-sm font-semibold"
+          >
+            <Plus className="h-4 w-4" />
+            <span>Create Group</span>
+          </Button>
+        </div>
       </div>
 
-      {/* Stats Section: Split 2/3 and 1/3 */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-16 items-stretch">
-        {/* Left: Global Counters */}
-        <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="relative overflow-hidden rounded-md border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-8 shadow-sm">
-            <div className="relative z-10">
-              <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-4">Total Groups</p>
-              <div className="flex items-baseline gap-2">
-                <span className="text-6xl font-black text-gray-900 dark:text-white leading-none">
-                  {loading ? "—" : groups.length}
-                </span>
-                <span className="text-sm font-bold text-emerald-500">+1 this week</span>
-              </div>
+      {/* Stats Section */}
+      <div className="grid grid-cols-2 lg:grid-cols-12 gap-4 lg:gap-8 mb-8 lg:mb-16 items-stretch">
+        {/* Total Groups */}
+        <div className="lg:col-span-4 relative overflow-hidden rounded-md border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 lg:p-8 shadow-sm">
+          <div className="relative z-10">
+            <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3 lg:mb-4">Total Groups</p>
+            <div className="flex items-baseline gap-2">
+              <span className="text-4xl lg:text-6xl font-black text-gray-900 dark:text-white leading-none">
+                {loading ? "—" : groups.length}
+              </span>
+              <span className="text-xs lg:text-sm font-bold text-emerald-500">+1 this week</span>
             </div>
-            {/* Subtle background decoration */}
-            <Users className="absolute -right-4 -bottom-4 h-32 w-32 text-gray-50 dark:text-zinc-800/50 -rotate-12 pointer-events-none" />
           </div>
-
-          <div className="relative overflow-hidden rounded-md border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-8 shadow-sm">
-            <div className="relative z-10">
-              <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-4">Total Submissions</p>
-              <div className="flex items-baseline gap-2">
-                <span className="text-6xl font-black text-gray-900 dark:text-white leading-none">
-                  {loading ? "—" : totalSubmissions}
-                </span>
-                <span className="text-sm font-bold text-indigo-500">12 Today</span>
-              </div>
-            </div>
-            <FileText className="absolute -right-4 -bottom-4 h-32 w-32 text-gray-50 dark:text-zinc-800/50 -rotate-12 pointer-events-none" />
-          </div>
+          <Users className="absolute -right-4 -bottom-4 h-24 lg:h-32 w-24 lg:w-32 text-gray-50 dark:text-zinc-800/50 -rotate-12 pointer-events-none" />
         </div>
 
-        {/* Right: Recent Activity */}
-        <div className="lg:col-span-4 flex flex-col h-full">
+        {/* Total Submissions */}
+        <div className="lg:col-span-4 relative overflow-hidden rounded-md border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 lg:p-8 shadow-sm">
+          <div className="relative z-10">
+            <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3 lg:mb-4">Total Submissions</p>
+            <div className="flex items-baseline gap-2">
+              <span className="text-4xl lg:text-6xl font-black text-gray-900 dark:text-white leading-none">
+                {loading ? "—" : totalSubmissions}
+              </span>
+              <span className="text-xs lg:text-sm font-bold text-indigo-500">12 Today</span>
+            </div>
+          </div>
+          <FileText className="absolute -right-4 -bottom-4 h-24 lg:h-32 w-24 lg:w-32 text-gray-50 dark:text-zinc-800/50 -rotate-12 pointer-events-none" />
+        </div>
+
+        {/* Recent Activity — desktop only */}
+        <div className="hidden lg:flex lg:col-span-4 flex-col h-full">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Recent Activity</h3>
           </div>
           <div className="space-y-2 flex-1">
-            {/* Mocking recent activity based on group data or generic logs */}
             {groups.slice(0, 2).map((g, idx) => (
               <div key={g.group_id} className="flex items-center gap-3 p-3.5 rounded-md border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm transition-all hover:bg-gray-50 dark:hover:bg-zinc-800/50 group cursor-pointer">
                 <div className="h-8 w-8 rounded-md bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center shrink-0">

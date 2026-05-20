@@ -26,6 +26,7 @@ import {
   ExternalLink,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   Eye,
   X,
   FileText,
@@ -108,6 +109,8 @@ export default function GroupDetailPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isBulkOperating, setIsBulkOperating] = useState(false);
   const [bulkActionConfirm, setBulkActionConfirm] = useState<'delete' | 'reevaluate' | null>(null);
+  const [showMobileActions, setShowMobileActions] = useState(false);
+  const mobileActionsRef = useRef<HTMLDivElement>(null);
 
   const groupColor = useMemo(() => {
     return GROUP_COLORS[groupIndex % GROUP_COLORS.length];
@@ -333,7 +336,7 @@ export default function GroupDetailPage() {
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="px-6 py-8 min-h-screen space-y-12"
+      className="px-4 sm:px-6 md:px-8 lg:px-12 py-6 sm:py-8 min-h-screen space-y-12"
     >
       {/* Page Header - Matching Groups Page Style */}
       <div>
@@ -347,15 +350,15 @@ export default function GroupDetailPage() {
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col lg:flex-row lg:items-start justify-between gap-12"
+        className="flex flex-col lg:flex-row lg:items-start justify-between gap-8 lg:gap-12"
       >
-        <div className="flex items-start gap-6">
-          <div className={cn("h-16 w-16 rounded-md flex items-center justify-center shrink-0 shadow-sm", groupColor.bg)}>
-            <Layers className={cn("h-8 w-8", groupColor.text)} />
+        <div className="flex items-start gap-4 sm:gap-6">
+          <div className={cn("h-14 w-14 sm:h-16 sm:w-16 rounded-md flex items-center justify-center shrink-0 shadow-sm", groupColor.bg)}>
+            <Layers className={cn("h-7 w-7 sm:h-8 sm:w-8", groupColor.text)} />
           </div>
-          <div className="space-y-4">
-            <div className="flex items-center gap-4">
-              <h2 className="text-4xl font-semibold text-gray-900 dark:text-white tracking-tight leading-none">
+          <div className="space-y-2 sm:space-y-4">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-gray-900 dark:text-white tracking-tight leading-none">
                 {loading ? "..." : data?.group.name}
               </h2>
               {data && (
@@ -370,23 +373,20 @@ export default function GroupDetailPage() {
               )}
             </div>
             
-            <div className="flex flex-wrap items-center gap-x-10 gap-y-4">
-              <div className="flex items-center gap-2.5">
-                <Calendar className="h-4 w-4 text-gray-400" />
-                <div className="flex flex-col">
-                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-1">Expires on</span>
-                  <span className="text-sm font-bold text-gray-700 dark:text-gray-200">
-                    {data ? new Date(data.group.expires_at).toLocaleDateString() : "—"}
-                  </span>
-                </div>
+            <div className="flex items-center gap-2.5">
+              <Calendar className="h-4 w-4 text-gray-400" />
+              <div className="flex flex-col">
+                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-1">Expires on</span>
+                <span className="text-sm font-bold text-gray-700 dark:text-gray-200">
+                  {data ? new Date(data.group.expires_at).toLocaleDateString() : "—"}
+                </span>
               </div>
-
             </div>
           </div>
         </div>
 
         {/* Clean Submission Gateway */}
-        <div className="max-w-md w-full">
+        <div className="w-full lg:max-w-md lg:w-full">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-zinc-500">Submission Gateway</span>
             <ExternalLink className="h-3.5 w-3.5 text-gray-300" />
@@ -408,9 +408,10 @@ export default function GroupDetailPage() {
         </div>
       </motion.div>
 
-      {/* Filter Bar */}
-      <div className="flex flex-wrap items-center gap-3 pt-6 border-t border-gray-100 dark:border-zinc-800/50">
-        <div className="relative flex-1 min-w-[220px] max-w-sm">
+        {/* Filter Bar */}
+      <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3 pt-6 border-t border-gray-100 dark:border-zinc-800/50">
+        {/* Search */}
+        <div className="relative w-full sm:flex-1 sm:min-w-[200px] sm:max-w-sm">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
           <input
             type="text"
@@ -421,17 +422,17 @@ export default function GroupDetailPage() {
           />
         </div>
 
-        <CustomSelect
-          value={statusFilter}
-          onChange={(v) => { setStatusFilter(v); setPage(1); }}
-          options={STATUS_OPTIONS}
-          placeholder="All Statuses"
-          className="w-44"
-        />
+        {/* Controls row */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <CustomSelect
+            value={statusFilter}
+            onChange={(v) => { setStatusFilter(v); setPage(1); }}
+            options={STATUS_OPTIONS}
+            placeholder="All Statuses"
+            className="w-40"
+          />
 
-        <div className="flex-1" />
-
-        <div className="flex items-center gap-2">
+          {/* Select button */}
           <Button
             variant="outline"
             onClick={() => {
@@ -446,12 +447,13 @@ export default function GroupDetailPage() {
             )}
           >
             {isSelectionMode ? (
-              <><X className="h-4 w-4" /> Cancel Selection</>
+              <><X className="h-4 w-4" /> <span className="hidden sm:inline">Cancel</span></>
             ) : (
-              <><MousePointer2 className="h-4 w-4" /> Select</>
+              <><MousePointer2 className="h-4 w-4" /> <span className="hidden sm:inline">Select</span></>
             )}
           </Button>
 
+          {/* Desktop: Show Export + Delete directly */}
           <Button
             variant="outline"
             onClick={async () => {
@@ -471,7 +473,7 @@ export default function GroupDetailPage() {
                 toast("Export failed: " + err.message, "error");
               }
             }}
-            className="gap-2 h-[42px] rounded-md font-semibold"
+            className="hidden sm:flex gap-2 h-[42px] rounded-md font-semibold"
           >
             <FileText className="h-4 w-4 text-emerald-600" />
             Export as Excel
@@ -480,11 +482,60 @@ export default function GroupDetailPage() {
           <Button
             variant="outline"
             onClick={() => setShowDeleteConfirm(true)}
-            className="gap-2 h-[42px] rounded-md border-red-100 dark:border-red-900/30 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 font-semibold"
+            className="hidden sm:flex gap-2 h-[42px] rounded-md border-red-100 dark:border-red-900/30 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 font-semibold"
           >
             <Trash2 className="h-4 w-4" />
             Delete Group
           </Button>
+
+          {/* Mobile: More actions dropdown */}
+          <div className="relative sm:hidden" ref={mobileActionsRef}>
+            <Button
+              variant="outline"
+              onClick={() => setShowMobileActions(!showMobileActions)}
+              className="gap-1.5 h-[42px] rounded-md font-semibold"
+            >
+              <MoreVertical className="h-4 w-4" />
+              Actions
+              <ChevronDown className={`h-3 w-3 transition-transform ${showMobileActions ? 'rotate-180' : ''}`} />
+            </Button>
+            {showMobileActions && (
+              <>
+                <div className="fixed inset-0 z-20" onClick={() => setShowMobileActions(false)} />
+                <div className="absolute right-0 top-full mt-1 z-30 bg-white dark:bg-zinc-900 rounded-md border border-gray-100 dark:border-zinc-800 shadow-lg overflow-hidden w-44">
+                  <button
+                    onClick={async () => {
+                      setShowMobileActions(false);
+                      toast("Generating Excel report...", "info");
+                      try {
+                        const blob = await exportGroupExcel(groupId);
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement("a");
+                        a.href = url;
+                        a.download = `Evaluation_Report_${data?.group.name}.xlsx`;
+                        document.body.appendChild(a);
+                        a.click();
+                        URL.revokeObjectURL(url);
+                        document.body.removeChild(a);
+                        toast("Excel report downloaded successfully", "success");
+                      } catch (err: any) {
+                        toast("Export failed: " + err.message, "error");
+                      }
+                    }}
+                    className="flex items-center gap-3 w-full px-4 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors"
+                  >
+                    <FileText className="h-4 w-4 text-emerald-600" /> Export Excel
+                  </button>
+                  <button
+                    onClick={() => { setShowMobileActions(false); setShowDeleteConfirm(true); }}
+                    className="flex items-center gap-3 w-full px-4 py-3 text-sm font-semibold text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
+                  >
+                    <Trash2 className="h-4 w-4" /> Delete Group
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
@@ -688,12 +739,15 @@ export default function GroupDetailPage() {
         </div>
         {/* Pagination */}
         {data && data.pagination.total_pages > 1 && (
-          <div className="px-8 py-6 border-t border-gray-50 dark:border-zinc-800 flex items-center bg-gray-50/30 dark:bg-zinc-800/20">
-            {/* Left Spacer */}
-            <div className="flex-1" />
+          <div className="px-4 sm:px-8 py-4 sm:py-6 border-t border-gray-50 dark:border-zinc-800 flex flex-col sm:flex-row items-center gap-3 sm:gap-0 bg-gray-50/30 dark:bg-zinc-800/20">
+            {/* Page info - shows on top on mobile */}
+            <p className="text-xs sm:text-sm text-gray-500 font-medium sm:flex-1">
+              Showing <span className="text-gray-900 dark:text-white font-bold">{Math.min(page * 15, data.pagination.total)}</span>{" "}
+              of <span className="text-gray-900 dark:text-white font-bold">{data.pagination.total}</span>
+            </p>
 
-            {/* Center Navigation */}
-            <div className="flex items-center gap-6">
+            {/* Navigation */}
+            <div className="flex items-center gap-3 sm:gap-6">
               <Button
                 variant="ghost"
                 size="sm"
@@ -702,13 +756,13 @@ export default function GroupDetailPage() {
                 onClick={() => setPage(page - 1)}
               >
                 <ChevronLeft className="h-4 w-4" />
-                <span>Previous</span>
+                <span>Prev</span>
               </Button>
               
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-500">Page {page}</span>
-                <span className="text-sm text-gray-400">of</span>
-                <span className="text-sm text-gray-400 font-medium">{data.pagination.total_pages}</span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-sm text-gray-500">Page</span>
+                <span className="text-sm font-bold text-gray-900 dark:text-white">{page}</span>
+                <span className="text-sm text-gray-400">/ {data.pagination.total_pages}</span>
               </div>
 
               <Button
@@ -721,14 +775,6 @@ export default function GroupDetailPage() {
                 <span>Next</span>
                 <ChevronRight className="h-4 w-4" />
               </Button>
-            </div>
-
-            {/* Right-aligned Stats */}
-            <div className="flex-1 flex justify-end">
-              <p className="text-sm text-gray-500 font-medium">
-                Showing <span className="text-gray-900 dark:text-white font-bold">{Math.min(page * 15, data.pagination.total)}</span>{" "}
-                of <span className="text-gray-900 dark:text-white font-bold">{data.pagination.total}</span>
-              </p>
             </div>
           </div>
         )}
