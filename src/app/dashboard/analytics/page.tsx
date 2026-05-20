@@ -79,7 +79,7 @@ export default function AnalyticsPage() {
   // ── Skeleton ───────────────────────────────────────────────────────────────
   if (loading && !dashboard) {
     return (
-      <div className="px-12 py-8 animate-pulse">
+      <div className="px-4 sm:px-6 md:px-8 lg:px-12 py-6 sm:py-8 animate-pulse">
         <div className="mb-8 space-y-3">
           <div className="h-9 w-48 bg-gray-200 dark:bg-zinc-800 rounded-md" />
           <div className="h-4 w-96 bg-gray-100 dark:bg-zinc-800/60 rounded-md" />
@@ -162,7 +162,7 @@ export default function AnalyticsPage() {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="px-12 py-8"
+      className="px-4 sm:px-6 md:px-8 lg:px-12 py-6 sm:py-8"
     >
       {/* Header */}
       <div className="mb-8">

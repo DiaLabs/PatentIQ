@@ -39,7 +39,7 @@ export default function EvaluationRulesPage() {
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="px-12 py-8"
+      className="px-4 sm:px-6 md:px-8 lg:px-12 py-6 sm:py-8"
     >
       {/* Page Title */}
       <div className="mb-8">

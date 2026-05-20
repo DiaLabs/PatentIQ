@@ -63,7 +63,7 @@ export default function SettingsPage() {
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="px-12 py-8 max-w-2xl"
+      className="px-4 sm:px-6 md:px-8 lg:px-12 py-6 sm:py-8 max-w-2xl"
     >
       {/* Header */}
       <div className="mb-8">
