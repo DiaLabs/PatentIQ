@@ -93,7 +93,7 @@ export default function OverviewPage() {
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="px-12 py-8 min-h-screen relative"
+      className="px-4 sm:px-6 md:px-8 lg:px-12 py-6 sm:py-8 min-h-screen relative"
     >
       {/* Welcome greeting — Overview only */}
       <DashboardHeader
@@ -109,85 +109,88 @@ export default function OverviewPage() {
       )}
 
       {/* Middle Section: Performance & Groups */}
-      <div className="mt-12 lg:grid lg:grid-cols-3 gap-8 items-stretch">        {/* Left: Global Performance (2/3) */}
+      <div className="mt-12 lg:grid lg:grid-cols-3 gap-8 items-stretch space-y-6 lg:space-y-0">
+        {/* Left: Global Performance (2/3) */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.1 }}
-          className="lg:col-span-2 bg-white dark:bg-zinc-900 rounded-md border border-gray-100 dark:border-zinc-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none p-8 flex flex-col h-full"
+          className="lg:col-span-2 bg-white dark:bg-zinc-900 rounded-md border border-gray-100 dark:border-zinc-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none p-4 sm:p-6 lg:p-8 flex flex-col h-full"
         >
-          <div className="flex items-center justify-between mb-10">
+          <div className="flex items-center justify-between mb-6 sm:mb-10">
             <div>
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Global Performance</h2>
-              <p className="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">System-wide evaluation overview</p>
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">Global Performance</h2>
+              <p className="mt-1 text-xs sm:text-sm font-normal text-gray-500 dark:text-gray-400">System-wide evaluation overview</p>
             </div>
             <TrendingUp className="h-5 w-5 text-indigo-500" />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 flex-1">
-            {/* Avg Score Chart/Stat */}
-            <div className="flex flex-col items-center justify-center p-6 rounded-md bg-gray-50/30 dark:bg-zinc-800/20 border border-gray-100/50 dark:border-zinc-800/50">
-              <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-4">Avg Overall Score</p>
-              <div className="relative h-28 w-28 flex items-center justify-center">
-                <svg className="h-full w-full -rotate-90">
-                  <circle cx="56" cy="56" r="50" className="stroke-gray-100 dark:stroke-zinc-800/50 fill-none" strokeWidth="8" />
-                  <motion.circle 
-                    cx="56" cy="56" r="50" 
-                    className="stroke-indigo-500 fill-none" 
-                    strokeWidth="8" 
-                    strokeDasharray="314"
-                    initial={{ strokeDashoffset: 314 }}
-                    animate={{ strokeDashoffset: 314 - (314 * (dashboard?.overview.avg_overall_score ?? 0)) / 100 }}
-                    transition={{ duration: 1, ease: "easeOut", delay: 0.5 }}
-                    strokeLinecap="round"
-                  />
-                </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {loading ? "—" : Math.round(dashboard?.overview.avg_overall_score ?? 0)}
-                  </span>
-                  <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-tighter">Percent</span>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8 flex-1">
+            <div className="lg:col-span-2 grid grid-cols-2 gap-4 sm:gap-6">
+              {/* Avg Score Chart/Stat */}
+              <div className="flex flex-col items-center justify-center p-4 sm:p-6 rounded-md bg-gray-50/30 dark:bg-zinc-800/20 border border-gray-100/50 dark:border-zinc-800/50">
+                <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2 sm:mb-4">Avg Overall Score</p>
+                <div className="relative h-20 w-20 sm:h-28 sm:w-28 flex items-center justify-center">
+                  <svg className="h-full w-full -rotate-90" viewBox="0 0 112 112">
+                    <circle cx="56" cy="56" r="50" className="stroke-gray-100 dark:stroke-zinc-800/50 fill-none" strokeWidth="8" />
+                    <motion.circle 
+                      cx="56" cy="56" r="50" 
+                      className="stroke-indigo-500 fill-none" 
+                      strokeWidth="8" 
+                      strokeDasharray="314"
+                      initial={{ strokeDashoffset: 314 }}
+                      animate={{ strokeDashoffset: 314 - (314 * (dashboard?.overview.avg_overall_score ?? 0)) / 100 }}
+                      transition={{ duration: 1, ease: "easeOut", delay: 0.5 }}
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white leading-none">
+                      {loading ? "—" : Math.round(dashboard?.overview.avg_overall_score ?? 0)}
+                    </span>
+                    <span className="text-[8px] sm:text-[10px] font-semibold text-gray-400 uppercase tracking-tighter mt-0.5 sm:mt-1">Percent</span>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Total Submissions */}
-            <div className="flex flex-col items-center justify-center p-6 rounded-md bg-gray-50/30 dark:bg-zinc-800/20 border border-gray-100/50 dark:border-zinc-800/50">
-              <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-4">Total Submissions</p>
-              <div className="text-center">
-                <span className="text-6xl font-black text-gray-900 dark:text-white leading-none">
-                  {loading ? (
-                    <div className="h-[60px] w-24 bg-gray-100 dark:bg-zinc-800 rounded animate-pulse" />
-                  ) : dashboard?.overview.total_submissions}
-                </span>
-                <p className="mt-3 text-[11px] font-bold text-gray-500 dark:text-gray-400 max-w-[140px] mx-auto leading-tight">
-                  Evaluated student documents across all groups
-                </p>
+              {/* Total Submissions */}
+              <div className="flex flex-col items-center justify-center p-4 sm:p-6 rounded-md bg-gray-50/30 dark:bg-zinc-800/20 border border-gray-100/50 dark:border-zinc-800/50">
+                <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2 sm:mb-4">Total Submissions</p>
+                <div className="text-center">
+                  <span className="text-4xl sm:text-6xl font-black text-gray-900 dark:text-white leading-none">
+                    {loading ? (
+                      <div className="h-10 sm:h-[60px] w-16 sm:w-24 bg-gray-100 dark:bg-zinc-800 rounded animate-pulse" />
+                    ) : dashboard?.overview.total_submissions}
+                  </span>
+                  <p className="mt-1.5 sm:mt-3 text-[9px] sm:text-[11px] font-bold text-gray-500 dark:text-gray-400 max-w-[140px] mx-auto leading-tight">
+                    Evaluated student documents across all groups
+                  </p>
+                </div>
               </div>
             </div>
 
             {/* Volume Stats */}
-            <div className="flex flex-col gap-4">
-              <div className="flex-1 p-5 rounded-md bg-emerald-50/30 dark:bg-emerald-900/10 border border-emerald-100/30 dark:border-emerald-900/20">
+            <div className="flex flex-row lg:flex-col gap-3 sm:gap-4">
+              <div className="flex-1 p-3 sm:p-5 rounded-md bg-emerald-50/30 dark:bg-emerald-900/10 border border-emerald-100/30 dark:border-emerald-900/20 flex flex-col justify-center">
                 <p className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1">Active Groups</p>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-3xl font-bold text-gray-900 dark:text-white leading-none">
+                <div className="flex items-baseline gap-1.5 sm:gap-2">
+                  <span className="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white leading-none">
                     {loading ? (
-                      <div className="h-8 w-12 bg-gray-100 dark:bg-zinc-800 rounded animate-pulse" />
+                      <div className="h-6 sm:h-8 w-8 sm:w-12 bg-gray-100 dark:bg-zinc-800 rounded animate-pulse" />
                     ) : dashboard?.overview.total_groups}
                   </span>
-                  <span className="text-xs text-emerald-600 font-bold">Cohorts</span>
+                  <span className="text-[10px] sm:text-xs text-emerald-600 font-bold">Cohorts</span>
                 </div>
               </div>
-              <div className="flex-1 p-5 rounded-md bg-red-50/30 dark:bg-red-900/10 border border-red-100/30 dark:border-red-900/20">
+              <div className="flex-1 p-3 sm:p-5 rounded-md bg-red-50/30 dark:bg-red-900/10 border border-red-100/30 dark:border-red-900/20 flex flex-col justify-center">
                 <p className="text-[9px] font-bold text-red-600 dark:text-red-400 uppercase tracking-widest mb-1">Flagged Items</p>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-3xl font-bold text-gray-900 dark:text-white leading-none">
+                <div className="flex items-baseline gap-1.5 sm:gap-2">
+                  <span className="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white leading-none">
                     {loading ? (
-                      <div className="h-8 w-12 bg-gray-100 dark:bg-zinc-800 rounded animate-pulse" />
+                      <div className="h-6 sm:h-8 w-8 sm:w-12 bg-gray-100 dark:bg-zinc-800 rounded animate-pulse" />
                     ) : dashboard?.overview.total_rejected}
                   </span>
-                  <span className="text-[10px] text-red-500 font-bold uppercase tracking-tighter">Action Required</span>
+                  <span className="text-[8px] sm:text-[10px] text-red-500 font-bold uppercase tracking-tighter">Required</span>
                 </div>
               </div>
             </div>
@@ -199,7 +202,7 @@ export default function OverviewPage() {
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.4, delay: 0.2 }}
-          className="bg-white dark:bg-zinc-900 rounded-md border border-gray-100 dark:border-zinc-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none p-8 h-full flex flex-col"
+          className="hidden lg:flex bg-white dark:bg-zinc-900 rounded-md border border-gray-100 dark:border-zinc-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none p-8 h-full flex-col"
         >
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Recent Groups</h2>
@@ -257,7 +260,7 @@ export default function OverviewPage() {
       </div>
       
       {/* Recent Submissions Card */}
-      <div className="mt-12 lg:grid lg:grid-cols-3 gap-8 items-start">
+      <div className="mt-12 lg:grid lg:grid-cols-3 gap-8 items-start space-y-6 lg:space-y-0">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -272,7 +275,7 @@ export default function OverviewPage() {
           </div>
 
           {/* Table */}
-          <div className="pb-24">
+          <div className="pb-6 overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-50 dark:border-zinc-800 bg-gray-50/20 dark:bg-zinc-800/10">
@@ -282,7 +285,6 @@ export default function OverviewPage() {
                   <th className="px-4 py-4 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">Group</th>
                   <th className="px-4 py-4 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">Status</th>
                   <th className="px-4 py-4 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">Score</th>
-                  <th className="px-4 py-4 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">Submitted</th>
                   <th className="px-6 py-4 text-right"></th>
                 </tr>
               </thead>
@@ -323,7 +325,7 @@ export default function OverviewPage() {
                       </td>
                       <td className="px-4 py-4">
                         <span className="text-xs font-mono text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-zinc-800 px-2 py-0.5 rounded">
-                          {s.unique_id || "—"}
+                           {s.unique_id || "—"}
                         </span>
                       </td>
                       <td className="px-4 py-4">
@@ -347,11 +349,6 @@ export default function OverviewPage() {
                           <span className="text-gray-300 dark:text-zinc-600">—</span>
                         )}
                       </td>
-                      <td className="px-4 py-4">
-                        <span className="text-[11px] text-gray-400 font-medium">
-                          {formatRelativeTime(s.submitted_at)}
-                        </span>
-                      </td>
                       <td className="px-6 py-4 text-right">
                         <SubmissionActionMenu 
                           submissionId={s.submission_id} 
@@ -364,7 +361,7 @@ export default function OverviewPage() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={7} className="px-8 py-12 text-center text-gray-400 italic">
+                    <td colSpan={6} className="px-8 py-12 text-center text-gray-400 italic">
                       No recent submissions found
                     </td>
                   </tr>
@@ -379,12 +376,12 @@ export default function OverviewPage() {
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.4, delay: 0.3 }}
-          className="bg-white dark:bg-zinc-900 rounded-md border border-gray-100 dark:border-zinc-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none p-8"
+          className="bg-white dark:bg-zinc-900 rounded-md border border-gray-100 dark:border-zinc-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none p-4 sm:p-6 lg:p-8"
         >
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-8">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-6 sm:mb-8">
             Quick Actions
           </h2>
-          <div className="space-y-4">
+          <div className="grid grid-cols-2 lg:grid-cols-1 gap-4">
             <QuickActionItem
               icon={<FileText className="h-5 w-5" />}
               title="View All Submissions"
@@ -584,18 +581,18 @@ function QuickActionItem({
   return (
     <Link
       href={href}
-      className="flex items-center gap-4 p-4 rounded-md border border-gray-50 dark:border-zinc-800 hover:border-gray-200 dark:hover:border-zinc-700 hover:bg-gray-50/50 dark:hover:bg-zinc-800/30 transition-all group"
+      className="flex flex-col items-center text-center justify-center p-3 sm:p-4 rounded-md border border-gray-50 dark:border-zinc-800 hover:border-gray-200 dark:hover:border-zinc-700 hover:bg-gray-50/50 dark:hover:bg-zinc-800/30 transition-all group lg:flex-row lg:items-center lg:text-left lg:gap-4 h-full"
     >
-      <div className={`h-11 w-11 rounded-full flex items-center justify-center shrink-0 ${color}`}>
+      <div className={`h-10 w-10 sm:h-11 sm:w-11 rounded-full flex items-center justify-center shrink-0 mb-2 lg:mb-0 ${color}`}>
         {icon}
       </div>
       <div className="flex-1 min-w-0">
-        <h3 className="text-sm font-bold text-gray-900 dark:text-white group-hover:text-indigo-600 transition-colors">
+        <h3 className="text-xs sm:text-sm font-bold text-gray-900 dark:text-white group-hover:text-indigo-600 transition-colors line-clamp-1 lg:line-clamp-none">
           {title}
         </h3>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">{subtitle}</p>
+        <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">{subtitle}</p>
       </div>
-      <ArrowRight className="h-4 w-4 text-gray-300 group-hover:text-gray-400 group-hover:translate-x-0.5 transition-all" />
+      <ArrowRight className="hidden lg:block h-4 w-4 text-gray-300 group-hover:text-gray-400 group-hover:translate-x-0.5 transition-all" />
     </Link>
   );
 }
