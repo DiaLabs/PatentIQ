@@ -63,25 +63,25 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                 initial={{ opacity: 0, y: 20, scale: 0.9 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
-                className={`pointer-events-auto flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl border ${
+                className={`pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-md shadow-xl border bg-white dark:bg-zinc-900 ${
                   t.type === 'success' 
-                    ? 'bg-emerald-50 border-emerald-100 text-emerald-800 dark:bg-emerald-900/20 dark:border-emerald-800 dark:text-emerald-300' 
+                    ? 'border-emerald-100 dark:border-emerald-900/30' 
                     : t.type === 'error'
-                    ? 'bg-red-50 border-red-100 text-red-800 dark:bg-red-900/20 dark:border-red-800 dark:text-red-300'
-                    : 'bg-indigo-50 border-indigo-100 text-indigo-800 dark:bg-indigo-900/20 dark:border-indigo-800 dark:text-indigo-300'
+                    ? 'border-red-100 dark:border-red-900/30'
+                    : 'border-indigo-100 dark:border-indigo-900/30'
                 }`}
               >
-                {t.type === 'success' && <CheckCircle2 className="h-5 w-5 shrink-0" />}
-                {t.type === 'error' && <AlertCircle className="h-5 w-5 shrink-0" />}
-                {t.type === 'info' && <Info className="h-5 w-5 shrink-0" />}
+                {t.type === 'success' && <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500" />}
+                {t.type === 'error' && <AlertCircle className="h-5 w-5 shrink-0 text-red-500" />}
+                {t.type === 'info' && <Info className="h-5 w-5 shrink-0 text-indigo-500" />}
                 
-                <span className="text-sm font-semibold pr-2">{t.message}</span>
+                <span className="text-sm font-semibold pr-2 text-gray-900 dark:text-gray-100">{t.message}</span>
                 
                 <button 
                   onClick={() => setToasts((prev) => prev.filter((toast) => toast.id !== t.id))}
                   className="p-1 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
                 >
-                  <X className="h-4 w-4 opacity-50" />
+                  <X className="h-4 w-4 text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 transition-colors" />
                 </button>
               </motion.div>
             ))}

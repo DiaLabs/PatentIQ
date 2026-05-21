@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { fetchSubmissionReport } from "@/lib/api";
 import { generatePatentReport } from "@/lib/pdf-generator";
-import { X, Loader2, Download, FileText, AlertTriangle, Link2 } from "lucide-react";
+import { X, Loader2, Download, FileText, AlertTriangle, Link2, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ReportContent } from "./report-content";
 import { Portal } from "@/components/ui/portal";
@@ -23,12 +23,15 @@ export function ReportModal({ submissionId, groupId, submitterName, uniqueId, on
   const [generatingPdf, setGeneratingPdf] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [reportData, setReportData] = useState<any>(null);
+  const [copied, setCopied] = useState(false);
   const { toast } = useToast();
 
   const handleShare = async () => {
     try {
       const publicUrl = `${window.location.origin}/report/${groupId}/${submissionId}`;
       await navigator.clipboard.writeText(publicUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
       toast("Report link copied to clipboard", "success");
     } catch (err) {
       toast("Failed to copy link", "error");
@@ -134,52 +137,64 @@ export function ReportModal({ submissionId, groupId, submitterName, uniqueId, on
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-8 py-5 border-b border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex-shrink-0">
-            <div className="flex items-center gap-4">
-              {/* Icon */}
-              <div className="h-10 w-10 flex items-center justify-center">
-                <img src="/icon0.svg" alt="Logo" className="h-10 w-10" />
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between px-4 sm:px-8 py-4 sm:py-5 border-b border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex-shrink-0 gap-4 sm:gap-0">
+            <div className="flex items-start sm:items-center justify-between sm:justify-start gap-4">
+              <div className="flex items-center gap-3 sm:gap-4">
+                {/* Icon */}
+                <div className="h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center shrink-0">
+                  <img src="/icon0.svg" alt="Logo" className="h-full w-full" />
+                </div>
+                <div>
+                  <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white leading-tight">
+                    Evaluation Report
+                  </h3>
+                  <p className="text-[10px] sm:text-xs text-gray-400 mt-0.5 font-medium leading-tight">
+                    Patent originality & quality assessment
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                  Evaluation Report
-                </h3>
-                <p className="text-xs text-gray-400 mt-0.5 font-medium">
-                  Patent originality & quality assessment
-                </p>
-              </div>
+              {/* Close button on mobile moves here to top right */}
+              <button
+                onClick={onClose}
+                className="sm:hidden h-8 w-8 flex items-center justify-center rounded-md text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
+              >
+                <X className="h-4 w-4" />
+              </button>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3">
               {reportData && (
                 <>
                   <Button
                     onClick={handleShare}
                     variant="outline"
-                    className="rounded-md border-gray-200 dark:border-zinc-700 text-gray-600 dark:text-gray-300 px-4 gap-2 h-[42px] text-sm font-semibold shadow-sm hover:bg-gray-50 dark:hover:bg-zinc-800 transition-all active:scale-95"
+                    className="flex-1 sm:flex-none rounded-md border-gray-200 dark:border-zinc-700 text-gray-600 dark:text-gray-300 px-3 sm:px-4 gap-2 h-10 sm:h-[42px] text-xs sm:text-sm font-semibold shadow-sm hover:bg-gray-50 dark:hover:bg-zinc-800 transition-all active:scale-95"
                   >
-                    <Link2 className="h-4 w-4" />
-                    Copy link
+                    {copied ? (
+                      <><Check className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-500" /> Copied</>
+                    ) : (
+                      <><Link2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Copy link</>
+                    )}
                   </Button>
                   
                   <Button
                     onClick={handleDownload}
                     disabled={generatingPdf}
-                    className="rounded-md bg-indigo-600 hover:bg-indigo-700 text-white px-5 gap-2 h-[42px] text-sm font-semibold shadow-sm transition-all active:scale-95"
+                    className="flex-1 sm:flex-none rounded-md bg-indigo-600 hover:bg-indigo-700 text-white px-3 sm:px-5 gap-2 h-10 sm:h-[42px] text-xs sm:text-sm font-semibold shadow-sm transition-all active:scale-95"
                   >
                   {generatingPdf ? (
-                    <><Loader2 className="h-4 w-4 animate-spin" /> Preparing PDF…</>
+                    <><Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin" /> <span className="hidden sm:inline">Preparing PDF…</span><span className="sm:hidden">Preparing…</span></>
                   ) : (
-                    <><Download className="h-4 w-4" /> Download PDF</>
+                    <><Download className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Download <span className="hidden sm:inline">PDF</span></>
                   )}
                 </Button>
                 </>
               )}
 
-              {/* Close button */}
+              {/* Close button on desktop */}
               <button
                 onClick={onClose}
-                className="h-9 w-9 flex items-center justify-center rounded-md text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
+                className="hidden sm:flex h-9 w-9 items-center justify-center rounded-md text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -187,7 +202,7 @@ export function ReportModal({ submissionId, groupId, submitterName, uniqueId, on
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-y-auto bg-gray-50/50 dark:bg-[#0a0a0a] p-8">
+          <div className="flex-1 overflow-y-auto bg-gray-50/50 dark:bg-[#0a0a0a] p-2 sm:p-8">
             {loading ? (
               <div className="h-full flex flex-col items-center justify-center gap-6">
                 <div className="relative">
