@@ -56,10 +56,7 @@ const STATUS_OPTIONS = [
   { value: "COMPLETED", label: "Completed" },
   { value: "PROCESSING", label: "In Progress" },
   { value: "QUEUED", label: "Queued" },
-  { value: "PENDING", label: "Pending" },
   { value: "FAILED", label: "Failed" },
-  { value: "REJECTED", label: "Rejected" },
-  { value: "PAUSED", label: "Paused" },
 ];
 
 const GROUP_COLORS = [
@@ -127,7 +124,7 @@ export default function GroupDetailPage() {
     if (!isPolling && isManual) setRefreshing(true);
     if (!isPolling && !isManual) {
       // If first load, show full page skeleton
-      if (!data) setLoading(true);
+      if (!dataRef.current) setLoading(true);
       // Otherwise only show table skeleton
       else setTableLoading(true);
     }
@@ -185,7 +182,7 @@ export default function GroupDetailPage() {
         setRefreshing(false);
       }
     }
-  }, [groupId, page, statusFilter, search, setRefreshing, !!data, refreshProfile]);
+  }, [groupId, page, statusFilter, search, setRefreshing, refreshProfile]);
 
   // Polling for processing submissions in real-time
   useEffect(() => {
@@ -423,13 +420,13 @@ export default function GroupDetailPage() {
         </div>
 
         {/* Controls row */}
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2 w-full">
           <CustomSelect
             value={statusFilter}
             onChange={(v) => { setStatusFilter(v); setPage(1); }}
             options={STATUS_OPTIONS}
             placeholder="All Statuses"
-            className="w-40"
+            className="w-[130px] sm:w-40 flex-1"
           />
 
           {/* Select button */}
@@ -489,15 +486,13 @@ export default function GroupDetailPage() {
           </Button>
 
           {/* Mobile: More actions dropdown */}
-          <div className="relative sm:hidden" ref={mobileActionsRef}>
+          <div className="relative sm:hidden ml-auto shrink-0" ref={mobileActionsRef}>
             <Button
               variant="outline"
               onClick={() => setShowMobileActions(!showMobileActions)}
-              className="gap-1.5 h-[42px] rounded-md font-semibold"
+              className="h-[42px] w-[42px] p-0 flex items-center justify-center rounded-md font-semibold"
             >
-              <MoreVertical className="h-4 w-4" />
-              Actions
-              <ChevronDown className={`h-3 w-3 transition-transform ${showMobileActions ? 'rotate-180' : ''}`} />
+              <MoreVertical className="h-5 w-5" />
             </Button>
             {showMobileActions && (
               <>
@@ -710,9 +705,14 @@ export default function GroupDetailPage() {
                     <td className="px-6 py-5 text-right">
                       <button
                         onClick={(e) => {
-                          const rect = e.currentTarget.getBoundingClientRect();
-                          setOpenMenuId(s.submission_id);
-                          setMenuAnchor({ top: rect.top, bottom: rect.bottom, right: rect.right });
+                          if (openMenuId === s.submission_id) {
+                            setOpenMenuId(null);
+                            setMenuAnchor(null);
+                          } else {
+                            const rect = e.currentTarget.getBoundingClientRect();
+                            setOpenMenuId(s.submission_id);
+                            setMenuAnchor(rect);
+                          }
                         }}
                         className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors menu-trigger"
                       >
@@ -853,17 +853,18 @@ export default function GroupDetailPage() {
         const activeRow = data?.submissions.find(s => s.submission_id === openMenuId);
         if (!activeRow) return null;
         
-        const menuHeight = 200; // Estimated height of the menu
         const spaceBelow = window.innerHeight - menuAnchor.bottom;
-        const showAbove = spaceBelow < menuHeight + 20;
+        const showAbove = spaceBelow < 220; // threshold
 
         return (
           <Portal>
             <div
-              className="fixed z-50 w-52 bg-white dark:bg-zinc-900 rounded-md border border-gray-100 dark:border-zinc-800 shadow-2xl overflow-hidden py-1 menu-container"
+              className="fixed z-[9999] w-56 bg-white dark:bg-zinc-900 rounded-md border border-gray-100 dark:border-zinc-800 shadow-xl overflow-hidden py-1.5 menu-container"
               style={{
-                top: showAbove ? menuAnchor.top - menuHeight - 4 : menuAnchor.bottom + 4,
-                left: menuAnchor.right - 208,
+                ...(showAbove 
+                  ? { bottom: window.innerHeight - menuAnchor.top + 4 }
+                  : { top: menuAnchor.bottom + 4 }),
+                left: Math.max(16, menuAnchor.right - 224),
               }}
               onMouseDown={(e) => e.stopPropagation()}
             >
@@ -881,9 +882,9 @@ export default function GroupDetailPage() {
                     toast("Download started", "success");
                   } catch (err: any) { toast("Download failed: " + err.message, "error"); }
                 }}
-                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors"
+                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors whitespace-nowrap"
               >
-                <Download className="h-4 w-4 text-indigo-500" />
+                <Download className="h-4 w-4 text-indigo-500 shrink-0" />
                 Download Document
               </button>
 
@@ -924,9 +925,9 @@ export default function GroupDetailPage() {
                   finally { setRetryingId(null); }
                 }}
                 disabled={retryingId === activeRow.submission_id}
-                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/10 transition-colors disabled:opacity-50"
+                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-amber-600 dark:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/10 transition-colors whitespace-nowrap"
               >
-                <RotateCcw className={cn("h-4 w-4", retryingId === activeRow.submission_id && "animate-spin")} />
+                <RotateCcw className={`h-4 w-4 shrink-0 ${retryingId === activeRow.submission_id ? "animate-spin" : ""}`} />
                 Re-evaluate
               </button>
 
@@ -937,9 +938,9 @@ export default function GroupDetailPage() {
                   setOpenMenuId(null); setMenuAnchor(null);
                   setDeleteTarget({ id: activeRow.submission_id, name: activeRow.file_name || "this submission" });
                 }}
-                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
+                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors whitespace-nowrap"
               >
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="h-4 w-4 shrink-0" />
                 Delete Submission
               </button>
             </div>

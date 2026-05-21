@@ -10,6 +10,7 @@ import { StatusBadge } from "@/components/dashboard/status-badge";
 import { useToast } from "@/context/ToastContext";
 import { Button } from "@/components/ui/button";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import { Portal } from "@/components/ui/portal";
 import {
   Users,
   AlertCircle,
@@ -434,6 +435,8 @@ function SubmissionActionMenu({
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const [menuAnchor, setMenuAnchor] = useState<DOMRect | null>(null);
   const router = useRouter();
   const { toast } = useToast();
   const [isDeleting, setIsDeleting] = useState(false);
@@ -442,7 +445,8 @@ function SubmissionActionMenu({
   useEffect(() => {
     if (!isOpen) return;
     const handler = (e: MouseEvent | TouchEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node) &&
+          buttonRef.current && !buttonRef.current.contains(e.target as Node)) {
         setIsOpen(false);
       }
     };
@@ -455,6 +459,15 @@ function SubmissionActionMenu({
       window.removeEventListener("scroll", scrollHandler, true);
     };
   }, [isOpen]);
+
+  const toggleMenu = (e: React.MouseEvent) => {
+    if (!isOpen) {
+      setMenuAnchor(e.currentTarget.getBoundingClientRect());
+      setIsOpen(true);
+    } else {
+      setIsOpen(false);
+    }
+  };
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -504,50 +517,64 @@ function SubmissionActionMenu({
   };
 
   return (
-    <div className="relative" ref={menuRef}>
+    <>
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        ref={buttonRef}
+        onClick={toggleMenu}
         disabled={isDeleting}
-        className="p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
+        className="p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50 menu-trigger"
       >
         <MoreVertical className="h-4 w-4" />
       </button>
 
       <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: -10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: -10 }}
-            className="absolute right-0 mt-2 w-48 bg-white dark:bg-zinc-900 rounded-md border border-gray-100 dark:border-zinc-800 shadow-xl z-50 py-1.5 overflow-hidden"
-          >
+        {isOpen && menuAnchor && (() => {
+          const spaceBelow = window.innerHeight - menuAnchor.bottom;
+          const showAbove = spaceBelow < 220; // threshold
+          return (
+            <Portal>
+              <motion.div
+                ref={menuRef}
+                initial={{ opacity: 0, scale: 0.95, y: showAbove ? 10 : -10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: showAbove ? 10 : -10 }}
+                className="fixed w-56 bg-white dark:bg-zinc-900 rounded-md border border-gray-100 dark:border-zinc-800 shadow-xl z-[9999] py-1.5 overflow-hidden menu-container"
+                style={{
+                  ...(showAbove 
+                    ? { bottom: window.innerHeight - menuAnchor.top + 4 }
+                    : { top: menuAnchor.bottom + 4 }),
+                  left: Math.max(16, menuAnchor.right - 224),
+                }}
+              >
             <button
               onClick={() => router.push(`/dashboard/submissions?id=${submissionId}`)}
-              className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors text-left"
+              className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors text-left whitespace-nowrap"
             >
-              <Eye className="h-4 w-4 text-indigo-500" /> View Details
+              <Eye className="h-4 w-4 text-indigo-500 shrink-0" /> View Details
             </button>
             <button
               onClick={handleDownload}
-              className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors text-left"
+              className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors text-left whitespace-nowrap"
             >
-              <Download className="h-4 w-4 text-blue-500" /> Download PDF
+              <Download className="h-4 w-4 text-blue-500 shrink-0" /> Download PDF
             </button>
             <button
               onClick={handleShare}
-              className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors text-left"
+              className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors text-left whitespace-nowrap"
             >
-              <Share2 className="h-4 w-4 text-emerald-500" /> Share Report
+              <Share2 className="h-4 w-4 text-emerald-500 shrink-0" /> Share Report
             </button>
             <div className="h-px bg-gray-50 dark:bg-zinc-800 my-1" />
             <button
               onClick={() => setIsDeleteDialogOpen(true)}
-              className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors text-left"
+              className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors text-left whitespace-nowrap"
             >
-              <Trash2 className="h-4 w-4" /> Delete Submission
+              <Trash2 className="h-4 w-4 shrink-0" /> Delete Submission
             </button>
-          </motion.div>
-        )}
+              </motion.div>
+            </Portal>
+          );
+        })()}
       </AnimatePresence>
 
       <ConfirmationDialog
@@ -561,7 +588,7 @@ function SubmissionActionMenu({
         confirmLabel="Delete"
         cancelLabel="Cancel"
       />
-    </div>
+    </>
   );
 }
 

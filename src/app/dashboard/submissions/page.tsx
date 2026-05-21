@@ -18,6 +18,7 @@ import {
   MoreVertical,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   Download,
   AlertCircle,
   Calendar,
@@ -41,11 +42,8 @@ const STATUS_OPTIONS = [
   { value: "", label: "All Statuses" },
   { value: "COMPLETED", label: "Completed" },
   { value: "PROCESSING", label: "In Progress" },
-  { value: "QUEUED", label: "Queued" },
-  { value: "PENDING", label: "Pending" },
+  { value: "PENDING", label: "Queued" },
   { value: "FAILED", label: "Failed" },
-  { value: "REJECTED", label: "Rejected" },
-  { value: "PAUSED", label: "Paused" },
 ];
 
 export default function SubmissionsPage() {
@@ -85,6 +83,10 @@ export default function SubmissionsPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isBulkOperating, setIsBulkOperating] = useState(false);
   const [bulkActionConfirm, setBulkActionConfirm] = useState<'delete' | 'reevaluate' | null>(null);
+  
+  // Mobile Actions State
+  const [showMobileActions, setShowMobileActions] = useState(false);
+  const mobileActionsRef = useRef<HTMLDivElement>(null);
 
   // Close menu on scroll or click outside
   useEffect(() => {
@@ -95,6 +97,9 @@ export default function SubmissionsPage() {
       const target = e.target as HTMLElement;
       if (openMenuId && !target.closest('.menu-container') && !target.closest('.menu-trigger')) {
         close();
+      }
+      if (showMobileActions && mobileActionsRef.current && !mobileActionsRef.current.contains(target)) {
+        setShowMobileActions(false);
       }
     };
     window.addEventListener("mousedown", handleOutsideClick);
@@ -122,7 +127,7 @@ export default function SubmissionsPage() {
   const load = useCallback(async (isPolling = false, isManual = false) => {
     if (!isPolling && isManual) setRefreshing(true);
     if (!isPolling && !isManual) {
-      if (!data) setLoading(true);
+      if (!dataRef.current) setLoading(true);
       else setTableLoading(true);
     }
     if (!isPolling) setError(null);
@@ -181,7 +186,7 @@ export default function SubmissionsPage() {
         setRefreshing(false);
       }
     }
-  }, [search, status, group, page, setRefreshing, !!data, refreshProfile]);
+  }, [search, status, group, page, setRefreshing, refreshProfile]);
 
   // Polling for processing submissions
   useEffect(() => {
@@ -318,14 +323,14 @@ export default function SubmissionsPage() {
         </div>
 
         {/* Controls row */}
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2 w-full">
           {/* Group Dropdown */}
           <CustomSelect
             value={group}
             onChange={(v) => { setGroup(v); setPage(1); }}
             options={groupOptions}
             placeholder="All Groups"
-            className="w-36"
+            className="w-[130px] sm:w-36 flex-1"
           />
 
           {/* Status Dropdown */}
@@ -334,11 +339,12 @@ export default function SubmissionsPage() {
             onChange={(v) => { setStatus(v); setPage(1); }}
             options={STATUS_OPTIONS}
             placeholder="All Statuses"
-            className="w-36"
+            className="w-[130px] sm:w-36 flex-1"
           />
 
           <div className="hidden sm:block flex-1" />
 
+          {/* Desktop: Show Export + Select directly */}
           <Button
             variant="outline"
             onClick={() => {
@@ -346,28 +352,74 @@ export default function SubmissionsPage() {
               setSelectedIds(new Set());
             }}
             className={cn(
-              "gap-2 h-[42px] rounded-md font-semibold transition-all border-indigo-100 dark:border-indigo-900/30",
+              "hidden sm:flex gap-2 h-[42px] rounded-md font-semibold transition-all border-indigo-100 dark:border-indigo-900/30",
               isSelectionMode 
                 ? "bg-indigo-600 text-white hover:bg-indigo-700 hover:text-white border-indigo-600" 
                 : "text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/10"
             )}
           >
             {isSelectionMode ? (
-              <><X className="h-4 w-4" /> <span className="hidden sm:inline">Cancel</span></>
+              <><X className="h-4 w-4" /> Cancel</>
             ) : (
-              <><MousePointer2 className="h-4 w-4" /> <span className="hidden sm:inline">Select</span></>
+              <><MousePointer2 className="h-4 w-4" /> Select</>
             )}
           </Button>
 
           <Button
             variant="outline"
             onClick={() => setShowExportModal(true)}
-            className="rounded-md gap-2 h-[42px]"
+            className="hidden sm:flex rounded-md gap-2 h-[42px] font-semibold"
           >
             <FileSpreadsheet className="h-4 w-4 text-emerald-600" />
-            <span className="hidden sm:inline">Export as Excel</span>
-            <span className="sm:hidden">Export</span>
+            Export as Excel
           </Button>
+
+          {/* Mobile: More actions dropdown */}
+          <div className="relative sm:hidden ml-auto shrink-0" ref={mobileActionsRef}>
+            <Button
+              variant="outline"
+              onClick={() => setShowMobileActions(!showMobileActions)}
+              className="h-[42px] w-[42px] p-0 flex items-center justify-center rounded-md font-semibold"
+            >
+              <MoreVertical className="h-5 w-5" />
+            </Button>
+            {showMobileActions && (
+              <>
+                <div className="fixed inset-0 z-20" onClick={() => setShowMobileActions(false)} />
+                <div className="absolute right-0 top-full mt-1 z-30 bg-white dark:bg-zinc-900 rounded-md border border-gray-100 dark:border-zinc-800 shadow-lg overflow-hidden w-44">
+                  <button
+                    onClick={() => {
+                      setShowMobileActions(false);
+                      setIsSelectionMode(!isSelectionMode);
+                      setSelectedIds(new Set());
+                    }}
+                    className={cn(
+                      "w-full flex items-center gap-3 px-4 py-2 text-sm font-medium transition-colors text-left",
+                      isSelectionMode 
+                        ? "text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20" 
+                        : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800"
+                    )}
+                  >
+                    {isSelectionMode ? (
+                      <><X className="h-4 w-4 shrink-0 text-gray-500" /> Cancel Selection</>
+                    ) : (
+                      <><MousePointer2 className="h-4 w-4 shrink-0 text-indigo-500" /> Select</>
+                    )}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowMobileActions(false);
+                      setShowExportModal(true);
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-2 text-sm text-emerald-600 dark:text-emerald-500 font-medium hover:bg-emerald-50 dark:hover:bg-emerald-900/10 transition-colors text-left"
+                  >
+                    <FileSpreadsheet className="h-4 w-4" />
+                    Export as Excel
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
@@ -566,8 +618,9 @@ export default function SubmissionsPage() {
                             setOpenMenuId(null);
                             setMenuAnchor(null);
                           } else {
-                            setMenuAnchor(e.currentTarget.getBoundingClientRect());
+                            const rect = e.currentTarget.getBoundingClientRect();
                             setOpenMenuId(s.submission_id);
+                            setMenuAnchor(rect);
                           }
                         }}
                         className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors menu-trigger"
@@ -646,18 +699,19 @@ export default function SubmissionsPage() {
 
       {/* Portal-rendered context menu — renders at document root, never clips */}
       {openMenuId && menuAnchor && (() => {
-        const menuHeight = 200; // Expected height
         const spaceBelow = window.innerHeight - menuAnchor.bottom;
-        const showAbove = spaceBelow < menuHeight + 20;
+        const showAbove = spaceBelow < 220; // threshold
         const activeRow = data?.submissions.find(s => s.submission_id === openMenuId);
         if (!activeRow) return null;
         return (
           <Portal>
             <div
-              className="fixed z-50 w-52 bg-white dark:bg-zinc-900 rounded-md border border-gray-100 dark:border-zinc-800 shadow-2xl overflow-hidden py-1 menu-container"
+              className="fixed z-[9999] w-56 bg-white dark:bg-zinc-900 rounded-md border border-gray-100 dark:border-zinc-800 shadow-xl overflow-hidden py-1.5 menu-container"
               style={{
-                top: showAbove ? menuAnchor.top - menuHeight - 4 : menuAnchor.bottom + 4,
-                left: menuAnchor.right - 208,
+                ...(showAbove 
+                  ? { bottom: window.innerHeight - menuAnchor.top + 4 }
+                  : { top: menuAnchor.bottom + 4 }),
+                left: Math.max(16, menuAnchor.right - 224),
               }}
               onMouseDown={(e) => e.stopPropagation()}
             >
@@ -675,9 +729,9 @@ export default function SubmissionsPage() {
                     toast("Download started", "success");
                   } catch (err: any) { toast("Download failed: " + err.message, "error"); }
                 }}
-                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors"
+                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors whitespace-nowrap"
               >
-                <Download className="h-4 w-4 text-indigo-500" />
+                <Download className="h-4 w-4 text-indigo-500 shrink-0" />
                 Download Document
               </button>
 
@@ -720,9 +774,9 @@ export default function SubmissionsPage() {
                   finally { setRetryingId(null); }
                 }}
                 disabled={retryingId === activeRow.submission_id}
-                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/10 transition-colors disabled:opacity-50"
+                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-amber-600 dark:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/10 transition-colors whitespace-nowrap"
               >
-                <RotateCcw className={`h-4 w-4 ${retryingId === activeRow.submission_id ? "animate-spin" : ""}`} />
+                <RotateCcw className={`h-4 w-4 shrink-0 ${retryingId === activeRow.submission_id ? "animate-spin" : ""}`} />
                 Re-evaluate
               </button>
 
@@ -733,9 +787,9 @@ export default function SubmissionsPage() {
                   setOpenMenuId(null); setMenuAnchor(null);
                   setDeleteTarget({ id: activeRow.submission_id, name: activeRow.file_name });
                 }}
-                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
+                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors whitespace-nowrap"
               >
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="h-4 w-4 shrink-0" />
                 Delete Submission
               </button>
             </div>
