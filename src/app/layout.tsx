@@ -8,9 +8,67 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "PatentIQ — Smarter Patent Evaluation, Stronger Innovations",
+  title: {
+    default: "PatentIQ — Smarter Patent Evaluation, Stronger Innovations",
+    template: "%s | PatentIQ",
+  },
   description:
     "PatentIQ combines AI, prior art search, and mentor-defined criteria to evaluate patents with accuracy, consistency, and clarity.",
+  keywords: [
+    "patetntiq",
+    "patent",
+    "dialabs",
+    "dia",
+    "dialabs.tech",
+    "patentiq dialabs",
+    "dialabs patentiq",
+    "itesh dialabs",
+    "itesh patentiq",
+    "dhruv dialabs",
+    "dhruv patentiq",
+    "aditya dialabs",
+    "aditya patentiq",
+    "codexdhruv",
+    "iteshxt",
+    "aditanupam",
+    "patent iq",
+    "patntiq",
+    "PatentIQ"
+  ],
+  authors: [
+    { name: "Itesh Singh Tomar", url: "https://iteshxt.me" },
+    { name: "Dhruv Sen", url: "https://codexdhruv.dev" },
+    { name: "Aditya Kumar Anupam", url: "https://aditanupam.dev" }
+  ],
+  creator: "PatentIQ",
+  publisher: "PatentIQ",
+  applicationName: "PatentIQ",
+  openGraph: {
+    title: "PatentIQ — Smarter Patent Evaluation, Stronger Innovations",
+    description: "PatentIQ combines AI, prior art search, and mentor-defined criteria to evaluate patents with accuracy, consistency, and clarity.",
+    siteName: "PatentIQ",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "PatentIQ — AI-Powered Patent Evaluation",
+    description: "PatentIQ combines AI, prior art search, and mentor-defined criteria to evaluate patents with accuracy.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  verification: {
+    google: "XW0dGehpDX49tHjWRW92ccBimJKiTJyznvrHlTtzKKM",
+  },
   icons: {
     icon: "/favicon.ico",
     apple: "/apple-icon.png",
