@@ -1,30 +1,103 @@
-/**
- * Out of Credits Modal Component
- * 
- * Styled cleanly and consistently with PatentIQ's core design system (matching CreateGroupDialog).
- * Displays a simple, highly professional, non-cliche status message along with the brand logo.
- */
-
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mail, X } from "lucide-react";
+import { X, Loader2, Coins } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Portal } from "@/components/ui/portal";
+import { createCheckoutSession } from "@/lib/api";
+import { DodoPayments } from "dodopayments-checkout";
+import { useTheme } from "next-themes";
 
-interface OutOfCreditsModalProps {
+interface TopUpModalProps {
   isOpen: boolean;
   onClose: () => void;
+  title?: string;
+  subtitle?: string;
 }
 
-export function OutOfCreditsModal({ isOpen, onClose }: OutOfCreditsModalProps) {
+export function OutOfCreditsModal({ 
+  isOpen, 
+  onClose,
+  title = "Out of Credits",
+  subtitle = "Your evaluation queue has been paused." 
+}: TopUpModalProps) {
+  const [selectedTier, setSelectedTier] = useState<number>(10);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isCheckoutOverlayOpen, setIsCheckoutOverlayOpen] = useState(false);
+  const { resolvedTheme } = useTheme();
+
+  // Initialize DodoPayments SDK on mount
+  useEffect(() => {
+    DodoPayments.Initialize({
+      mode: "test", // Change to "live" for production
+      displayType: "overlay",
+      onEvent: (event) => {
+        console.log("Dodo Checkout event:", event);
+        switch (event.event_type) {
+          case "checkout.opened":
+            setIsLoading(false);
+            setIsCheckoutOverlayOpen(true);
+            break;
+          case "checkout.error":
+            setIsLoading(false);
+            console.error("Checkout error:", event.data?.message);
+            break;
+          case "checkout.closed":
+            setIsLoading(false);
+            setIsCheckoutOverlayOpen(false);
+            break;
+        }
+      },
+    });
+  }, []);
+
+  const tiers = [
+    { credits: 10, price: "₹50", id: 10, popular: false },
+    { credits: 50, price: "₹200", id: 50, popular: true },
+    { credits: 100, price: "₹350", id: 100, popular: false },
+  ];
+
+  const handleCheckout = async () => {
+    setIsLoading(true);
+    try {
+      // Call backend to create Dodo Checkout Session
+      const session = await createCheckoutSession(selectedTier, resolvedTheme === 'dark' ? 'dark' : 'light');
+      
+      // Open the overlay checkout
+      const url = session.checkout_url || session.payment_link;
+      if (url) {
+        DodoPayments.Checkout.open({
+          checkoutUrl: url
+        });
+      } else {
+        throw new Error("Invalid session response");
+      }
+    } catch (error) {
+      console.error("Failed to initiate checkout:", error);
+      alert("Failed to initiate checkout. Please try again.");
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <Portal>
+    <>
+      <AnimatePresence>
+        {isCheckoutOverlayOpen && (
+          <Portal>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[9990] bg-zinc-950/40 backdrop-blur-sm"
+            />
+          </Portal>
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {isOpen && (
+          <Portal>
           <div className="fixed inset-0 z-[250] flex items-center justify-center p-4">
-            {/* Backdrop aligned with standard modal blur */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -32,87 +105,102 @@ export function OutOfCreditsModal({ isOpen, onClose }: OutOfCreditsModalProps) {
               onClick={onClose}
               className="absolute inset-0 bg-zinc-950/40 backdrop-blur-sm transition-all"
             />
-
-            {/* Modal Box - Matching CreateGroupDialog styling perfectly */}
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-md bg-white dark:bg-zinc-900 rounded-md border border-gray-100 dark:border-zinc-800 shadow-2xl p-8 z-10"
+              className="relative w-full max-w-lg bg-white dark:bg-zinc-900 rounded-md border border-gray-100 dark:border-zinc-800 shadow-2xl p-6 sm:p-8 z-10"
             >
-              {/* Header with Logo */}
-              <div className="flex items-start justify-between mb-8">
+              <div className="flex items-start justify-between mb-6">
                 <div className="flex items-center gap-3">
-                  <img 
-                    src="/icon0.svg" 
-                    alt="PatentIQ Logo" 
-                    className="w-10 h-10 object-contain shrink-0" 
-                  />
+                  <div className="w-10 h-10 rounded-md bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center shrink-0">
+                    <Coins className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                  </div>
                   <div>
                     <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
-                      Out of Credits
+                      {title}
                     </h3>
-                    <p className="mt-1.5 text-sm text-gray-500 dark:text-gray-400">
-                      Your evaluation queue has been paused.
+                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                      {subtitle}
                     </p>
                   </div>
                 </div>
                 <button
                   onClick={onClose}
-                  className="p-1 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-md transition-colors text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                  className="p-1 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-md transition-colors"
                 >
-                  <X className="h-5 w-5" />
+                  <X className="h-5 w-5 text-gray-400" />
                 </button>
               </div>
 
-              {/* Informative Body Content */}
-              <div className="space-y-6">
-                <div className="p-4 rounded-md bg-amber-50/50 dark:bg-amber-950/10 border border-amber-100/80 dark:border-amber-900/30">
-                  <p className="text-sm text-amber-700 dark:text-amber-400 leading-relaxed font-medium">
-                    We've successfully paused your pipeline evaluations to prevent API failures and preserve your student documents. No credits have been deducted.
-                  </p>
-                </div>
-
-                <div>
-                  <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">
-                    Account Pipeline Refill
-                  </label>
-                  <div className="rounded-md border border-gray-200 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-800/50 px-5 py-4 flex flex-col gap-1.5">
-                    <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
-                      Contact Developer for Refill
-                    </span>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 leading-normal">
-                      Email our team to top up your account credits. We will process your refill request instantly.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Footer Actions */}
-                <div className="grid grid-cols-2 gap-4 pt-2">
-                  <Button
-                    variant="outline"
-                    onClick={onClose}
-                    className="h-12 font-bold rounded-md border-gray-200 dark:border-zinc-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800"
-                  >
-                    Close
-                  </Button>
-                  <a
-                    href="mailto:mail.dialabs@gmail.com?subject=PatentIQ Credit Refill Request"
-                    className="w-full"
-                  >
-                    <Button
-                      className="w-full h-12 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-md shadow-lg shadow-indigo-500/10 flex items-center justify-center gap-2 group transition-all"
+              <div className="space-y-4 mb-6">
+                <p className="block text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">
+                  Select Package
+                </p>
+                <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                  {tiers.map((tier) => (
+                    <div
+                      key={tier.id}
+                      onClick={() => setSelectedTier(tier.id)}
+                      className={`relative flex flex-col items-center justify-center text-center p-2 sm:p-4 rounded-md cursor-pointer transition-all border-2 ${
+                        selectedTier === tier.id
+                          ? "border-indigo-600 bg-indigo-50/50 dark:bg-indigo-900/20 shadow-sm"
+                          : "border-gray-100 dark:border-zinc-800 hover:border-gray-200 dark:hover:border-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-800/50"
+                      }`}
                     >
-                      <Mail className="h-4 w-4 text-white" />
-                      Email Developer
-                    </Button>
-                  </a>
+                      {tier.popular && (
+                        <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-amber-100 text-amber-700 dark:bg-amber-900/80 dark:text-amber-400 text-[8px] sm:text-[9px] font-bold uppercase tracking-wider px-1.5 sm:px-2 py-0.5 rounded-sm whitespace-nowrap shadow-sm">
+                          Popular
+                        </span>
+                      )}
+                      <div className="flex flex-col items-center gap-1 sm:gap-2 w-full mt-1 sm:mt-0">
+                        <span className="font-bold text-xs sm:text-sm text-gray-900 dark:text-white">
+                          {tier.credits} Credits
+                        </span>
+                        <span className="font-bold text-base sm:text-xl text-indigo-600 dark:text-indigo-400 mt-0.5 sm:mt-1">
+                          {tier.price}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <Button
+                  variant="outline"
+                  onClick={onClose}
+                  disabled={isLoading}
+                  className="h-12 font-bold rounded-md border-gray-200 dark:border-zinc-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleCheckout}
+                  disabled={isLoading}
+                  className="h-12 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-md shadow-lg shadow-indigo-500/10 transition-all flex items-center justify-center gap-2"
+                >
+                  {isLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    "Checkout"
+                  )}
+                </Button>
+              </div>
+
+              <div className="mt-4 pt-4 border-t border-gray-100 dark:border-zinc-800 text-center">
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Need a custom plan? Contact us at{" "}
+                  <a href="mailto:mail.dialabs@gmail.com" className="font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">
+                    mail.dialabs@gmail.com
+                  </a>
+                </p>
               </div>
             </motion.div>
           </div>
         </Portal>
-      )}
-    </AnimatePresence>
+        )}
+      </AnimatePresence>
+    </>
   );
 }

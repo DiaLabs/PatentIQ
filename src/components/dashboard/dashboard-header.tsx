@@ -5,21 +5,44 @@ import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 import { useToast } from "@/context/ToastContext";
 import { useAuth } from "@/context/AuthContext";
 import { OutOfCreditsModal } from "@/components/dashboard/out-of-credits-modal";
+import { PaymentSuccessModal, PaymentFailureModal } from "@/components/dashboard/payment-status-modals";
 
 interface PageTopBarProps {
   onRefresh?: () => void;
   isLoading?: boolean;
+  disableModals?: boolean;
 }
 
 /** The right-side icon row (theme toggle, bell, refresh). 
  *  Rendered in the dashboard layout so it persists across ALL pages. */
-export function PageTopBar({ onRefresh, isLoading = false }: PageTopBarProps) {
+export function PageTopBar({ onRefresh, isLoading = false, disableModals = false }: PageTopBarProps) {
   const { actions, clearActions } = useToast();
   const { mentorProfile } = useAuth();
   const [showNotifications, setShowNotifications] = useState(false);
   const [isCreditsModalOpen, setIsCreditsModalOpen] = useState(false);
+  const [paymentSuccessOpen, setPaymentSuccessOpen] = useState(false);
+  const [paymentFailureOpen, setPaymentFailureOpen] = useState(false);
   const [pausedIdsToDismiss, setPausedIdsToDismiss] = useState<string[]>([]);
   const prevCreditsRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    // Check for payment status in URL on mount
+    const params = new URLSearchParams(window.location.search);
+    const paymentStatus = params.get('payment');
+    
+    if (paymentStatus === 'success') {
+      setPaymentSuccessOpen(true);
+      // Clean up URL without triggering Next.js hydration router errors
+      if (typeof window !== "undefined") {
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    } else if (paymentStatus === 'cancel') {
+      setPaymentFailureOpen(true);
+      if (typeof window !== "undefined") {
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }
+  }, []);
 
   // Monitor credits change to auto-popup the modal when credits transition to 0
   useEffect(() => {
@@ -59,42 +82,50 @@ export function PageTopBar({ onRefresh, isLoading = false }: PageTopBarProps) {
 
       {/* Credits Display — desktop only (mobile sees it in sidebar) */}
       {mentorProfile !== null && (
-        <div
-          onClick={() => {
-            if (mentorProfile.credits === 0) {
-              setIsCreditsModalOpen(true);
-            }
-          }}
-          className={`hidden lg:flex items-center gap-1.5 px-1 sm:px-2 h-10 select-none transition-all duration-200 ${
-            mentorProfile.credits === 0
-              ? "text-red-500 dark:text-red-400 font-semibold cursor-pointer hover:opacity-85 hover:scale-105 active:scale-95"
-              : mentorProfile.credits <= 5
-              ? "text-red-500 dark:text-red-400 font-semibold cursor-default"
-              : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 cursor-default"
-          }`}
-          title={mentorProfile.credits === 0 ? "Click to contact developer and refill credits" : undefined}
-        >
-          <Coins className="h-4 w-4" />
-          <span className="text-sm font-medium">Credits: <span className="font-bold tabular-nums">{mentorProfile.credits}</span></span>
+        <div className="hidden lg:flex items-center gap-3">
+          <div
+            onClick={() => setIsCreditsModalOpen(true)}
+            className={`flex items-center gap-1.5 px-1 sm:px-2 h-10 select-none transition-all duration-200 cursor-pointer hover:opacity-85 active:scale-95 ${
+              mentorProfile.credits === 0
+                ? "text-red-500 dark:text-red-400 font-semibold"
+                : mentorProfile.credits <= 5
+                ? "text-red-500 dark:text-red-400 font-semibold"
+                : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
+            }`}
+            title="Click to top up your credits"
+          >
+            <Coins className="h-4 w-4" />
+            <span className="text-sm font-medium">Credits: <span className="font-bold tabular-nums">{mentorProfile.credits}</span></span>
+          </div>
         </div>
       )}
 
-      {/* Out of Credits Modal */}
-      <OutOfCreditsModal
-        isOpen={isCreditsModalOpen}
-        onClose={() => {
-          if (pausedIdsToDismiss.length > 0) {
-            try {
-              const current = JSON.parse(localStorage.getItem("dismissed-paused-submissions") || "[]");
-              const updated = Array.from(new Set([...current, ...pausedIdsToDismiss]));
-              localStorage.setItem("dismissed-paused-submissions", JSON.stringify(updated));
-            } catch (err) {
-              console.error("Failed to save dismissed paused submissions:", err);
-            }
-          }
-          setIsCreditsModalOpen(false);
-        }}
-      />
+      {/* Payment Modals */}
+      {!disableModals && (
+        <>
+          <PaymentSuccessModal isOpen={paymentSuccessOpen} onClose={() => setPaymentSuccessOpen(false)} />
+          <PaymentFailureModal isOpen={paymentFailureOpen} onClose={() => setPaymentFailureOpen(false)} />
+
+          {/* Out of Credits Modal */}
+          <OutOfCreditsModal
+            title="Top Up Credits"
+            subtitle="Purchase additional credits for evaluations."
+            isOpen={isCreditsModalOpen}
+            onClose={() => {
+              if (pausedIdsToDismiss.length > 0) {
+                try {
+                  const current = JSON.parse(localStorage.getItem("dismissed-paused-submissions") || "[]");
+                  const updated = Array.from(new Set([...current, ...pausedIdsToDismiss]));
+                  localStorage.setItem("dismissed-paused-submissions", JSON.stringify(updated));
+                } catch (err) {
+                  console.error("Failed to save dismissed paused submissions:", err);
+                }
+              }
+              setIsCreditsModalOpen(false);
+            }}
+          />
+        </>
+      )}
 
       {/* Refresh Button */}
       {onRefresh && (
