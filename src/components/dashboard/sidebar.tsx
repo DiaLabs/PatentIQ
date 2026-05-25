@@ -40,7 +40,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
   return (
     <aside className={cn(
-      "fixed left-0 top-0 h-screen w-64 border-r border-gray-100 dark:border-zinc-800 bg-white/50 dark:bg-[#0a0a0a]/50 backdrop-blur-xl z-50 flex flex-col transition-transform duration-300",
+      "fixed left-0 top-0 h-screen w-64 border-r border-gray-100 dark:border-zinc-800 bg-white dark:bg-[#0a0a0a] lg:bg-white/50 lg:dark:bg-[#0a0a0a]/50 lg:backdrop-blur-xl z-50 flex flex-col transition-transform duration-300 shadow-2xl lg:shadow-none",
       isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
     )}>
       {/* Brand */}
