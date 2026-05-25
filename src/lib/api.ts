@@ -100,7 +100,7 @@ export interface RecentSubmission {
   status: SubmissionStatus;
   score: number | null;
   submitted_at: number;
-  error_message?: string | null;
+  last_error?: string | null;
 }
 
 export interface DashboardData {
@@ -133,13 +133,11 @@ export interface Submission {
   invention_title?: string;
   team_member_names: string[];
   status: SubmissionStatus;
-  current_stage: number | null;
-  rejection_reason: string | null;
   overall_score: number | null;
   verdict: string | null;
   submitted_at: string;
   file_name: string;
-  error_message?: string | null;
+  last_error?: string | null;
 }
 
 export type SubmissionStatus =
@@ -324,7 +322,7 @@ export interface PipelinePhase {
   cost_usd: number | null;
   tokens_used: number | null;
   api_provider: string | null;
-  error_message: string | null;
+  last_error: string | null;
   metadata?: any;
 }
 
@@ -382,7 +380,6 @@ export async function prepareUpload(body: {
   unique_id: string;
   submitter_email: string;
   invention_title: string;
-  phone: string;
   team_member_names: string[];
   group_name: string;
   file_name: string;

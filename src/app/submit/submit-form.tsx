@@ -43,7 +43,6 @@ export default function SubmitForm() {
   const [uniqueId, setUniqueId] = useState("");
   const [inventionTitle, setInventionTitle] = useState("");
   const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
   const [teammates, setTeammates] = useState<string[]>([""]);
   const [file, setFile] = useState<File | null>(null);
   const [groupInfo, setGroupInfo] = useState<{ name: string; expires_at?: number; mentor_name?: string } | null>(null);
@@ -139,7 +138,6 @@ export default function SubmitForm() {
         unique_id: uniqueId.trim(),
         submitter_email: email.trim(),
         invention_title: inventionTitle.trim(),
-        phone: "N/A",
         team_member_names: confirmedTeammates,
         group_name: groupInfo?.name || "Submitted Group",
         file_name: file.name,
@@ -167,7 +165,7 @@ export default function SubmitForm() {
         setStep("error");
       }
     }
-  }, [file, submitterName, uniqueId, email, inventionTitle, phone, token, teammates, groupInfo]);
+  }, [file, submitterName, uniqueId, email, inventionTitle, token, teammates, groupInfo]);
 
   // Poll for status
   useEffect(() => {

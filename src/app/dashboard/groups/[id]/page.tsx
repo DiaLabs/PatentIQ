@@ -139,7 +139,7 @@ export default function GroupDetailPage() {
 
       // Detect paused submissions to fire modal event in real-time
       const pausedSubIds = result.submissions
-        .filter(s => s.status === 'FAILED' && s.error_message?.includes('Evaluation paused'))
+        .filter(s => s.status === 'FAILED' && s.last_error?.includes('Evaluation paused'))
         .map(s => s.submission_id);
       
       if (pausedSubIds.length > 0) {
@@ -637,7 +637,7 @@ export default function GroupDetailPage() {
                       </div>
                     </td>
                     <td className="px-6 py-5">
-                      <StatusBadge status={s.status as SubmissionStatus} errorMessage={s.error_message} />
+                      <StatusBadge status={s.status as SubmissionStatus} errorMessage={s.last_error} />
                     </td>
                     <td className="px-4 py-5">
                       {s.overall_score != null ? (

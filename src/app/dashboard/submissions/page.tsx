@@ -143,7 +143,7 @@ export default function SubmissionsPage() {
 
       // Detect paused submissions to fire modal event in real-time
       const pausedSubIds = res.submissions
-        .filter(s => s.status === 'FAILED' && s.error_message?.includes('Evaluation paused'))
+        .filter(s => s.status === 'FAILED' && s.last_error?.includes('Evaluation paused'))
         .map(s => s.submission_id);
       
       if (pausedSubIds.length > 0) {
@@ -539,7 +539,7 @@ export default function SubmissionsPage() {
                     <td className="px-4 py-5">
                       <span className="text-sm text-gray-600 dark:text-gray-400">{s.group_name}</span>
                     </td>
-                    <td className="px-4 py-5"><StatusBadge status={s.status} errorMessage={s.error_message} /></td>
+                    <td className="px-4 py-5"><StatusBadge status={s.status} errorMessage={s.last_error} /></td>
                     <td className="px-4 py-5">
                       {s.score != null ? (
                         <div className={cn(

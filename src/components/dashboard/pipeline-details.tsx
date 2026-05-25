@@ -112,11 +112,10 @@ export function PipelineDetails({ phases, status, currentStage = 0, loading = fa
             {/* Phase Details (Expanded) */}
             {isExpanded && (
               <div className="border-t border-gray-100 bg-gray-50 px-4 py-3 space-y-3">
-                {/* Error Message */}
-                {isFailed && phase.error_message && (
+                {isFailed && phase.last_error && (
                   <div className="rounded bg-red-50 border border-red-200 p-3">
                     <p className="text-xs font-medium text-red-700 mb-1">❌ Error</p>
-                    <p className="text-xs text-red-600 break-words font-mono">{phase.error_message}</p>
+                    <p className="text-xs text-red-600 break-words font-mono">{phase.last_error}</p>
                   </div>
                 )}
 
