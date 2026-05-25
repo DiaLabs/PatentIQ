@@ -282,6 +282,14 @@ export async function fetchGroups(): Promise<{ groups: Group[] }> {
   return apiFetch<{ groups: Group[] }>('/api/v1/mentor/groups');
 }
 
+/** POST /api/v1/mentor/billing/checkout */
+export async function createCheckoutSession(credits: number, theme?: 'light' | 'dark' | 'auto'): Promise<any> {
+  return apiFetch<any>('/api/v1/mentor/billing/checkout', {
+    method: 'POST',
+    body: JSON.stringify({ credits, theme }),
+  });
+}
+
 /** POST /mentor/groups */
 export async function createGroup(body: {
   name: string;
