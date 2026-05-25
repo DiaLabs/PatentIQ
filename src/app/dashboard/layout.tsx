@@ -8,6 +8,7 @@ import { Menu } from "lucide-react";
 import { PageTopBar } from "@/components/dashboard/dashboard-header";
 import { useRefresh } from "@/context/RefreshContext";
 import Link from "next/link";
+import { FeedbackButton } from "@/components/ui/feedback-button";
 
 export default function DashboardLayout({
   children,
@@ -45,7 +46,7 @@ export default function DashboardLayout({
               <span className="text-lg font-bold text-gray-900 dark:text-white tracking-tight">PatentIQ</span>
             </Link>
             <div className="flex items-center">
-              <PageTopBar onRefresh={refresh} isLoading={isRefreshing} />
+              <PageTopBar onRefresh={refresh} isLoading={isRefreshing} disableModals={true} />
             </div>
           </header>
 
@@ -58,6 +59,9 @@ export default function DashboardLayout({
             {children}
           </main>
         </div>
+
+        {/* Global Floating Feedback Button */}
+        <FeedbackButton />
       </div>
     </ProtectedRoute>
   );

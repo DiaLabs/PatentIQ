@@ -22,7 +22,7 @@ export function LoadingScreen() {
             PatentIQ
           </span>
           <div className="flex justify-center gap-1.5">
-            {[0, 1, 2, 3].map((i) => (
+            {[0, 1, 2].map((i) => (
               <motion.div
                 key={i}
                 className="h-2 w-2 rounded-full bg-indigo-600 dark:bg-indigo-400"

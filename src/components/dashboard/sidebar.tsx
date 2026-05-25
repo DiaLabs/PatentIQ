@@ -16,7 +16,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
 
 const navItems = [
   { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
@@ -35,6 +36,7 @@ interface SidebarProps {
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const { user, mentorProfile, signOut } = useAuth();
+  const [showSignOut, setShowSignOut] = useState(false);
 
   return (
     <aside className={cn(
@@ -95,17 +97,15 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       {mentorProfile && (
         <div
           onClick={() => {
-            if (mentorProfile.credits === 0) {
-              const event = new CustomEvent('insufficient-credits-modal', { detail: { pausedSubIds: [] } });
-              window.dispatchEvent(event);
-            }
+            const event = new CustomEvent('insufficient-credits-modal', { detail: { pausedSubIds: [] } });
+            window.dispatchEvent(event);
           }}
-          className={`lg:hidden mx-4 mb-2 flex items-center gap-3 px-4 py-2.5 rounded-md border transition-all ${
+          className={`lg:hidden mx-4 mb-2 flex items-center gap-3 px-4 py-2.5 rounded-md border transition-all cursor-pointer ${
             mentorProfile.credits === 0
-              ? "border-red-200 dark:border-red-900/40 bg-red-50 dark:bg-red-900/10 cursor-pointer hover:bg-red-100 dark:hover:bg-red-900/20"
+              ? "border-red-200 dark:border-red-900/40 bg-red-50 dark:bg-red-900/10 hover:bg-red-100 dark:hover:bg-red-900/20"
               : mentorProfile.credits <= 5
-              ? "border-red-200 dark:border-red-900/40 bg-red-50/50 dark:bg-red-900/10"
-              : "border-gray-100 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-800/30"
+              ? "border-red-200 dark:border-red-900/40 bg-red-50/50 dark:bg-red-900/10 hover:bg-red-50 dark:hover:bg-red-900/20"
+              : "border-gray-100 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-800/30 hover:bg-gray-100 dark:hover:bg-zinc-800/50"
           }`}
         >
           <Coins className={`h-4 w-4 shrink-0 ${
@@ -125,23 +125,44 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
       {/* User / Bottom */}
       <div className="p-4 border-t border-gray-100 dark:border-zinc-800">
-        <div className="flex items-center gap-3 px-4 py-3 mb-2">
-          <div className="h-9 w-9 rounded-full bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center text-indigo-700 dark:text-indigo-300 font-bold text-sm uppercase">
+        <button 
+          onClick={() => setShowSignOut(!showSignOut)}
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-md hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors"
+        >
+          <div className="h-9 w-9 rounded-full bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center text-indigo-700 dark:text-indigo-300 font-bold text-sm uppercase shrink-0">
             {user?.displayName?.[0] || user?.email?.[0] || "?"}
           </div>
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 text-left">
             <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{user?.displayName || "Mentor"}</p>
             <p className="text-[10px] font-medium text-gray-400 dark:text-gray-500 truncate">{user?.email}</p>
           </div>
-        </div>
-        
-        <button
-          onClick={signOut}
-          className="flex items-center gap-3 w-full px-4 py-3 text-sm font-semibold text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-md transition-all group"
-        >
-          <LogOut className="h-5 w-5 text-gray-400 group-hover:text-red-500 transition-colors" />
-          Sign Out
+          <div className="shrink-0 text-gray-400">
+            {showSignOut ? (
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+            )}
+          </div>
         </button>
+        
+        <AnimatePresence>
+          {showSignOut && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden"
+            >
+              <button
+                onClick={signOut}
+                className="mt-2 flex items-center justify-center gap-2 w-full px-4 py-2.5 text-sm font-semibold text-red-600 bg-red-50 hover:bg-red-100 dark:text-red-400 dark:bg-red-900/10 dark:hover:bg-red-900/20 rounded-md transition-all group"
+              >
+                <LogOut className="h-4 w-4" />
+                Sign Out
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </aside>
   );
