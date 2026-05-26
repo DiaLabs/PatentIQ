@@ -41,6 +41,7 @@ import {
   Square,
   MousePointer2,
   Loader2,
+  Pencil,
 } from "lucide-react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -50,6 +51,7 @@ import { ReportModal } from "@/components/dashboard/report-modal";
 import { useToast } from "@/context/ToastContext";
 import { CustomSelect } from "@/components/ui/custom-select";
 import { Button } from "@/components/ui/button";
+import { EditGroupDialog } from "@/components/dashboard/edit-group-dialog";
 
 const STATUS_OPTIONS = [
   { value: "", label: "All Statuses" },
@@ -90,6 +92,7 @@ export default function GroupDetailPage() {
   const [statusFilter, setStatusFilter] = useState("");
   const [deleting, setDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
   const [copied, setCopied] = useState(false);
   const [groupIndex, setGroupIndex] = useState(0);
   
@@ -359,14 +362,23 @@ export default function GroupDetailPage() {
                 {loading ? "..." : data?.group.name}
               </h2>
               {data && (
-                <span className={cn(
-                  "text-[10px] font-black uppercase tracking-[0.15em] px-3 py-1 rounded-full",
-                  data.group.is_expired 
-                    ? "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/10" 
-                    : "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/10"
-                )}>
-                  {data.group.is_expired ? "Expired" : "Active"}
-                </span>
+                <>
+                  <span className={cn(
+                    "text-[10px] font-black uppercase tracking-[0.15em] px-3 py-1 rounded-full",
+                    data.group.is_expired 
+                      ? "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/10" 
+                      : "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/10"
+                  )}>
+                    {data.group.is_expired ? "Expired" : "Active"}
+                  </span>
+                  <button
+                    onClick={() => setShowEditDialog(true)}
+                    className="p-2 rounded-md text-gray-400 hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                    title="Edit group details"
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </button>
+                </>
               )}
             </div>
             
@@ -1063,6 +1075,15 @@ export default function GroupDetailPage() {
           submitterName={selectedSubmissionReport.submitterName}
           uniqueId={selectedSubmissionReport.uniqueId}
           onClose={() => setSelectedSubmissionReport(null)}
+        />
+      )}
+
+      {/* Edit Group Dialog */}
+      {showEditDialog && data && (
+        <EditGroupDialog
+          group={data.group}
+          onClose={() => setShowEditDialog(false)}
+          onSaved={() => load()}
         />
       )}
     </motion.div>

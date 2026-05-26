@@ -320,6 +320,17 @@ export async function deleteGroup(groupId: string): Promise<void> {
   await apiFetch(`/api/v1/mentor/groups/${groupId}`, { method: 'DELETE' });
 }
 
+/** PUT /mentor/groups/:id */
+export async function updateGroup(groupId: string, body: {
+  name?: string;
+  link_expiry_days?: number;
+}): Promise<Group> {
+  return apiFetch<Group>(`/api/v1/mentor/groups/${groupId}`, {
+    method: 'PUT',
+    body: JSON.stringify(body),
+  });
+}
+
 /** GET /mentor/groups/:groupId/submissions/:submissionId/pipeline */
 export interface PipelinePhase {
   phase_name: string;
