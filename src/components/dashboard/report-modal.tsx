@@ -67,18 +67,41 @@ export function ReportModal({ submissionId, groupId, submitterName, uniqueId, on
     try {
       const dataCopy = JSON.parse(JSON.stringify(reportData));
       
-      // Fetch logo for watermark
-      let logoBase64 = undefined;
+      // Fetch assets for PDF cover page and watermark
+      let watermarkBase64: string | undefined;
+      let headerSvg: string | undefined;
+      let footerPngBase64: string | undefined;
+
       try {
-        const response = await fetch('/icon1.png');
-        const blob = await response.blob();
-        logoBase64 = await new Promise<string>((resolve) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result as string);
-          reader.readAsDataURL(blob);
-        });
+        const [watermarkRes, svgRes, footerPngRes] = await Promise.all([
+          fetch('/icon1.png').catch(() => null),
+          fetch('/icon0.svg').catch(() => null),
+          fetch('/diaicon.png').catch(() => null)
+        ]);
+
+        if (watermarkRes && watermarkRes.ok) {
+          const blob = await watermarkRes.blob();
+          watermarkBase64 = await new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.readAsDataURL(blob);
+          });
+        }
+
+        if (svgRes && svgRes.ok) {
+          headerSvg = await svgRes.text();
+        }
+
+        if (footerPngRes && footerPngRes.ok) {
+          const blob = await footerPngRes.blob();
+          footerPngBase64 = await new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.readAsDataURL(blob);
+          });
+        }
       } catch (err) {
-        console.error("Failed to fetch logo for watermark:", err);
+        console.error("Failed to fetch assets for PDF:", err);
       }
 
       // Dynamic import pdfMake and pdfFonts to avoid SSR issues
@@ -98,7 +121,11 @@ export function ReportModal({ submissionId, groupId, submitterName, uniqueId, on
       }
 
       // We still use our layout generator
-      const pdf = generatePatentReport(dataCopy, logoBase64);
+      const pdf = generatePatentReport(dataCopy, {
+        watermark: watermarkBase64,
+        headerSvg: headerSvg,
+        footerPng: footerPngBase64
+      });
       
       // Set fonts if it wasn't set globally by the generator
       if (!(pdf as any).vfs) {
