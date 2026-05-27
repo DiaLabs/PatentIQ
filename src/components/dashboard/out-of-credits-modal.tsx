@@ -28,7 +28,7 @@ export function OutOfCreditsModal({
   // Initialize DodoPayments SDK on mount
   useEffect(() => {
     DodoPayments.Initialize({
-      mode: "test", // Change to "live" for production
+      mode: "live", // Change to "live" for production
       displayType: "overlay",
       onEvent: (event) => {
         console.log("Dodo Checkout event:", event);
