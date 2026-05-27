@@ -149,7 +149,7 @@ export function ReportContent({ data }: ReportContentProps) {
                     <span className="text-[16px] font-bold text-[#0f172a] dark:text-white leading-none">{data.submitter_name || "Student"}</span>
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Email Address</span>
+                    <span className="text-[10px] font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-widest">Email Address</span>
                     <span className="text-[16px] font-medium text-[#0f172a] dark:text-white leading-none">{data.submitter_email || "Not Provided"}</span>
                   </div>
                 </div>
@@ -161,7 +161,7 @@ export function ReportContent({ data }: ReportContentProps) {
                     <span className="text-[16px] font-bold text-[#0f172a] dark:text-white leading-none">{data.assignee_name || "Mentor"}</span>
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Group / Cohort</span>
+                    <span className="text-[10px] font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-widest">Group / Cohort</span>
                     <span className="text-[16px] font-medium text-[#0f172a] dark:text-white leading-none">{data.group_name || "N/A"}</span>
                   </div>
                 </div>

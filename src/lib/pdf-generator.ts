@@ -208,7 +208,7 @@ export const generatePatentReport = (data: any, assets?: { watermark?: string, h
                     stack: [
                       { text: 'SUBMITTED BY', fontSize: 8, bold: true, color: '#6366f1', characterSpacing: 1, margin: [0, 0, 0, 4] },
                       { text: data.submitter_name || "Student", fontSize: 14, bold: true, color: '#0f172a', margin: [0, 0, 0, 15] },
-                      { text: 'EMAIL ADDRESS', fontSize: 8, bold: true, color: '#9ca3af', characterSpacing: 1, margin: [0, 0, 0, 4] },
+                      { text: 'EMAIL ADDRESS', fontSize: 8, bold: true, color: '#6366f1', characterSpacing: 1, margin: [0, 0, 0, 4] },
                       { text: data.submitter_email || "Not Provided", fontSize: 12, color: '#0f172a' }
                     ]
                   },
@@ -218,7 +218,7 @@ export const generatePatentReport = (data: any, assets?: { watermark?: string, h
                     stack: [
                       { text: 'ASSIGNED TO', fontSize: 8, bold: true, color: '#6366f1', characterSpacing: 1, margin: [0, 0, 0, 4] },
                       { text: data.assignee_name || "Mentor", fontSize: 14, bold: true, color: '#0f172a', margin: [0, 0, 0, 15] },
-                      { text: 'GROUP / COHORT', fontSize: 8, bold: true, color: '#9ca3af', characterSpacing: 1, margin: [0, 0, 0, 4] },
+                      { text: 'GROUP / COHORT', fontSize: 8, bold: true, color: '#6366f1', characterSpacing: 1, margin: [0, 0, 0, 4] },
                       { text: data.group_name || "N/A", fontSize: 12, color: '#0f172a' }
                     ]
                   }
