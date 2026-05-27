@@ -51,24 +51,7 @@ export const generatePatentReport = (data: any, assets?: { watermark?: string, h
       ] as any;
     },
 
-    header: (currentPage) => {
-      if (currentPage !== 2) return null; // Page 2 is now the first content page
-      return {
-        columns: [
-          {
-            stack: [
-              {
-                text: 'PatentIQ Evaluation Report',
-                fontSize: 14,
-                bold: true,
-                color: '#6366f1',
-                margin: [40, 30, 0, 0]
-              }
-            ]
-          }
-        ]
-      };
-    },
+
 
     footer: (currentPage, pageCount) => {
       if (currentPage === 1) {
@@ -174,7 +157,7 @@ export const generatePatentReport = (data: any, assets?: { watermark?: string, h
           // Title
           {
             text: 'EVALUATION REPORT',
-            fontSize: 24,
+            fontSize: 18, // Reduced from 24
             bold: true,
             color: '#0f172a',
             alignment: 'center',
@@ -182,8 +165,14 @@ export const generatePatentReport = (data: any, assets?: { watermark?: string, h
           },
           // Small underline
           {
-            canvas: [{ type: 'line', x1: 235, y1: 0, x2: 280, y2: 0, lineWidth: 2, lineColor: '#6366f1' }],
-            alignment: 'center',
+            columns: [
+              { width: '*', text: '' },
+              {
+                width: 45,
+                canvas: [{ type: 'line', x1: 0, y1: 0, x2: 45, y2: 0, lineWidth: 2, lineColor: '#6366f1' }]
+              },
+              { width: '*', text: '' }
+            ],
             margin: [0, 0, 0, 15]
           },
           // Subtitle / Patent Title
