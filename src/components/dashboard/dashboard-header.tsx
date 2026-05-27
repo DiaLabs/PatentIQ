@@ -6,6 +6,7 @@ import { useToast } from "@/context/ToastContext";
 import { useAuth } from "@/context/AuthContext";
 import { OutOfCreditsModal } from "@/components/dashboard/out-of-credits-modal";
 import { PaymentSuccessModal, PaymentFailureModal } from "@/components/dashboard/payment-status-modals";
+import { useRouter } from "next/navigation";
 
 interface PageTopBarProps {
   onRefresh?: () => void;
@@ -18,6 +19,7 @@ interface PageTopBarProps {
 export function PageTopBar({ onRefresh, isLoading = false, disableModals = false }: PageTopBarProps) {
   const { actions, clearActions } = useToast();
   const { mentorProfile } = useAuth();
+  const router = useRouter();
   const [showNotifications, setShowNotifications] = useState(false);
   const [isCreditsModalOpen, setIsCreditsModalOpen] = useState(false);
   const [paymentSuccessOpen, setPaymentSuccessOpen] = useState(false);
@@ -27,24 +29,36 @@ export function PageTopBar({ onRefresh, isLoading = false, disableModals = false
   const prevCreditsRef = useRef<number | null>(null);
 
   useEffect(() => {
-    // Check for payment status in URL on mount
+    // ONLY handle URL cleanup and modal triggers in the primary (desktop) top-bar instance.
+    // Since PageTopBar is rendered twice on desktop/mobile views, exiting early on the mobile 
+    // instance prevents concurrent router.replace race conditions where Next.js cancels/reverts the URL update.
+    if (disableModals) return;
+
     const params = new URLSearchParams(window.location.search);
     const paymentStatus = params.get('payment');
-    
+    const dodoStatus = params.get('status');
+
     if (paymentStatus === 'success') {
-      setPaymentSuccessOpen(true);
-      setAddedCredits(params.get('credits') || "0");
-      // Clean up URL without triggering Next.js hydration router errors
+      if (dodoStatus === 'failed') {
+        setPaymentFailureOpen(true);
+      } else {
+        setPaymentSuccessOpen(true);
+        setAddedCredits(params.get('credits') || "0");
+      }
+
+      // Clean up URL instantly
       if (typeof window !== "undefined") {
-        window.history.replaceState({}, document.title, window.location.pathname);
+        window.history.replaceState(null, "", window.location.pathname);
+        router.replace(window.location.pathname, { scroll: false });
       }
     } else if (paymentStatus === 'cancel') {
       setPaymentFailureOpen(true);
       if (typeof window !== "undefined") {
-        window.history.replaceState({}, document.title, window.location.pathname);
+        window.history.replaceState(null, "", window.location.pathname);
+        router.replace(window.location.pathname, { scroll: false });
       }
     }
-  }, []);
+  }, [router, disableModals]);
 
   // Monitor credits change to auto-popup the modal when credits transition to 0
   useEffect(() => {
@@ -87,13 +101,12 @@ export function PageTopBar({ onRefresh, isLoading = false, disableModals = false
         <div className="hidden lg:flex items-center gap-3">
           <div
             onClick={() => setIsCreditsModalOpen(true)}
-            className={`flex items-center gap-1.5 px-1 sm:px-2 h-10 select-none transition-all duration-200 cursor-pointer hover:opacity-85 active:scale-95 ${
-              mentorProfile.credits === 0
+            className={`flex items-center gap-1.5 px-1 sm:px-2 h-10 select-none transition-all duration-200 cursor-pointer hover:opacity-85 active:scale-95 ${mentorProfile.credits === 0
                 ? "text-red-500 dark:text-red-400 font-semibold"
                 : mentorProfile.credits <= 5
-                ? "text-red-500 dark:text-red-400 font-semibold"
-                : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
-            }`}
+                  ? "text-red-500 dark:text-red-400 font-semibold"
+                  : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
+              }`}
             title="Click to top up your credits"
           >
             <Coins className="h-4 w-4" />
@@ -105,9 +118,9 @@ export function PageTopBar({ onRefresh, isLoading = false, disableModals = false
       {/* Payment Modals */}
       {!disableModals && (
         <>
-          <PaymentSuccessModal 
-            isOpen={paymentSuccessOpen} 
-            onClose={() => setPaymentSuccessOpen(false)} 
+          <PaymentSuccessModal
+            isOpen={paymentSuccessOpen}
+            onClose={() => setPaymentSuccessOpen(false)}
             credits={addedCredits}
           />
           <PaymentFailureModal isOpen={paymentFailureOpen} onClose={() => setPaymentFailureOpen(false)} />
@@ -158,11 +171,10 @@ export function PageTopBar({ onRefresh, isLoading = false, disableModals = false
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => setShowNotifications(!showNotifications)}
-          className={`flex items-center justify-center h-10 w-10 rounded-full transition-colors relative ${
-            showNotifications
+          className={`flex items-center justify-center h-10 w-10 rounded-full transition-colors relative ${showNotifications
               ? "bg-indigo-50 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-400"
               : "text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-zinc-800 dark:hover:text-gray-300"
-          }`}
+            }`}
         >
           <Bell className="h-5 w-5" />
           {actions.length > 0 && (
@@ -196,11 +208,10 @@ export function PageTopBar({ onRefresh, isLoading = false, disableModals = false
                     <div className="divide-y divide-gray-50 dark:divide-zinc-800">
                       {actions.map((action) => (
                         <div key={action.id} className="p-4 hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors flex gap-3">
-                          <div className={`h-8 w-8 rounded-md flex items-center justify-center shrink-0 ${
-                            action.type === "success" ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20" :
-                            action.type === "error" ? "bg-red-50 text-red-600 dark:bg-red-900/20" :
-                            "bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20"
-                          }`}>
+                          <div className={`h-8 w-8 rounded-md flex items-center justify-center shrink-0 ${action.type === "success" ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20" :
+                              action.type === "error" ? "bg-red-50 text-red-600 dark:bg-red-900/20" :
+                                "bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20"
+                            }`}>
                             {action.type === "success" && <CheckCircle2 className="h-4 w-4" />}
                             {action.type === "error" && <AlertCircle className="h-4 w-4" />}
                             {action.type === "info" && <Info className="h-4 w-4" />}
