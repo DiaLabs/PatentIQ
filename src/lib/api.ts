@@ -21,25 +21,53 @@ export async function apiFetch<T = unknown>(
 
   const idToken = await user.getIdToken(false);
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${idToken}`,
-      ...(options.headers ?? {}),
-    },
-  });
+  const isGet = !options.method || options.method.toUpperCase() === 'GET';
+  const cacheKey = `api_cache_${path}`;
 
-  if (!response.ok) {
-    let msg = `API error: ${response.status} ${response.statusText}`;
-    try {
-      const e = await response.json() as { error?: string };
-      if (e.error) msg = e.error;
-    } catch { /* ignore */ }
-    throw new Error(msg);
+  try {
+    const response = await fetch(`${API_BASE_URL}${path}`, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${idToken}`,
+        ...(options.headers ?? {}),
+      },
+    });
+
+    if (!response.ok) {
+      if (response.status >= 500) {
+        if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('api-network-error'));
+      }
+      let msg = `API error: ${response.status} ${response.statusText}`;
+      try {
+        const e = await response.json() as { error?: string };
+        if (e.error) msg = e.error;
+      } catch { /* ignore */ }
+      throw new Error(msg);
+    }
+
+    const data = await response.json() as T;
+    
+    // Save to cache for offline support
+    if (isGet && typeof window !== 'undefined') {
+      try { localStorage.setItem(cacheKey, JSON.stringify(data)); } catch (e) {}
+    }
+    
+    return data;
+  } catch (err: any) {
+    if (err.message === 'Failed to fetch' || err.message.includes('NetworkError') || err.message.includes('API error: 502') || err.message.includes('API error: 503')) {
+      if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('api-network-error'));
+      
+      // Attempt to load from cache if it was a GET request
+      if (isGet && typeof window !== 'undefined') {
+        try {
+          const cached = localStorage.getItem(cacheKey);
+          if (cached) return JSON.parse(cached) as T;
+        } catch (e) {}
+      }
+    }
+    throw err;
   }
-
-  return response.json() as Promise<T>;
 }
 
 /** Public fetch — no auth header (student-facing endpoints) */
@@ -47,24 +75,52 @@ export async function publicFetch<T = unknown>(
   path: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(options.headers ?? {}),
-    },
-  });
+  const isGet = !options.method || options.method.toUpperCase() === 'GET';
+  const cacheKey = `public_api_cache_${path}`;
 
-  if (!response.ok) {
-    let msg = `API error: ${response.status} ${response.statusText}`;
-    try {
-      const e = await response.json() as { error?: string };
-      if (e.error) msg = e.error;
-    } catch { /* ignore */ }
-    throw new Error(msg);
+  try {
+    const response = await fetch(`${API_BASE_URL}${path}`, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(options.headers ?? {}),
+      },
+    });
+
+    if (!response.ok) {
+      if (response.status >= 500) {
+        if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('api-network-error'));
+      }
+      let msg = `API error: ${response.status} ${response.statusText}`;
+      try {
+        const e = await response.json() as { error?: string };
+        if (e.error) msg = e.error;
+      } catch { /* ignore */ }
+      throw new Error(msg);
+    }
+
+    const data = await response.json() as T;
+    
+    // Save to cache for offline support
+    if (isGet && typeof window !== 'undefined') {
+      try { localStorage.setItem(cacheKey, JSON.stringify(data)); } catch (e) {}
+    }
+
+    return data;
+  } catch (err: any) {
+    if (err.message === 'Failed to fetch' || err.message.includes('NetworkError') || err.message.includes('API error: 502') || err.message.includes('API error: 503')) {
+      if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('api-network-error'));
+      
+      // Attempt to load from cache if it was a GET request
+      if (isGet && typeof window !== 'undefined') {
+        try {
+          const cached = localStorage.getItem(cacheKey);
+          if (cached) return JSON.parse(cached) as T;
+        } catch (e) {}
+      }
+    }
+    throw err;
   }
-
-  return response.json() as Promise<T>;
 }
 
 // ── Type Definitions ──────────────────────────────────────────────────────────

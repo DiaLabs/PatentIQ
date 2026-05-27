@@ -37,6 +37,7 @@ export default function SubmitForm() {
   const [step, setStep] = useState<Step>("form");
   const [error, setError] = useState<string | null>(null);
   const [showLimitModal, setShowLimitModal] = useState(false);
+  const [showNetworkModal, setShowNetworkModal] = useState(false);
 
   // Form state
   const [submitterName, setSubmitterName] = useState("");
@@ -71,6 +72,38 @@ export default function SubmitForm() {
     };
     loadGroup();
   }, [token]);
+
+  // Load from cache on mount
+  useEffect(() => {
+    try {
+      const cached = localStorage.getItem('patent_iq_submission_cache');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        // Expire cache after 24 hours
+        if (Date.now() - parsed.timestamp < 24 * 60 * 60 * 1000) {
+          if (parsed.submitterName) setSubmitterName(parsed.submitterName);
+          if (parsed.uniqueId) setUniqueId(parsed.uniqueId);
+          if (parsed.inventionTitle) setInventionTitle(parsed.inventionTitle);
+          if (parsed.email) setEmail(parsed.email);
+          if (parsed.teammates) setTeammates(parsed.teammates);
+        } else {
+          localStorage.removeItem('patent_iq_submission_cache');
+        }
+      }
+    } catch (e) {
+      // ignore cache read errors
+    }
+  }, []);
+
+  // Save to cache on change
+  useEffect(() => {
+    if (!submitterName && !email && !uniqueId && !inventionTitle) return;
+    const cache = {
+      submitterName, uniqueId, inventionTitle, email, teammates,
+      timestamp: Date.now()
+    };
+    localStorage.setItem('patent_iq_submission_cache', JSON.stringify(cache));
+  }, [submitterName, uniqueId, inventionTitle, email, teammates]);
 
   // Tracking state
   const [statusData, setStatusData] = useState<SubmissionStatusResponse | null>(null);
@@ -156,12 +189,25 @@ export default function SubmitForm() {
 
       setSubmissionId(confirmed.submission_id);
       setStep("tracking");
+      // Clear cache on successful submission
+      localStorage.removeItem('patent_iq_submission_cache');
     } catch (err: any) {
-      if (err?.message?.includes("resubmission limit") || err?.message?.includes("LIMIT_REACHED")) {
+      const msg = err?.message || "";
+      if (msg.includes("resubmission limit") || msg.includes("LIMIT_REACHED")) {
         setShowLimitModal(true);
         setStep("form");
+      } else if (
+        msg.includes("Failed to fetch") || 
+        msg.includes("NetworkError") || 
+        msg.includes("API error: 502") || 
+        msg.includes("API error: 503") || 
+        msg.includes("API error: 504") ||
+        msg.includes("Load failed")
+      ) {
+        setShowNetworkModal(true);
+        setStep("form");
       } else {
-        setError(err?.message ?? "Submission failed. Please try again.");
+        setError(msg || "Submission failed. Please try again.");
         setStep("error");
       }
     }
@@ -586,6 +632,50 @@ export default function SubmitForm() {
             >
               Close Alert
             </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Network Error Modal */}
+      {showNetworkModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-zinc-950/40 backdrop-blur-md transition-opacity duration-300"
+            onClick={() => setShowNetworkModal(false)}
+          />
+          <div className="relative bg-white dark:bg-zinc-900 border border-orange-100 dark:border-orange-950/30 rounded-2xl max-w-md w-full shadow-2xl p-8 text-center overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-orange-50 dark:bg-orange-950/20 border-2 border-orange-100 dark:border-orange-900/20 mb-6 animate-pulse">
+              <AlertCircle className="h-8 w-8 text-orange-500 dark:text-orange-400" />
+            </div>
+
+            <h3 className="text-xl font-bold text-gray-950 dark:text-white tracking-tight mb-2">
+              Connection Error
+            </h3>
+            
+            <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed mb-6">
+              We couldn't connect to the server. Your form details have been securely cached on your device for 24 hours. Please check your internet connection and try uploading your PDF again.
+            </p>
+
+            <div className="flex gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowNetworkModal(false)}
+                className="flex-1 py-6 text-base font-semibold rounded-xl border-gray-200 dark:border-zinc-800 transition-all duration-200"
+              >
+                Close
+              </Button>
+              <Button
+                type="button"
+                onClick={(e) => {
+                  setShowNetworkModal(false);
+                  handleSubmit(e);
+                }}
+                className="flex-1 py-6 text-base font-semibold rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/10 dark:shadow-none transition-all duration-200"
+              >
+                Retry Now
+              </Button>
+            </div>
           </div>
         </div>
       )}

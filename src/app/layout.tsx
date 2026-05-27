@@ -80,6 +80,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { ToastProvider } from "@/context/ToastContext";
 import { RefreshProvider } from "@/context/RefreshContext";
 import { GridBackground } from "@/components/ui/grid-background";
+import { NetworkStatusModal } from "@/components/ui/network-status-modal";
 
 export default function RootLayout({
   children,
@@ -112,6 +113,7 @@ export default function RootLayout({
           <ToastProvider>
             <RefreshProvider>
               <GridBackground />
+              <NetworkStatusModal />
               {children}
             </RefreshProvider>
           </ToastProvider>
