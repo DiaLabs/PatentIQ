@@ -9,6 +9,7 @@ import { PageTopBar } from "@/components/dashboard/dashboard-header";
 import { useRefresh } from "@/context/RefreshContext";
 import Link from "next/link";
 import { FeedbackButton } from "@/components/ui/feedback-button";
+import { OnboardingGuide } from "@/components/dashboard/onboarding-guide";
 
 export default function DashboardLayout({
   children,
@@ -62,6 +63,9 @@ export default function DashboardLayout({
 
         {/* Global Floating Feedback Button */}
         <FeedbackButton />
+        
+        {/* Interactive Onboarding Tour */}
+        <OnboardingGuide />
       </div>
     </ProtectedRoute>
   );

@@ -68,6 +68,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           return (
             <Link
               key={item.name}
+              id={`sidebar-nav-${item.name.toLowerCase()}`}
               href={item.href}
               onClick={onClose}
               className={cn(

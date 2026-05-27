@@ -100,6 +100,7 @@ export function PageTopBar({ onRefresh, isLoading = false, disableModals = false
       {mentorProfile !== null && (
         <div className="hidden lg:flex items-center gap-3">
           <div
+            id={!disableModals ? "tour-credits" : undefined}
             onClick={() => setIsCreditsModalOpen(true)}
             className={`flex items-center gap-1.5 px-1 sm:px-2 h-10 select-none transition-all duration-200 cursor-pointer hover:opacity-85 active:scale-95 ${mentorProfile.credits === 0
                 ? "text-red-500 dark:text-red-400 font-semibold"

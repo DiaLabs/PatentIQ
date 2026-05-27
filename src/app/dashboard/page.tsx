@@ -391,6 +391,7 @@ export default function OverviewPage() {
               href="/dashboard/submissions"
             />
             <QuickActionItem
+              id="tour-share-link"
               icon={<Users className="h-5 w-5" />}
               title="View All Groups"
               subtitle="Manage your evaluation groups"
@@ -598,15 +599,18 @@ function QuickActionItem({
   subtitle,
   color,
   href,
+  id,
 }: {
   icon: React.ReactNode;
   title: string;
   subtitle: string;
   color: string;
   href: string;
+  id?: string;
 }) {
   return (
     <Link
+      id={id}
       href={href}
       className="flex flex-col items-center text-center justify-center p-3 sm:p-4 rounded-md border border-gray-50 dark:border-zinc-800 hover:border-gray-200 dark:hover:border-zinc-700 hover:bg-gray-50/50 dark:hover:bg-zinc-800/30 transition-all group lg:flex-row lg:items-center lg:text-left lg:gap-4 h-full"
     >

@@ -258,6 +258,7 @@ export default function GroupsPage() {
           />
           <div className="flex-1" />
           <Button
+            id="tour-create-group"
             onClick={() => setShowDialog(true)}
             className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md px-4 sm:px-5 h-[42px] shadow-sm font-semibold"
           >
