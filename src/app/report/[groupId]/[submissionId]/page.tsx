@@ -16,7 +16,7 @@ export default function PublicReportPage() {
   const params = useParams();
   const groupId = params.groupId as string;
   const submissionId = params.submissionId as string;
-  
+
   const [loading, setLoading] = useState(true);
   const [generatingPdf, setGeneratingPdf] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -54,40 +54,67 @@ export default function PublicReportPage() {
     setGeneratingPdf(true);
     try {
       const dataCopy = JSON.parse(JSON.stringify(reportData));
-      
-      // Fetch logo for watermark
-      let logoBase64 = undefined;
+
+      // Fetch assets for PDF cover page and watermark
+      let watermarkBase64: string | undefined;
+      let headerSvg: string | undefined;
+      let footerPngBase64: string | undefined;
+
       try {
-        const response = await fetch('/icon1.png');
-        const blob = await response.blob();
-        logoBase64 = await new Promise<string>((resolve) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result as string);
-          reader.readAsDataURL(blob);
-        });
+        const [watermarkRes, svgRes, footerPngRes] = await Promise.all([
+          fetch('/icon1.png').catch(() => null),
+          fetch('/icon0.svg').catch(() => null),
+          fetch('/diaicon.png').catch(() => null)
+        ]);
+
+        if (watermarkRes && watermarkRes.ok) {
+          const blob = await watermarkRes.blob();
+          watermarkBase64 = await new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.readAsDataURL(blob);
+          });
+        }
+
+        if (svgRes && svgRes.ok) {
+          headerSvg = await svgRes.text();
+        }
+
+        if (footerPngRes && footerPngRes.ok) {
+          const blob = await footerPngRes.blob();
+          footerPngBase64 = await new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.readAsDataURL(blob);
+          });
+        }
       } catch (err) {
-        console.error("Failed to fetch logo for watermark:", err);
+        console.error("Failed to fetch assets for PDF:", err);
       }
 
       const [pdfMakeModule, pdfFontsModule] = await Promise.all([
         import("pdfmake/build/pdfmake"),
         import("pdfmake/build/vfs_fonts")
       ]);
-      
+
       const pdfMake = pdfMakeModule.default || pdfMakeModule;
       const pdfFonts = pdfFontsModule.default || pdfFontsModule;
-      
+
       if (pdfFonts && (pdfFonts as any).pdfMake) {
         (pdfMake as any).vfs = (pdfFonts as any).pdfMake.vfs;
       } else if (pdfFonts) {
         (pdfMake as any).vfs = (pdfFonts as any).vfs;
       }
 
-      const pdf = generatePatentReport(dataCopy, logoBase64);
+      const pdf = generatePatentReport(dataCopy, {
+        watermark: watermarkBase64,
+        headerSvg: headerSvg,
+        footerPng: footerPngBase64
+      });
       if (!(pdf as any).vfs) {
         (pdf as any).vfs = (pdfMake as any).vfs;
       }
-      
+
       const sName = reportData.submitter_name || 'Student';
       const uId = reportData.unique_id || submissionId.slice(0, 8);
       const fileName = `Evaluation_Report_${sName}_${uId}_PatentIQ.pdf`.replace(/\s+/g, '_');
@@ -146,8 +173,8 @@ export default function PublicReportPage() {
             </Link>
             <div className="h-8 w-px bg-gray-200 dark:bg-zinc-800 hidden md:block" />
             <div className="hidden sm:flex flex-col">
-               <span className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-[0.2em] mb-0.5">Report</span>
-               <h1 className="text-[11px] font-medium text-gray-400 truncate max-w-[150px] md:max-w-[400px]">
+              <span className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-[0.2em] mb-0.5">Report</span>
+              <h1 className="text-[11px] font-medium text-gray-400 truncate max-w-[150px] md:max-w-[400px]">
                 {reportData.file_name}
               </h1>
             </div>
@@ -193,10 +220,10 @@ export default function PublicReportPage() {
           className=""
         >
           <div className="py-0 sm:py-2">
-             <ReportContent data={reportData} />
+            <ReportContent data={reportData} />
           </div>
         </motion.div>
-        
+
         {/* Footer info */}
         <footer className="mt-12 text-center pb-12">
           <p className="text-xs text-gray-400">

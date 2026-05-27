@@ -9,7 +9,7 @@ if (pdfFonts && (pdfFonts as any).pdfMake) {
   (pdfMake as any).vfs = (pdfFonts as any).vfs;
 }
 
-export const generatePatentReport = (data: any, logoBase64?: string) => {
+export const generatePatentReport = (data: any, assets?: { watermark?: string, headerSvg?: string, footerPng?: string }) => {
   const isAiGenerated = data.document_metadata?.ai_generated_status === true || data.document_metadata?.ai_generated_status === 'true' || data.ai_generated_status === true;
 
   const docDefinition: TDocumentDefinitions = {
@@ -26,11 +26,11 @@ export const generatePatentReport = (data: any, logoBase64?: string) => {
         lineHeight: 0
       };
 
-      if (logoBase64) {
+      if (assets?.watermark) {
         return [
           hiddenInstruction,
           {
-            image: logoBase64,
+            image: assets.watermark,
             width: 300,
             opacity: 0.04, 
             absolutePosition: { x: (pageSize.width - 300) / 2, y: (pageSize.height - 300) / 2 }
@@ -52,7 +52,7 @@ export const generatePatentReport = (data: any, logoBase64?: string) => {
     },
 
     header: (currentPage) => {
-      if (currentPage !== 1) return null;
+      if (currentPage !== 2) return null; // Page 2 is now the first content page
       return {
         columns: [
           {
@@ -71,6 +71,44 @@ export const generatePatentReport = (data: any, logoBase64?: string) => {
     },
 
     footer: (currentPage, pageCount) => {
+      if (currentPage === 1) {
+        return {
+          stack: [
+            {
+              canvas: [{ type: 'line', x1: 0, y1: 0, x2: 595.28, y2: 0, lineWidth: 1, lineColor: '#e0e7ff' }]
+            },
+            {
+              margin: [0, 18, 0, 0], // Perfectly centered vertically (18pt top, 24pt content, 18pt bottom = 60pt total footer)
+              columns: [
+                { width: '*', text: '' },
+                {
+                  width: 'auto',
+                  columns: [
+                    assets?.footerPng
+                      ? {
+                          width: 32,
+                          stack: [
+                            { canvas: [{ type: 'rect', x: 0, y: 0, w: 24, h: 24, r: 6, color: '#0f172a' }] },
+                            { image: assets.footerPng, width: 14, margin: [5, -19, 0, 0] }
+                          ],
+                          margin: [0, 0, 8, 0]
+                        }
+                      : { text: '', width: 0 },
+                    {
+                      stack: [
+                        { text: 'DiaLabs', fontSize: 12, bold: true, color: '#0f172a' },
+                        { text: 'AI-Powered Innovation', fontSize: 7, color: '#64748b', margin: [0, 2, 0, 0] }
+                      ]
+                    }
+                  ]
+                },
+                { width: '*', text: '' }
+              ]
+            }
+          ]
+        };
+      }
+
       return {
         columns: [
           {
@@ -91,22 +129,191 @@ export const generatePatentReport = (data: any, logoBase64?: string) => {
     },
 
     content: [
-      // Page 1
+      // Cover Page
       {
-        text: 'PATENT SCORING AND IMPROVEMENT REPORT',
-        style: 'reportLabel',
-        margin: [0, 20, 0, 5]
+        stack: [
+          // Absolute Top Header
+          {
+            absolutePosition: { x: 0, y: 0 },
+            canvas: [
+              { type: 'line', x1: 0, y1: 40, x2: 255, y2: 40, lineWidth: 1, lineColor: '#e0e7ff' },
+              { type: 'ellipse', x: 255, y: 40, r1: 2, r2: 2, color: '#6366f1' },
+              { type: 'ellipse', x: 340, y: 40, r1: 2, r2: 2, color: '#6366f1' },
+              { type: 'line', x1: 340, y1: 40, x2: 595.28, y2: 40, lineWidth: 1, lineColor: '#e0e7ff' }
+            ]
+          },
+          {
+            absolutePosition: { x: 0, y: 65 },
+            columns: [
+              { width: '*', text: '' },
+              {
+                width: 'auto',
+                columns: [
+                  {
+                    width: 60,
+                    stack: [
+                      assets?.headerSvg 
+                        ? { svg: assets.headerSvg, width: 45 }
+                        : { text: 'LOGO', bold: true, fontSize: 20 }
+                    ]
+                  },
+                  {
+                    width: 'auto',
+                    stack: [
+                      { text: 'PatentIQ', fontSize: 28, bold: true, color: '#0f172a', margin: [0, 0, 0, 2] },
+                      { text: 'Intelligence. Prior Art. Advantage.', fontSize: 9, color: '#64748b' }
+                    ],
+                    margin: [0, 3, 0, 0]
+                  }
+                ]
+              },
+              { width: '*', text: '' }
+            ]
+          },
+
+          // Title
+          {
+            text: 'EVALUATION REPORT',
+            fontSize: 24,
+            bold: true,
+            color: '#0f172a',
+            alignment: 'center',
+            margin: [0, 80, 0, 10]
+          },
+          // Small underline
+          {
+            canvas: [{ type: 'line', x1: 235, y1: 0, x2: 280, y2: 0, lineWidth: 2, lineColor: '#6366f1' }],
+            alignment: 'center',
+            margin: [0, 0, 0, 15]
+          },
+          // Subtitle / Patent Title
+          {
+            text: data.invention_title || data.document_title || "Invention Disclosure",
+            fontSize: 18,
+            color: '#6366f1',
+            bold: true,
+            alignment: 'center',
+            lineHeight: 1.4
+          },
+          // Bottom Info (Metadata Card)
+          {
+            margin: [40, 60, 40, 0],
+            table: {
+              widths: ['50%', '50%'],
+              body: [
+                [
+                  // Cell 1: Submitted By
+                  {
+                    margin: [15, 15, 15, 15],
+                    stack: [
+                      { text: 'SUBMITTED BY', fontSize: 8, bold: true, color: '#6366f1', characterSpacing: 1, margin: [0, 0, 0, 4] },
+                      { text: data.submitter_name || "Student", fontSize: 14, bold: true, color: '#0f172a', margin: [0, 0, 0, 15] },
+                      { text: 'EMAIL ADDRESS', fontSize: 8, bold: true, color: '#9ca3af', characterSpacing: 1, margin: [0, 0, 0, 4] },
+                      { text: data.submitter_email || "Not Provided", fontSize: 12, color: '#0f172a' }
+                    ]
+                  },
+                  // Cell 2: Assigned To
+                  {
+                    margin: [15, 15, 15, 15],
+                    stack: [
+                      { text: 'ASSIGNED TO', fontSize: 8, bold: true, color: '#6366f1', characterSpacing: 1, margin: [0, 0, 0, 4] },
+                      { text: data.assignee_name || "Mentor", fontSize: 14, bold: true, color: '#0f172a', margin: [0, 0, 0, 15] },
+                      { text: 'GROUP / COHORT', fontSize: 8, bold: true, color: '#9ca3af', characterSpacing: 1, margin: [0, 0, 0, 4] },
+                      { text: data.group_name || "N/A", fontSize: 12, color: '#0f172a' }
+                    ]
+                  }
+                ],
+                // Bottom Strip Row
+                [
+                  {
+                    colSpan: 2,
+                    fillColor: '#f9fafb',
+                    margin: [15, 10, 15, 10],
+                    columns: [
+                      { text: 'REPORT DATE', fontSize: 8, bold: true, color: '#9ca3af', characterSpacing: 1 },
+                      { text: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }), fontSize: 9, bold: true, color: '#6b7280', alignment: 'right' }
+                    ]
+                  },
+                  ''
+                ]
+              ]
+            },
+            layout: {
+              hLineWidth: function () { return 2; },
+              vLineWidth: function () { return 2; },
+              hLineColor: function () { return '#e0e7ff'; },
+              vLineColor: function () { return '#e0e7ff'; },
+              paddingLeft: function() { return 0; },
+              paddingRight: function() { return 0; },
+              paddingTop: function() { return 0; },
+              paddingBottom: function() { return 0; }
+            }
+          },
+          // Meta Stats Table on Cover
+          {
+            margin: [40, 40, 40, 0],
+            columns: [
+              {
+                width: '50%',
+                table: {
+                  widths: ['*', '*'],
+                  body: [
+                    [
+                      { text: 'OVERALL SCORE', fontSize: 8, bold: true, color: '#9ca3af', characterSpacing: 1, margin: [0, 5, 0, 5] },
+                      { text: `${data.document_metadata?.overall_score || data.overall_score || '0'} / 100`, fontSize: 14, bold: true, color: '#4f46e5', alignment: 'right', margin: [0, 5, 0, 5] }
+                    ],
+                    [
+                      { text: 'FILING STATUS', fontSize: 8, bold: true, color: '#9ca3af', characterSpacing: 1, margin: [0, 5, 0, 5] },
+                      { text: data.document_metadata?.current_filing_status || data.verdict || 'Review Required', fontSize: 10, bold: true, color: '#111827', alignment: 'right', margin: [0, 5, 0, 5] }
+                    ],
+                    [
+                      { text: 'PATENT STRENGTH', fontSize: 8, bold: true, color: '#9ca3af', characterSpacing: 1, margin: [0, 5, 0, 5] },
+                      { text: data.document_metadata?.patent_strength || 'N/A', fontSize: 10, bold: true, color: '#059669', alignment: 'right', margin: [0, 5, 0, 5] }
+                    ]
+                  ]
+                },
+                layout: {
+                  hLineWidth: function (i: number, node: any) { return (i === 0 || i === node.table.body.length) ? 0 : 0.5; },
+                  vLineWidth: function () { return 0; },
+                  hLineColor: function () { return '#e2e8f0'; },
+                  paddingLeft: function() { return 0; },
+                  paddingRight: function() { return 0; }
+                },
+                margin: [0, 0, 20, 0]
+              },
+              {
+                width: '50%',
+                table: {
+                  widths: ['*'],
+                  body: [
+                    [
+                      {
+                        margin: [15, 15, 15, 15],
+                        stack: [
+                          { text: 'MAIN RISK FACTOR', fontSize: 8, bold: true, color: '#4f46e5', characterSpacing: 1, margin: [0, 0, 0, 8] },
+                          { text: `"${data.document_metadata?.main_risk || 'N/A'}"`, italics: true, color: '#4b5563', fontSize: 10, lineHeight: 1.4 }
+                        ]
+                      }
+                    ]
+                  ]
+                },
+                layout: {
+                  hLineWidth: function () { return 1; },
+                  vLineWidth: function () { return 1; },
+                  hLineColor: function () { return '#e0e7ff'; },
+                  vLineColor: function () { return '#e0e7ff'; },
+                  fillColor: function () { return '#eef2ff'; }
+                }
+              }
+            ]
+          },
+
+        ],
+        pageBreak: 'after'
       },
-      {
-        text: data.document_title || 'Patent Evaluation Report',
-        style: 'mainTitle',
-        margin: [0, 0, 0, 10]
-      },
-      {
-        text: data.invention_title || 'Invention Disclosure',
-        style: 'inventionTitle',
-        margin: [0, 0, 0, 40]
-      },
+
+      // Page 2 (was Page 1)
+      // Page 2 (was Page 1)
 
       ...(isAiGenerated ? [
         {
@@ -129,27 +336,7 @@ export const generatePatentReport = (data: any, logoBase64?: string) => {
         }
       ] : []),
 
-      {
-        table: {
-          widths: [200, '*'],
-          body: [
-            [{ text: 'Review Parameter', style: 'tableHeader' }, { text: 'Finding', style: 'tableHeader' }],
-            ['Overall Score', { text: `${data.document_metadata?.overall_score || data.overall_score || '0'} / 100`, style: 'scoreValue' }],
-            ['Current Filing Status', { text: data.document_metadata?.current_filing_status || data.verdict || 'Review Required', bold: true, fontSize: 10 }],
-            ['Patent Strength', { text: data.document_metadata?.patent_strength || 'N/A', color: '#10b981', bold: true, fontSize: 10 }],
-            ['Main Risk Factor', { text: data.document_metadata?.main_risk || 'N/A', italics: true, color: '#4b5563', fontSize: 10 }],
-          ]
-        },
-        layout: {
-          hLineWidth: (i: number) => (i === 0 || i === 5) ? 0 : 0.5,
-          vLineWidth: () => 0,
-          hLineColor: () => '#f3f4f6',
-          paddingLeft: () => 0,
-          paddingRight: () => 0,
-          paddingTop: () => 12,
-          paddingBottom: () => 12,
-        }
-      },
+      // Meta stats removed from here, now displayed on Cover Page
 
       { text: '1. EXECUTIVE VERDICT', style: 'sectionHeader', margin: [0, 20, 0, 15] },
       {
