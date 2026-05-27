@@ -9,9 +9,10 @@ import { Portal } from "@/components/ui/portal";
 interface PaymentStatusModalProps {
   isOpen: boolean;
   onClose: () => void;
+  credits?: string;
 }
 
-export function PaymentSuccessModal({ isOpen, onClose }: PaymentStatusModalProps) {
+export function PaymentSuccessModal({ isOpen, onClose, credits }: PaymentStatusModalProps) {
   return (
     <AnimatePresence>
       {isOpen && (
@@ -48,7 +49,7 @@ export function PaymentSuccessModal({ isOpen, onClose }: PaymentStatusModalProps
               </h3>
               
               <p className="text-sm text-gray-500 dark:text-gray-400 mb-8 leading-relaxed">
-                Your credits have been added to your account. You can now resume your student evaluations.
+                <strong className="text-emerald-600 dark:text-emerald-400">{credits && credits !== "0" ? `${credits} credits` : "Your credits"}</strong> have been successfully added to your account. You can now resume your student evaluations.
               </p>
 
               <Button

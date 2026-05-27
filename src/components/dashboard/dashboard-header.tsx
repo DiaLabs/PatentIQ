@@ -21,6 +21,7 @@ export function PageTopBar({ onRefresh, isLoading = false, disableModals = false
   const [showNotifications, setShowNotifications] = useState(false);
   const [isCreditsModalOpen, setIsCreditsModalOpen] = useState(false);
   const [paymentSuccessOpen, setPaymentSuccessOpen] = useState(false);
+  const [addedCredits, setAddedCredits] = useState("0");
   const [paymentFailureOpen, setPaymentFailureOpen] = useState(false);
   const [pausedIdsToDismiss, setPausedIdsToDismiss] = useState<string[]>([]);
   const prevCreditsRef = useRef<number | null>(null);
@@ -32,6 +33,7 @@ export function PageTopBar({ onRefresh, isLoading = false, disableModals = false
     
     if (paymentStatus === 'success') {
       setPaymentSuccessOpen(true);
+      setAddedCredits(params.get('credits') || "0");
       // Clean up URL without triggering Next.js hydration router errors
       if (typeof window !== "undefined") {
         window.history.replaceState({}, document.title, window.location.pathname);
@@ -103,7 +105,11 @@ export function PageTopBar({ onRefresh, isLoading = false, disableModals = false
       {/* Payment Modals */}
       {!disableModals && (
         <>
-          <PaymentSuccessModal isOpen={paymentSuccessOpen} onClose={() => setPaymentSuccessOpen(false)} />
+          <PaymentSuccessModal 
+            isOpen={paymentSuccessOpen} 
+            onClose={() => setPaymentSuccessOpen(false)} 
+            credits={addedCredits}
+          />
           <PaymentFailureModal isOpen={paymentFailureOpen} onClose={() => setPaymentFailureOpen(false)} />
 
           {/* Out of Credits Modal */}
