@@ -262,8 +262,8 @@ function SettingsContent() {
                 )}
               >
                 {pkg.popular && (
-                  <span className="absolute -top-3 bg-indigo-600 text-white text-[9px] font-bold uppercase tracking-widest py-1 px-3 rounded-full">
-                    Most Popular
+                  <span className="absolute -top-2.5 bg-[#451a03] dark:bg-[#451a03] text-[#f59e0b] text-[9px] font-bold uppercase tracking-widest py-1 px-2.5 rounded shadow-sm">
+                    Popular
                   </span>
                 )}
                 <div className="h-10 w-10 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-full flex items-center justify-center mb-3">
