@@ -1,8 +1,20 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
-import { fetchGroups, type Group } from "@/lib/api";
+import { fetchGroups, fetchAllSubmissions, type Group, type RecentSubmission } from "@/lib/api";
 import { CreateGroupDialog } from "@/components/dashboard/create-group-dialog";
+
+function formatRelativeTime(timestamp: number) {
+  const tsMs = timestamp.toString().length < 13 ? timestamp * 1000 : timestamp;
+  const diffMs = Math.max(0, Date.now() - tsMs);
+  const diffMins = Math.floor(diffMs / 60000);
+  if (diffMins < 1) return "Just now";
+  if (diffMins < 60) return `${diffMins} min${diffMins > 1 ? "s" : ""} ago`;
+  const diffHrs = Math.floor(diffMins / 60);
+  if (diffHrs < 24) return `${diffHrs} hour${diffHrs > 1 ? "s" : ""} ago`;
+  const diffDays = Math.floor(diffHrs / 24);
+  return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
+}
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import {
@@ -164,6 +176,7 @@ const SORT_OPTIONS = [
 export default function GroupsPage() {
   const { refreshTrigger, setRefreshing } = useRefresh();
   const [groups, setGroups] = useState<Group[]>([]);
+  const [recentActivities, setRecentActivities] = useState<RecentSubmission[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showDialog, setShowDialog] = useState(false);
@@ -175,11 +188,16 @@ export default function GroupsPage() {
     else {
       setLoading(true);
       setGroups([]);
+      setRecentActivities([]);
     }
     setError(null);
     try {
-      const data = await fetchGroups();
-      setGroups(data.groups);
+      const [groupsData, submissionsData] = await Promise.all([
+        fetchGroups(),
+        fetchAllSubmissions({ limit: 2 })
+      ]);
+      setGroups(groupsData.groups);
+      setRecentActivities(submissionsData.submissions);
     } catch (e: any) {
       setError(e?.message ?? "Failed to load groups.");
     } finally {
@@ -304,20 +322,30 @@ export default function GroupsPage() {
             <h3 className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Recent Activity</h3>
           </div>
           <div className="space-y-2 flex-1">
-            {groups.slice(0, 2).map((g, idx) => (
-              <div key={g.group_id} className="flex items-center gap-3 p-3.5 rounded-md border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm transition-all hover:bg-gray-50 dark:hover:bg-zinc-800/50 group cursor-pointer">
+            {recentActivities.map((activity) => (
+              <Link href={`/dashboard/groups/${activity.group_id}?submission=${activity.submission_id}`} key={activity.submission_id} className="flex items-center gap-3 p-3.5 rounded-md border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm transition-all hover:bg-gray-50 dark:hover:bg-zinc-800/50 group cursor-pointer">
                 <div className="h-8 w-8 rounded-md bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center shrink-0">
-                  {idx === 0 ? <Plus className="h-4 w-4 text-indigo-600" /> : <Clock className="h-4 w-4 text-amber-600" />}
+                  {activity.status === 'COMPLETED' ? (
+                    <Clock className="h-4 w-4 text-emerald-600" />
+                  ) : activity.status === 'FAILED' || activity.status === 'REJECTED' ? (
+                    <AlertCircle className="h-4 w-4 text-red-600" />
+                  ) : (
+                    <Plus className="h-4 w-4 text-indigo-600" />
+                  )}
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-xs font-bold text-gray-900 dark:text-white truncate group-hover:text-indigo-600 transition-colors">
-                    {idx === 0 ? `New submission in ${g.name}` : `Evaluation completed for ${g.name}`}
+                    {activity.status === 'COMPLETED'
+                      ? `Evaluation completed in ${activity.group_name}`
+                      : activity.status === 'FAILED' || activity.status === 'REJECTED'
+                      ? `Evaluation failed in ${activity.group_name}`
+                      : `New submission in ${activity.group_name}`}
                   </p>
-                  <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">2 hours ago</p>
+                  <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">{formatRelativeTime(activity.submitted_at)}</p>
                 </div>
-              </div>
+              </Link>
             ))}
-            {groups.length === 0 && !loading && (
+            {recentActivities.length === 0 && !loading && (
               <div className="p-8 text-center border-2 border-dashed border-gray-100 dark:border-zinc-800 rounded-md">
                 <p className="text-xs text-gray-400 italic">No recent activity</p>
               </div>
