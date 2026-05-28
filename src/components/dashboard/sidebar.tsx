@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { 
   LayoutDashboard, 
   Users, 
@@ -12,12 +12,17 @@ import {
   LogOut,
   ChevronRight,
   X,
-  Coins
+  Coins,
+  ChevronDown,
+  User,
+  CreditCard,
+  Palette,
+  GraduationCap
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const navItems = [
   { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
@@ -25,7 +30,17 @@ const navItems = [
   { name: "Submissions", href: "/dashboard/submissions", icon: FileText },
   { name: "Evaluation Rules", href: "/dashboard/evaluation-rules", icon: Sliders },
   { name: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
-  { name: "Settings", href: "/dashboard/settings", icon: Settings },
+  { 
+    name: "Settings", 
+    href: "/dashboard/settings", 
+    icon: Settings,
+    subItems: [
+      { name: "Profile", href: "/dashboard/settings?tab=profile", icon: User },
+      { name: "Billing & Credits", href: "/dashboard/settings?tab=billing", icon: CreditCard },
+      { name: "Appearance", href: "/dashboard/settings?tab=appearance", icon: Palette },
+      { name: "Educator Trial", href: "/dashboard/settings?tab=educator", icon: GraduationCap },
+    ]
+  },
 ];
 
 interface SidebarProps {
@@ -35,8 +50,15 @@ interface SidebarProps {
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const { user, mentorProfile, signOut } = useAuth();
   const [showSignOut, setShowSignOut] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+
+  useEffect(() => {
+    setSettingsOpen(pathname.startsWith("/dashboard/settings"));
+  }, [pathname]);
 
   return (
     <aside className={cn(
@@ -58,12 +80,73 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       </div>
 
       {/* Nav Links */}
-      <nav className="flex-1 px-4 space-y-1">
+      <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
         {navItems.map((item) => {
           const isActive = item.href === "/dashboard" 
             ? pathname === "/dashboard" 
             : pathname.startsWith(item.href);
           const Icon = item.icon;
+          
+          if (item.subItems) {
+            return (
+              <div key={item.name} className="space-y-1">
+                <button
+                  onClick={() => {
+                    setSettingsOpen(true);
+                    if (!pathname.startsWith("/dashboard/settings")) {
+                      router.push("/dashboard/settings?tab=profile");
+                      if (onClose) onClose();
+                    } else {
+                      setSettingsOpen(!settingsOpen);
+                    }
+                  }}
+                  className={cn(
+                    "w-full group flex items-center gap-3 px-4 py-3 rounded-md text-sm font-semibold transition-all relative overflow-hidden",
+                    isActive
+                      ? "text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10" 
+                      : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-zinc-800/50"
+                  )}
+                >
+                  <Icon className={cn("h-5 w-5", isActive ? "text-indigo-600 dark:text-indigo-400" : "text-gray-400 dark:text-zinc-500")} />
+                  {item.name}
+                  <ChevronDown className={cn("ml-auto h-4 w-4 transition-transform", settingsOpen ? "rotate-180" : "")} />
+                </button>
+                <AnimatePresence>
+                  {settingsOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="overflow-hidden space-y-1"
+                    >
+                      {item.subItems.map(sub => {
+                        const tab = searchParams ? searchParams.get("tab") : null;
+                        const activeTab = tab || "profile";
+                        const isSubActive = isActive && sub.href.includes(`tab=${activeTab}`);
+                        const SubIcon = sub.icon;
+                        return (
+                          <Link
+                            key={sub.name}
+                            href={sub.href}
+                            onClick={onClose}
+                            className={cn(
+                              "flex items-center gap-3 px-4 py-2.5 ml-4 rounded-md text-sm font-medium transition-all",
+                              isSubActive
+                                ? "text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10"
+                                : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-zinc-800/50"
+                            )}
+                          >
+                            <SubIcon className={cn("h-4 w-4", isSubActive ? "text-indigo-600 dark:text-indigo-400" : "text-gray-400 dark:text-zinc-500")} />
+                            {sub.name}
+                          </Link>
+                        );
+                      })}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            );
+          }
           
           return (
             <Link
@@ -130,8 +213,12 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           onClick={() => setShowSignOut(!showSignOut)}
           className="w-full flex items-center gap-3 px-4 py-3 rounded-md hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors"
         >
-          <div className="h-9 w-9 rounded-full bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center text-indigo-700 dark:text-indigo-300 font-bold text-sm uppercase shrink-0">
-            {user?.displayName?.[0] || user?.email?.[0] || "?"}
+          <div className="h-9 w-9 rounded-full bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center text-indigo-700 dark:text-indigo-300 font-bold text-sm uppercase shrink-0 overflow-hidden">
+            {mentorProfile?.picture_url ? (
+              <img src={mentorProfile.picture_url} alt="Profile" className="h-full w-full object-cover" />
+            ) : (
+              user?.displayName?.[0] || user?.email?.[0] || "?"
+            )}
           </div>
           <div className="flex-1 min-w-0 text-left">
             <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{user?.displayName || "Mentor"}</p>
